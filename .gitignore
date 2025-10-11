@@ -1,0 +1,30 @@
+cat > .gitignore <<'EOF'
+# macOS
+.DS_Store
+
+# Node/Angular
+node_modules/
+dist/
+.angular/
+.npm/
+.pnpm-store/
+
+# PHP/Laravel
+vendor/
+storage/*.key
+storage/logs/*
+bootstrap/cache/*
+.env
+.env.*
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# Docker
+*.pid
+*.log
+
+# Misc
+coverage/
+EOF

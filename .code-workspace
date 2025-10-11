@@ -1,0 +1,13 @@
+//cat > arte-catolica.code-workspace <<'EOF'
+{
+  "folders": [
+    { "path": "backend" },
+    { "path": "frontend" },
+    { "path": "infra" }
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "files.eol": "\n"
+  }
+}
+//EOF
