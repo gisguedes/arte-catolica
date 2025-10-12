@@ -7,10 +7,11 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "prepare": "husky",
+    "prepare": "husky install",
     "lint": "eslint . --ext .ts,.html",
     "format": "prettier . --write",
-    "format:check": "prettier . --check"
+    "format:check": "prettier . --check",
+    "qa": "npm run lint && npm run format:check && npm run test"
   },
   "prettier": {
     "printWidth": 100,
