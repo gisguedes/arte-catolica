@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Crear issue en JIRA
+    url: https://tu-jira.com/secure/CreateIssue!default.jspa
+    about: Usa JIRA para registrar trabajo planificado

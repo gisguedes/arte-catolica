@@ -1,0 +1,6 @@
+# Asigna automáticamente revisores por carpeta
+/backend/   @gisguedes
+/frontend/  @gisguedes
+
+# Archivos de CI y metadatos
+/.github/   @gisguedes
