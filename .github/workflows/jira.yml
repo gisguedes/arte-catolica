@@ -2,8 +2,8 @@ name: Jira PR Comment
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize, edited]  # se ejecuta en PRs
-  workflow_dispatch: {}                               # permite ejecutarlo a mano
+    types: [opened, reopened, synchronize, edited]
+  workflow_dispatch: {}
 
 jobs:
   notify-jira:
@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Detecta la clave JIRA (ABC-123) desde el título del PR; si quieres, puedes ampliar a rama/commit
+      # Detecta la clave JIRA (ABC-123) desde el título del PR; puedes ampliar a rama/commit si quieres
       - name: Extract JIRA issue key
         id: jirakey
         shell: bash
@@ -25,7 +25,6 @@ jobs:
             echo "WARNING: No JIRA key detected in PR title (e.g. GG-13: ...)" >&2
           fi
 
-      # Login a Jira (actions oficiales de Atlassian)
       - name: Jira login
         if: steps.jirakey.outputs.key != ''
         uses: atlassian/gajira-login@v3
@@ -34,18 +33,17 @@ jobs:
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
-      # Comenta en la issue con info del PR
       - name: Comment on issue
         if: steps.jirakey.outputs.key != ''
         uses: atlassian/gajira-comment@v3
         with:
           issue: ${{ steps.jirakey.outputs.key }}
-          body: |
-            🚀 PR creado: [${{ github.event.pull_request.html_url }}](${{ github.event.pull_request.html_url }})
+          comment: |
+            🚀 PR creado: ${{ github.event.pull_request.html_url }}
             📦 Rama: `${{ github.head_ref }}`
             👤 Autor: ${{ github.actor }}
 
-      # (Opcional) Mover a "In Review" cuando se abre el PR
+      # (Opcional) mover a In Review al abrir el PR (asegúrate de que tu workflow user puede transicionar)
       - name: Move to In Review
         if: steps.jirakey.outputs.key != '' && github.event.action == 'opened'
         uses: atlassian/gajira-transition@v3
