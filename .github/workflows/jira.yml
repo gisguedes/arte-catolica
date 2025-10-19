@@ -1,0 +1,49 @@
+name: Jira Sync
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed, edited]
+  push:
+    branches: ['**']       # ejecuta en cualquier rama
+  workflow_dispatch: {}     # permite lanzarlo manualmente
+
+jobs:
+  notify-jira:
+    name: Notify Jira Cloud
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Extrae la clave tipo ABC-123 desde rama, título de PR o último commit
+      - name: Extract JIRA issue key
+        id: jirakey
+        shell: bash
+        run: |
+          KEY=""
+          BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
+          if [[ "$BRANCH" =~ ([A-Z]+-[0-9]+) ]]; then KEY="${BASH_REMATCH[1]}"; fi
+          if [ -z "$KEY" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
+            TITLE="${{ github.event.pull_request.title }}"
+            if [[ "$TITLE" =~ ([A-Z]+-[0-9]+) ]]; then KEY="${BASH_REMATCH[1]}"; fi
+          fi
+          if [ -z "$KEY" ]; then
+            MSG="$(git log -1 --pretty=%B)"
+            if [[ "$MSG" =~ ([A-Z]+-[0-9]+) ]]; then KEY="${BASH_REMATCH[1]}"; fi
+          fi
+          echo "Detected JIRA KEY: $KEY"
+          echo "key=$KEY" >> "$GITHUB_OUTPUT"
+          if [ -z "$KEY" ]; then
+            echo "WARNING: No JIRA key detected in branch/PR/commit" >&2
+          fi
+
+      - name: Jira Cloud Action
+        if: steps.jirakey.outputs.key != ''
+        uses: dodevops/jira-cloud-github-action@v0.1.0
+        with:
+          jira-base-url: https://gislaine-guedes.atlassian.net
+          jira-user: ${{ secrets.JIRA_USER }}
+          jira-api-token: ${{ secrets.JIRA_API_TOKEN }}
+          jira-project: GG
+          jira-issue: ${{ steps.jirakey.outputs.key }}
