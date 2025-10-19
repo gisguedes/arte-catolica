@@ -13,7 +13,7 @@ export type HealthResponse = {
 @Injectable({ providedIn: 'root' })
 export class HealthService {
   private http = inject(HttpClient);
-  private base = environment.apiBaseUrl;
+  private base = environment.apiUrl;
 
   getHealth() {
     return this.http.get<HealthResponse>(`${this.base}/health`);

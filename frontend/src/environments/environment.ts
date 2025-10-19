@@ -15,7 +15,7 @@
 // C) Local usando PROXY de Angular (ng serve) → requiere proxy.conf.json
 export const environment = {
   production: false,
-  apiBaseUrl: '/api',
+  apiUrl: '/api',
 };
 
 // Nota:

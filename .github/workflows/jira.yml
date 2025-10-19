@@ -43,10 +43,11 @@ jobs:
             📦 Rama: `${{ github.head_ref }}`
             👤 Autor: ${{ github.actor }}
 
-      # (Opcional) mover a In Review al abrir el PR (asegúrate de que tu workflow user puede transicionar)
-      - name: Move to In Review
+      # Mover a "En curso" (estado activo) al abrir el PR
+      - name: Move to Work In Progress
         if: steps.jirakey.outputs.key != '' && github.event.action == 'opened'
         uses: atlassian/gajira-transition@v3
         with:
           issue: ${{ steps.jirakey.outputs.key }}
-          transition: "In Review"
+          transition: "Iniciar Progreso"   # ← este es el nombre válido según JIRA
+
