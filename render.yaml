@@ -1,0 +1,140 @@
+services:
+  - name: arte-backend-staging
+    type: web
+    runtime: docker
+    plan: starter
+    dockerfilePath: backend.Dockerfile   # 👈 ya no va en infra/
+    dockerContext: .
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_NAME
+        value: ArteCatolica
+      - key: APP_ENV
+        value: staging
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://arte-backend-staging.onrender.com
+      - key: APP_KEY
+        sync: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: arte-db-staging
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: arte-db-staging
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: arte-db-staging
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: arte-db-staging
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: arte-db-staging
+          property: password
+    postDeployCommand: |
+      php artisan migrate --force
+
+  - name: arte-frontend-staging
+    type: static
+    # STAGING
+    buildCommand: |
+    cd frontend && npm ci && npm run build:staging
+  staticPublishPath: frontend/dist/app/browser
+
+    # PROD
+    buildCommand: |
+      cd frontend && npm ci && npm run build:prod
+    staticPublishPath: frontend/dist/app/browser
+
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=600
+
+databases:
+  - name: arte-db-staging
+    plan: starter
+
+services:
+  # =========================
+  # BACKEND - PRODUCCIÓN
+  # =========================
+  - name: arte-backend-prod
+    type: web
+    runtime: docker
+    plan: standard
+    dockerfilePath: backend.Dockerfile   # 👈 en raíz (no infra/)
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeploy: true
+    postDeployCommand: |
+      php artisan migrate --force
+    envVars:
+      - key: APP_NAME
+        value: ArteCatolica
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://api.arte-catolica.com
+      - key: APP_KEY
+        sync: false  # ➜ añádela como secret en Render
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: arte-db-prod
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: arte-db-prod
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: arte-db-prod
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: arte-db-prod
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: arte-db-prod
+          property: password
+      # (Opcional) si usas CORS por env
+      - key: FRONTEND_ORIGIN
+        value: https://app.arte-catolica.com
+
+  # =========================
+  # FRONTEND - PRODUCCIÓN
+  # =========================
+  - name: arte-frontend-prod
+    type: static
+    buildCommand: |
+      cd frontend && npm ci && npm run build
+    # ⚠️ Ajusta si Angular genera dist/<project>/browser
+    staticPublishPath: frontend/dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=600
+    envVars:
+      - key: API_BASE_URL
+        value: https://api.arte-catolica.com/api
+
+databases:
+  # =========================
+  # DB - PRODUCCIÓN
+  # =========================
+  - name: arte-db-prod
+    plan: standard

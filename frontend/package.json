@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --proxy-config proxy.conf.json --port 4200",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
@@ -11,7 +11,10 @@
     "lint": "eslint . --ext .ts,.html",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "qa": "npm run lint && npm run format:check && npm run test"
+    "qa": "npm run lint && npm run format:check && npm run test",
+    "build:staging": "ng build --configuration=staging",
+    "build:prod": "ng build --configuration=production",
+    "serve:staging": "ng serve --configuration=staging"
   },
   "prettier": {
     "printWidth": 100,
