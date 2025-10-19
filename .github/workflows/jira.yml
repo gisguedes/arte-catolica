@@ -1,49 +1,54 @@
-name: Jira Sync
+name: Jira PR Comment
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize, closed, edited]
-  push:
-    branches: ['**']       # ejecuta en cualquier rama
-  workflow_dispatch: {}     # permite lanzarlo manualmente
+    types: [opened, reopened, synchronize, edited]  # se ejecuta en PRs
+  workflow_dispatch: {}                               # permite ejecutarlo a mano
 
 jobs:
   notify-jira:
-    name: Notify Jira Cloud
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Extrae la clave tipo ABC-123 desde rama, título de PR o último commit
+      # Detecta la clave JIRA (ABC-123) desde el título del PR; si quieres, puedes ampliar a rama/commit
       - name: Extract JIRA issue key
         id: jirakey
         shell: bash
         run: |
           KEY=""
-          BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
-          if [[ "$BRANCH" =~ ([A-Z]+-[0-9]+) ]]; then KEY="${BASH_REMATCH[1]}"; fi
-          if [ -z "$KEY" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
-            TITLE="${{ github.event.pull_request.title }}"
-            if [[ "$TITLE" =~ ([A-Z]+-[0-9]+) ]]; then KEY="${BASH_REMATCH[1]}"; fi
-          fi
-          if [ -z "$KEY" ]; then
-            MSG="$(git log -1 --pretty=%B)"
-            if [[ "$MSG" =~ ([A-Z]+-[0-9]+) ]]; then KEY="${BASH_REMATCH[1]}"; fi
-          fi
+          TITLE="${{ github.event.pull_request.title }}"
+          if [[ "$TITLE" =~ ([A-Z]+-[0-9]+) ]]; then KEY="${BASH_REMATCH[1]}"; fi
           echo "Detected JIRA KEY: $KEY"
           echo "key=$KEY" >> "$GITHUB_OUTPUT"
           if [ -z "$KEY" ]; then
-            echo "WARNING: No JIRA key detected in branch/PR/commit" >&2
+            echo "WARNING: No JIRA key detected in PR title (e.g. GG-13: ...)" >&2
           fi
 
-      - name: Jira Cloud Action
+      # Login a Jira (actions oficiales de Atlassian)
+      - name: Jira login
         if: steps.jirakey.outputs.key != ''
-        uses: dodevops/jira-cloud-github-action@v0.1.0
+        uses: atlassian/gajira-login@v3
+        env:
+          JIRA_BASE_URL: https://gislaine-guedes.atlassian.net
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      # Comenta en la issue con info del PR
+      - name: Comment on issue
+        if: steps.jirakey.outputs.key != ''
+        uses: atlassian/gajira-comment@v3
         with:
-          jira-base-url: https://gislaine-guedes.atlassian.net
-          jira-user: ${{ secrets.JIRA_USER }}
-          jira-api-token: ${{ secrets.JIRA_API_TOKEN }}
-          jira-project: GG
-          jira-issue: ${{ steps.jirakey.outputs.key }}
+          issue: ${{ steps.jirakey.outputs.key }}
+          body: |
+            🚀 PR creado: [${{ github.event.pull_request.html_url }}](${{ github.event.pull_request.html_url }})
+            📦 Rama: `${{ github.head_ref }}`
+            👤 Autor: ${{ github.actor }}
+
+      # (Opcional) Mover a "In Review" cuando se abre el PR
+      - name: Move to In Review
+        if: steps.jirakey.outputs.key != '' && github.event.action == 'opened'
+        uses: atlassian/gajira-transition@v3
+        with:
+          issue: ${{ steps.jirakey.outputs.key }}
+          transition: "In Review"
