@@ -1,0 +1,13 @@
+{
+  "frontend/**/*.ts": "cd frontend && eslint --fix",
+  "frontend/**/*.html": "cd frontend && eslint --fix",
+  "frontend/**/*.ts": "cd frontend && prettier --write",
+  "frontend/**/*.tsx": "cd frontend && prettier --write",
+  "frontend/**/*.js": "cd frontend && prettier --write",
+  "frontend/**/*.jsx": "cd frontend && prettier --write",
+  "frontend/**/*.html": "cd frontend && prettier --write",
+  "frontend/**/*.css": "cd frontend && prettier --write",
+  "frontend/**/*.scss": "cd frontend && prettier --write",
+  "frontend/**/*.json": "cd frontend && prettier --write",
+  "frontend/**/*.md": "cd frontend && prettier --write"
+}
