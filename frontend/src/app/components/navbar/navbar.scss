@@ -1,0 +1,91 @@
+.navbar {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  .navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #8b4513;
+    text-decoration: none;
+    transition: color 0.3s;
+
+    &:hover {
+      color: #654321;
+    }
+  }
+
+  .navbar-menu {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+
+    a {
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+      position: relative;
+
+      &:hover {
+        color: #8b4513;
+      }
+
+      &.active {
+        color: #8b4513;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -0.5rem;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background-color: #8b4513;
+        }
+      }
+    }
+
+    .cart-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      position: relative;
+
+      .cart-badge {
+        background-color: #8b4513;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: bold;
+      }
+    }
+
+    .user-name {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .logout-link {
+      cursor: pointer;
+    }
+  }
+}
+

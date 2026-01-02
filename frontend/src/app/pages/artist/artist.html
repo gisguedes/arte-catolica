@@ -1,0 +1,41 @@
+<div class="artist-page">
+  <div class="container">
+    <div class="loading" *ngIf="isLoading()">
+      <p>Cargando información del artista...</p>
+    </div>
+
+    <div class="artist-info" *ngIf="artist() && !isLoading()">
+      <div class="artist-header">
+        <div class="artist-image" *ngIf="artist()?.image">
+          <img [src]="artist()!.image" [alt]="artist()!.name" />
+        </div>
+        <div class="artist-details">
+          <h1>{{ artist()!.name }}</h1>
+          <p class="artist-bio" *ngIf="artist()!.bio">{{ artist()!.bio }}</p>
+          <div class="artist-contact" *ngIf="artist()!.email || artist()!.website">
+            <a *ngIf="artist()!.email" [href]="'mailto:' + artist()!.email" class="contact-link">
+              {{ artist()!.email }}
+            </a>
+            <a *ngIf="artist()!.website" [href]="artist()!.website" target="_blank" class="contact-link">
+              Sitio Web
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="artist-products" *ngIf="artist() && !isLoading()">
+      <h2>Obras de {{ artist()!.name }}</h2>
+      <div class="products-grid" *ngIf="products().length > 0">
+        <app-product-card
+          *ngFor="let product of products()"
+          [product]="product"
+        ></app-product-card>
+      </div>
+      <div class="no-products" *ngIf="products().length === 0">
+        <p>Este artista aún no tiene productos disponibles.</p>
+      </div>
+    </div>
+  </div>
+</div>
+

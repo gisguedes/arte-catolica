@@ -1,0 +1,40 @@
+<div class="products-page">
+  <div class="container">
+    <h1>Arte Católica</h1>
+    <p class="subtitle">Descubre hermosas obras de arte católico</p>
+
+    <div class="filters">
+      <button
+        class="filter-btn"
+        [class.active]="selectedCategoryId() === null"
+        (click)="clearFilter()"
+      >
+        Todas las Categorías
+      </button>
+      <button
+        *ngFor="let category of categories()"
+        class="filter-btn"
+        [class.active]="selectedCategoryId() === category.id"
+        (click)="filterByCategory(category.id)"
+      >
+        {{ category.name }}
+      </button>
+    </div>
+
+    <div class="loading" *ngIf="isLoading()">
+      <p>Cargando productos...</p>
+    </div>
+
+    <div class="products-grid" *ngIf="!isLoading()">
+      <app-product-card
+        *ngFor="let product of products()"
+        [product]="product"
+      ></app-product-card>
+    </div>
+
+    <div class="no-products" *ngIf="!isLoading() && products().length === 0">
+      <p>No se encontraron productos en esta categoría.</p>
+    </div>
+  </div>
+</div>
+

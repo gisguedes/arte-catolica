@@ -1,0 +1,18 @@
+<div class="product-card">
+  <a [routerLink]="['/artist', product.artist_id]" class="artist-link">
+    Por {{ product.artist?.name || 'Artista' }}
+  </a>
+  <div class="card-content">
+    <div class="product-image">
+      <img [src]="product.image || '/assets/placeholder-image.jpg'" [alt]="product.name" />
+    </div>
+    <div class="product-info">
+      <h3 class="product-name">{{ product.name }}</h3>
+      <p class="product-price">${{ product.price.toFixed(2) }}</p>
+    </div>
+  </div>
+  <button class="add-to-cart-btn" (click)="addToCart($event)">
+    Agregar al Carrito
+  </button>
+</div>
+
