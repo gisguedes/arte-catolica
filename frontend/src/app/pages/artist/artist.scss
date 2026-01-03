@@ -1,0 +1,117 @@
+.artist-page {
+  min-height: calc(100vh - 200px);
+  padding: 2rem 0;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 4rem;
+    color: #666;
+  }
+
+  .artist-info {
+    margin-bottom: 4rem;
+
+    .artist-header {
+      display: flex;
+      gap: 3rem;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      .artist-image {
+        flex-shrink: 0;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        overflow: hidden;
+        background-color: #f5f5f5;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
+      .artist-details {
+        flex: 1;
+
+        h1 {
+          margin: 0 0 1rem 0;
+          color: #333;
+          font-size: 2.5rem;
+        }
+
+        .artist-bio {
+          color: #666;
+          font-size: 1.1rem;
+          line-height: 1.6;
+          margin-bottom: 1.5rem;
+        }
+
+        .artist-contact {
+          display: flex;
+          gap: 1.5rem;
+
+          .contact-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+
+            &:hover {
+              color: var(--primary-dark);
+              text-decoration: underline;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .artist-products {
+    h2 {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 2rem;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .no-products {
+      text-align: center;
+      padding: 4rem;
+      color: #666;
+      font-size: 1.1rem;
+      background: white;
+      border-radius: 12px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .artist-page {
+    .artist-info .artist-header {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+
+      .artist-image {
+        width: 150px;
+        height: 150px;
+      }
+    }
+  }
+}
+

@@ -1,0 +1,37 @@
+<div class="profile-container">
+  <div class="container">
+    <h1>Mi Área Personal</h1>
+    
+    <div class="user-info">
+      <div class="avatar">
+        <span>{{ user()?.name?.charAt(0) }}{{ user()?.surname?.charAt(0) }}</span>
+      </div>
+      <div class="user-details">
+        <h2>{{ user()?.name }} {{ user()?.surname }}</h2>
+        <p>{{ user()?.email }}</p>
+      </div>
+    </div>
+
+    <div class="role-selection" *ngIf="selectedRole() === null">
+      <h3>Elige tu tipo de perfil</h3>
+      <p class="subtitle">Puedes tener ambos perfiles activos</p>
+      
+      <div class="role-cards">
+        <div class="role-card" (click)="selectRole('buyer')">
+          <div class="icon">🛒</div>
+          <h4>Comprador</h4>
+          <p>Gestiona tus pedidos, favoritos y direcciones de entrega</p>
+          <span class="badge" *ngIf="hasBuyerProfile()">Activo</span>
+        </div>
+        
+        <div class="role-card" (click)="selectRole('seller')">
+          <div class="icon">🎨</div>
+          <h4>Vendedor</h4>
+          <p>Gestiona tus productos, pedidos y datos profesionales</p>
+          <span class="badge" *ngIf="hasSellerProfile()">Activo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

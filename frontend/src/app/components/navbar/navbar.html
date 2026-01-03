@@ -1,0 +1,29 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <a routerLink="/" class="navbar-brand">Arte Católica</a>
+    
+    <div class="navbar-menu">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        Inicio
+      </a>
+      <a routerLink="/cart" routerLinkActive="active" class="cart-link">
+        <span>Carrito</span>
+        <span class="cart-badge" *ngIf="cartItemCount() > 0">
+          {{ cartItemCount() }}
+        </span>
+      </a>
+      
+      <ng-container *ngIf="isAuthenticated(); else loginLink">
+        <a routerLink="/profile" routerLinkActive="active">Mi Área</a>
+        <a routerLink="/" (click)="logout()" class="logout-link">
+          Cerrar Sesión
+        </a>
+        <span class="user-name">{{ user()?.name }}</span>
+      </ng-container>
+      <ng-template #loginLink>
+        <a routerLink="/login" routerLinkActive="active">Iniciar Sesión</a>
+      </ng-template>
+    </div>
+  </div>
+</nav>
+

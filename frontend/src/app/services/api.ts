@@ -9,9 +9,17 @@ export class ApiService {
   private baseUrl = 'http://localhost:8000/api'; // URL del backend Laravel
   private http = inject(HttpClient);
 
-  // Métodos para autenticación
+  // Métodos para autenticación (sin token, el interceptor lo agregará si existe)
   login(email: string, password: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/login`, { email, password });
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    });
+    return this.http.post(
+      `${this.baseUrl}/login`,
+      { email, password },
+      { headers }
+    );
   }
 
   register(userData: any): Observable<any> {
@@ -22,7 +30,7 @@ export class ApiService {
     return this.http.post(`${this.baseUrl}/logout`, {});
   }
 
-  // Métodos genéricos para CRUD
+  // Métodos genéricos para CRUD (el interceptor agregará el token automáticamente)
   get<T>(endpoint: string): Observable<T> {
     return this.http.get<T>(`${this.baseUrl}/${endpoint}`);
   }

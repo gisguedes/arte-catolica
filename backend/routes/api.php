@@ -1,23 +1,27 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\VendorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', function () {
-    $checks = ['app' => true, 'db' => false];
-
-    try {
-        DB::select('SELECT 1'); // ping a Postgres
-        $checks['db'] = true;
-    } catch (\Throwable $e) {
-        $checks['db'] = false;
-    }
-
     return response()->json([
         'name' => config('app.name'),
         'env' => config('app.env'),
         'version' => app()->version(),
-        'checks' => $checks,
-        'timestamp' => now()->toISOString(),
+        'checks' => [
+            'app' => true,
+            'db' => \DB::connection()->getPdo() !== null,
+        ],
+        'timestamp' => now()->toIso8601String(),
     ]);
 });
+
+// Rutas públicas de la API
+Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
+Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+Route::apiResource('vendors', VendorController::class)->only(['index', 'show']);
+
+// Ruta adicional para productos de un vendor
+Route::get('vendors/{id}/products', [VendorController::class, 'products']);

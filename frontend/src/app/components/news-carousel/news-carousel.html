@@ -1,0 +1,42 @@
+<div class="news-carousel" *ngIf="news.length > 0">
+  <div class="carousel-container">
+    <button class="carousel-btn prev" (click)="prev()" *ngIf="news.length > 1">
+      ‹
+    </button>
+    
+    <div class="carousel-slides">
+      <div 
+        class="slide" 
+        *ngFor="let item of news; let i = index"
+        [class.active]="currentIndex() === i"
+      >
+        <div class="slide-content">
+          <div class="slide-image" *ngIf="item.image">
+            <img [src]="item.image" [alt]="item.title">
+          </div>
+          <div class="slide-text">
+            <h2>{{ item.title }}</h2>
+            <p>{{ item.description }}</p>
+            <a [href]="item.link || '#'" class="slide-link" *ngIf="item.link">
+              Leer más →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="carousel-btn next" (click)="next()" *ngIf="news.length > 1">
+      ›
+    </button>
+  </div>
+
+  <div class="carousel-dots" *ngIf="news.length > 1">
+    <button
+      *ngFor="let item of news; let i = index"
+      class="dot"
+      [class.active]="currentIndex() === i"
+      (click)="goTo(i)"
+    ></button>
+  </div>
+</div>
+
