@@ -1,0 +1,130 @@
+<div class="seller-profile">
+  <div class="container">
+    <div class="header">
+      <h1>Perfil Profesional</h1>
+      <a routerLink="/profile" class="back-link">← Volver al área personal</a>
+    </div>
+
+    <div class="tabs">
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'products'"
+        (click)="setTab('products')"
+      >
+        Mis Productos
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'orders'"
+        (click)="setTab('orders')"
+      >
+        Pedidos
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'bank'"
+        (click)="setTab('bank')"
+      >
+        Datos Bancarios
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'settings'"
+        (click)="setTab('settings')"
+      >
+        Configuración
+      </button>
+    </div>
+
+    <!-- Tab: Productos -->
+    <div class="tab-content" *ngIf="activeTab() === 'products'">
+      <div class="products-section">
+        <div class="section-header">
+          <h2>Mis Productos</h2>
+          <button class="btn-primary">Nuevo Producto</button>
+        </div>
+        <div class="empty-state" *ngIf="products().length === 0">
+          <p>No has creado productos aún</p>
+          <button class="btn-primary">Crear Primer Producto</button>
+        </div>
+        <div class="products-list" *ngIf="products().length > 0">
+          <!-- Products will be displayed here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Pedidos -->
+    <div class="tab-content" *ngIf="activeTab() === 'orders'">
+      <div class="orders-section">
+        <h2>Pedidos Recibidos</h2>
+        <div class="empty-state" *ngIf="orders().length === 0">
+          <p>No tienes pedidos aún</p>
+        </div>
+        <div class="orders-list" *ngIf="orders().length > 0">
+          <!-- Orders will be displayed here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Datos Bancarios -->
+    <div class="tab-content" *ngIf="activeTab() === 'bank'">
+      <div class="bank-section">
+        <h2>Datos Bancarios</h2>
+        <p class="section-description">Configura tus datos bancarios para recibir pagos</p>
+        <div class="empty-state" *ngIf="bankAccounts().length === 0">
+          <p>No has configurado datos bancarios</p>
+          <button class="btn-primary">Agregar Cuenta Bancaria</button>
+        </div>
+        <div class="bank-accounts-list" *ngIf="bankAccounts().length > 0">
+          <!-- Bank accounts will be displayed here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Configuración -->
+    <div class="tab-content" *ngIf="activeTab() === 'settings'">
+      <div class="settings-section">
+        <h2>Configuración del Perfil Profesional</h2>
+        
+        <div class="settings-form">
+          <h3>Datos Personales/Empresa</h3>
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" [value]="user()?.name" placeholder="Nombre o Razón Social">
+          </div>
+          <div class="form-group">
+            <label>Apellidos</label>
+            <input type="text" [value]="user()?.surname" placeholder="Apellidos">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" [value]="user()?.email">
+          </div>
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="tel" placeholder="+34 600 000 000">
+          </div>
+          <div class="form-group">
+            <label>NIF/CIF</label>
+            <input type="text" placeholder="12345678A">
+          </div>
+
+          <h3>Configuración de Envíos</h3>
+          <div class="form-group">
+            <label>Plazo de Entrega (días)</label>
+            <input type="number" [value]="deliveryTime()" min="1" max="30">
+          </div>
+
+          <h3>Biografía</h3>
+          <div class="form-group">
+            <label>Descripción</label>
+            <textarea rows="4" placeholder="Cuéntanos sobre ti y tu arte..."></textarea>
+          </div>
+
+          <button class="btn-primary">Guardar Cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

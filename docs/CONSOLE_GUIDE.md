@@ -97,6 +97,7 @@ Limpiar consola	                clear o Cmd + K
 Salir de un heredoc o bloqueo	Ctrl + C
 Salir de nano	                Ctrl + X
 Guardar en nano	                Ctrl + O → Enter
+Salir de npm                    Control + Z
 
 🧭 Referencias rápidas
 

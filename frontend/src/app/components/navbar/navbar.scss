@@ -1,6 +1,6 @@
 .navbar {
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: var(--bg-white);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 1rem 0;
   position: sticky;
   top: 0;
@@ -17,13 +17,13 @@
 
   .navbar-brand {
     font-size: 1.5rem;
-    font-weight: bold;
-    color: #8b4513;
+    font-weight: 700;
+    color: var(--primary-color);
     text-decoration: none;
     transition: color 0.3s;
 
     &:hover {
-      color: #654321;
+      color: var(--primary-dark);
     }
   }
 
@@ -33,18 +33,18 @@
     align-items: center;
 
     a {
-      color: #333;
+      color: var(--text-medium);
       text-decoration: none;
       font-weight: 500;
       transition: color 0.3s;
       position: relative;
 
       &:hover {
-        color: #8b4513;
+        color: var(--primary-color);
       }
 
       &.active {
-        color: #8b4513;
+        color: var(--primary-color);
         
         &::after {
           content: '';
@@ -53,7 +53,7 @@
           left: 0;
           right: 0;
           height: 2px;
-          background-color: #8b4513;
+          background-color: var(--primary-color);
         }
       }
     }
@@ -65,7 +65,7 @@
       position: relative;
 
       .cart-badge {
-        background-color: #8b4513;
+        background-color: var(--primary-color);
         color: white;
         border-radius: 50%;
         width: 20px;
@@ -79,7 +79,7 @@
     }
 
     .user-name {
-      color: #666;
+      color: var(--text-light);
       font-size: 0.9rem;
     }
 
@@ -88,4 +88,3 @@
     }
   }
 }
-

@@ -1,0 +1,112 @@
+<div class="buyer-profile">
+  <div class="container">
+    <div class="header">
+      <h1>Perfil de Comprador</h1>
+      <a routerLink="/profile" class="back-link">← Volver al área personal</a>
+    </div>
+
+    <div class="tabs">
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'orders'"
+        (click)="setTab('orders')"
+      >
+        Mis Pedidos
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'favorites'"
+        (click)="setTab('favorites')"
+      >
+        Favoritos
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'addresses'"
+        (click)="setTab('addresses')"
+      >
+        Direcciones
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'settings'"
+        (click)="setTab('settings')"
+      >
+        Configuración
+      </button>
+    </div>
+
+    <!-- Tab: Pedidos -->
+    <div class="tab-content" *ngIf="activeTab() === 'orders'">
+      <div class="orders-section">
+        <h2>Pedidos en Curso</h2>
+        <div class="empty-state" *ngIf="orders().length === 0">
+          <p>No tienes pedidos en curso</p>
+        </div>
+        <div class="orders-list" *ngIf="orders().length > 0">
+          <!-- Orders will be displayed here -->
+        </div>
+
+        <h2 class="section-title">Historial de Pedidos</h2>
+        <div class="empty-state" *ngIf="orders().length === 0">
+          <p>No has realizado ningún pedido aún</p>
+          <a routerLink="/" class="btn-primary">Explorar Productos</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Favoritos -->
+    <div class="tab-content" *ngIf="activeTab() === 'favorites'">
+      <div class="favorites-section">
+        <h2>Mis Favoritos</h2>
+        <div class="empty-state" *ngIf="favorites().length === 0">
+          <p>No tienes productos favoritos</p>
+          <a routerLink="/" class="btn-primary">Explorar Productos</a>
+        </div>
+        <div class="favorites-grid" *ngIf="favorites().length > 0">
+          <!-- Favorites will be displayed here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Direcciones -->
+    <div class="tab-content" *ngIf="activeTab() === 'addresses'">
+      <div class="addresses-section">
+        <div class="section-header">
+          <h2>Mis Direcciones</h2>
+          <button class="btn-primary">Agregar Dirección</button>
+        </div>
+        <div class="empty-state" *ngIf="addresses().length === 0">
+          <p>No has agregado direcciones aún</p>
+          <button class="btn-primary">Agregar Primera Dirección</button>
+        </div>
+        <div class="addresses-list" *ngIf="addresses().length > 0">
+          <!-- Addresses will be displayed here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Configuración -->
+    <div class="tab-content" *ngIf="activeTab() === 'settings'">
+      <div class="settings-section">
+        <h2>Configuración</h2>
+        <div class="settings-form">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" [value]="user()?.name" readonly>
+          </div>
+          <div class="form-group">
+            <label>Apellidos</label>
+            <input type="text" [value]="user()?.surname" readonly>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" [value]="user()?.email" readonly>
+          </div>
+          <button class="btn-secondary">Editar Perfil</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

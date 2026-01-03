@@ -14,6 +14,7 @@
       </a>
       
       <ng-container *ngIf="isAuthenticated(); else loginLink">
+        <a routerLink="/profile" routerLinkActive="active">Mi Área</a>
         <a routerLink="/" (click)="logout()" class="logout-link">
           Cerrar Sesión
         </a>

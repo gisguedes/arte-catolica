@@ -1,7 +1,10 @@
 export interface User {
   id: number;
   name: string;
+  surname?: string;
   email: string;
+  avatar?: string;
+  provider?: string;
   created_at?: string;
   updated_at?: string;
 }

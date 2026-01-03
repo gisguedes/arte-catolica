@@ -1,40 +1,84 @@
-<div class="products-page">
+<div class="home-page">
+  <!-- Carrusel de Noticias -->
+  <app-news-carousel [news]="newsItems()"></app-news-carousel>
+
   <div class="container">
-    <h1>Arte Católica</h1>
-    <p class="subtitle">Descubre hermosas obras de arte católico</p>
-
-    <div class="filters">
-      <button
-        class="filter-btn"
-        [class.active]="selectedCategoryId() === null"
-        (click)="clearFilter()"
-      >
-        Todas las Categorías
-      </button>
-      <button
-        *ngFor="let category of categories()"
-        class="filter-btn"
-        [class.active]="selectedCategoryId() === category.id"
-        (click)="filterByCategory(category.id)"
-      >
-        {{ category.name }}
-      </button>
+    <!-- Cards de Navegación -->
+    <div class="navigation-cards">
+      <a routerLink="/" class="nav-card">
+        <div class="nav-icon">🖼️</div>
+        <h3>Productos</h3>
+        <p>Explora nuestra colección de arte católico</p>
+      </a>
+      
+      <a routerLink="/" [queryParams]="{category_id: categories()[0]?.id}" class="nav-card" *ngIf="categories().length > 0">
+        <div class="nav-icon">📂</div>
+        <h3>Categorías</h3>
+        <p>Navega por nuestras categorías</p>
+      </a>
+      
+      <a routerLink="/" class="nav-card">
+        <div class="nav-icon">🎨</div>
+        <h3>Artistas</h3>
+        <p>Conoce a nuestros artistas</p>
+      </a>
     </div>
 
-    <div class="loading" *ngIf="isLoading()">
-      <p>Cargando productos...</p>
-    </div>
+    <!-- Categorías destacadas -->
+    <section class="section" *ngIf="categories().length > 0">
+      <h2 class="section-title">Categorías</h2>
+      <div class="categories-grid">
+        <a
+          *ngFor="let category of categories().slice(0, 6)"
+          routerLink="/"
+          [queryParams]="{category_id: category.id}"
+          class="category-card"
+        >
+          <h3>{{ category.name }}</h3>
+          <p>{{ category.description }}</p>
+        </a>
+      </div>
+    </section>
 
-    <div class="products-grid" *ngIf="!isLoading()">
-      <app-product-card
-        *ngFor="let product of products()"
-        [product]="product"
-      ></app-product-card>
-    </div>
+    <!-- Productos destacados -->
+    <section class="section">
+      <h2 class="section-title">Productos Destacados</h2>
+      <div class="filters">
+        <button
+          class="filter-btn"
+          [class.active]="selectedCategoryId() === null"
+          (click)="clearFilter()"
+        >
+          Todos
+        </button>
+        <button
+          *ngFor="let category of categories().slice(0, 5)"
+          class="filter-btn"
+          [class.active]="selectedCategoryId() === category.id"
+          (click)="filterByCategory(category.id)"
+        >
+          {{ category.name }}
+        </button>
+      </div>
 
-    <div class="no-products" *ngIf="!isLoading() && products().length === 0">
-      <p>No se encontraron productos en esta categoría.</p>
-    </div>
+      <div class="loading" *ngIf="isLoading()">
+        <p>Cargando productos...</p>
+      </div>
+
+      <div class="products-grid" *ngIf="!isLoading()">
+        <app-product-card
+          *ngFor="let product of products().slice(0, 12)"
+          [product]="product"
+        ></app-product-card>
+      </div>
+
+      <div class="no-products" *ngIf="!isLoading() && products().length === 0">
+        <p>No se encontraron productos en esta categoría.</p>
+      </div>
+
+      <div class="view-all" *ngIf="!isLoading() && products().length > 0">
+        <a routerLink="/" class="btn-secondary">Ver Todos los Productos</a>
+      </div>
+    </section>
   </div>
 </div>
-
