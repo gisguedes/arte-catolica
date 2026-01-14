@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('address_id')->constrained()->onDelete('restrict');
-            $table->foreignId('payment_method_id')->constrained()->onDelete('restrict');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('address_id')->constrained()->onDelete('restrict');
+            $table->foreignUuid('payment_method_id')->constrained()->onDelete('restrict');
             $table->string('order_number')->unique();
             $table->enum('status', ['pending', 'processing', 'shipped', 'delivered', 'cancelled'])->default('pending');
             $table->decimal('subtotal', 10, 2);

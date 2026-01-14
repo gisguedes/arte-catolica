@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    use HasFactory;
+    use HasUuids, HasFactory;
+
+    public $incrementing = false;
+    protected $keyType = 'string';
+
 
     protected $fillable = [
         'slug',
@@ -29,7 +34,7 @@ class Category extends Model
 
     public function products()
     {
-        return $this->hasMany(Product::class);
+        return $this->belongsToMany(Product::class)->withTimestamps();
     }
 
     // Helper para obtener traducción en un idioma específico

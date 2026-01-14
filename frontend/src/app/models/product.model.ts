@@ -1,19 +1,19 @@
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   description?: string;
   price: number;
   image?: string;
-  category_id: number;
-  artist_id: number;
+  artist_id: string;
   category?: Category;
+  categories?: Category[];
   artist?: Artist;
   created_at?: string;
   updated_at?: string;
 }
 
 export interface Category {
-  id: number;
+  id: string;
   name: string;
   description?: string;
   created_at?: string;
@@ -21,7 +21,7 @@ export interface Category {
 }
 
 export interface Artist {
-  id: number;
+  id: string;
   name: string;
   bio?: string;
   image?: string;

@@ -38,12 +38,12 @@ export class CartService {
     this.saveCartToStorage();
   }
 
-  removeFromCart(productId: number): void {
+  removeFromCart(productId: string): void {
     this.items.set(this.items().filter((item) => item.product.id !== productId));
     this.saveCartToStorage();
   }
 
-  updateQuantity(productId: number, quantity: number): void {
+  updateQuantity(productId: string, quantity: number): void {
     if (quantity <= 0) {
       this.removeFromCart(productId);
       return;
