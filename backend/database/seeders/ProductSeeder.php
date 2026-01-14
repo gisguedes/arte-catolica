@@ -139,13 +139,14 @@ class ProductSeeder extends Seeder
 
             $product = Product::create([
                 'vendor_id' => $vendor->id,
-                'category_id' => $category->id,
                 'price' => $productData['price'],
                 'stock' => $productData['stock'],
                 'sku' => $productData['sku'],
                 'is_active' => true,
                 'is_featured' => false,
             ]);
+
+            $product->categories()->attach($category->id);
 
             // Crear traducciones
             foreach ($productData['translations'] as $locale => $translation) {

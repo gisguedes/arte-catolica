@@ -4,9 +4,9 @@ export interface Product {
   description?: string;
   price: number;
   image?: string;
-  category_id: string;
   artist_id: string;
   category?: Category;
+  categories?: Category[];
   artist?: Artist;
   created_at?: string;
   updated_at?: string;

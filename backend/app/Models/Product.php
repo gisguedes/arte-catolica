@@ -16,7 +16,6 @@ class Product extends Model
 
     protected $fillable = [
         'vendor_id',
-        'category_id',
         'price',
         'stock',
         'sku',
@@ -40,9 +39,9 @@ class Product extends Model
         return $this->belongsTo(Vendor::class);
     }
 
-    public function category()
+    public function categories()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsToMany(Category::class)->withTimestamps();
     }
 
     public function translations()
