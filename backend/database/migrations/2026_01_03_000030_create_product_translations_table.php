@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('product_translations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('product_id')->constrained()->onDelete('cascade');
             $table->string('locale', 5); // 'es', 'en', etc.
             $table->string('name');
             $table->text('description')->nullable();

@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('payment_methods', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
             $table->enum('type', ['card', 'paypal', 'bank_transfer', 'apple_pay', 'google_pay'])->default('card');
             $table->string('provider')->nullable(); // 'visa', 'mastercard', 'paypal', etc.
             $table->string('last_four')->nullable(); // Últimos 4 dígitos de la tarjeta

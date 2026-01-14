@@ -15,7 +15,7 @@ export class ArtistService {
     );
   }
 
-  getArtist(id: number): Observable<Artist> {
+  getArtist(id: string): Observable<Artist> {
     return this.apiService.get<{ data: Artist }>(`vendors/${id}`).pipe(
       map(response => response.data || response as any)
     );

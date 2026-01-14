@@ -22,7 +22,7 @@ export class ProductsComponent implements OnInit {
   products = signal<Product[]>([]);
   categories = signal<Category[]>([]);
   featuredArtists = signal<Artist[]>([]);
-  selectedCategoryId = signal<number | null>(null);
+  selectedCategoryId = signal<string | null>(null);
   isLoading = signal(true);
 
   newsItems = signal([
@@ -37,7 +37,7 @@ export class ProductsComponent implements OnInit {
   ngOnInit(): void {
     // Escuchar cambios en query params
     this.route.queryParams.subscribe(params => {
-      const categoryId = params['category_id'] ? +params['category_id'] : null;
+      const categoryId = params['category_id'] ?? null;
       if (categoryId) {
         this.filterByCategory(categoryId);
       } else {
@@ -73,7 +73,7 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-  loadProducts(categoryId?: number): void {
+  loadProducts(categoryId?: string): void {
     this.isLoading.set(true);
     this.selectedCategoryId.set(categoryId || null);
     this.productService.getProducts(categoryId).subscribe({
@@ -89,7 +89,7 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-  filterByCategory(categoryId: number | null): void {
+  filterByCategory(categoryId: string | null): void {
     this.loadProducts(categoryId || undefined);
   }
 

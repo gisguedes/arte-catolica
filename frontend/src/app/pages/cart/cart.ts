@@ -17,11 +17,11 @@ export class CartComponent {
   totalPrice = this.cartService.totalPrice;
   totalItems = this.cartService.totalItems;
 
-  updateQuantity(productId: number, quantity: number): void {
+  updateQuantity(productId: string, quantity: number): void {
     this.cartService.updateQuantity(productId, quantity);
   }
 
-  removeItem(productId: number): void {
+  removeItem(productId: string): void {
     this.cartService.removeFromCart(productId);
   }
 

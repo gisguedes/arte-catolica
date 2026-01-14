@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('product_images', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('product_id')->constrained()->onDelete('cascade');
             $table->string('image_path');
             $table->integer('order')->default(0); // Para ordenar las imágenes
             $table->boolean('is_primary')->default(false); // Imagen principal

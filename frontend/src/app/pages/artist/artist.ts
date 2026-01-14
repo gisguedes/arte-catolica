@@ -25,12 +25,12 @@ export class ArtistComponent implements OnInit {
   ngOnInit(): void {
     const artistId = this.route.snapshot.paramMap.get('id');
     if (artistId) {
-      this.loadArtist(+artistId);
-      this.loadArtistProducts(+artistId);
+      this.loadArtist(artistId);
+      this.loadArtistProducts(artistId);
     }
   }
 
-  loadArtist(id: number): void {
+  loadArtist(id: string): void {
     this.artistService.getArtist(id).subscribe({
       next: (artist) => {
         this.artist.set(artist);
@@ -43,7 +43,7 @@ export class ArtistComponent implements OnInit {
     });
   }
 
-  loadArtistProducts(artistId: number): void {
+  loadArtistProducts(artistId: string): void {
     this.productService.getProductsByArtist(artistId).subscribe({
       next: (products) => this.products.set(products),
       error: (error) => console.error('Error loading artist products:', error),

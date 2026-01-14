@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_vendor_relations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('vendor_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('vendor_id')->constrained()->onDelete('cascade');
             $table->enum('role', ['buyer', 'seller'])->default('buyer'); // El usuario puede ser comprador o vendedor
             $table->boolean('is_active')->default(true);
             $table->timestamps();

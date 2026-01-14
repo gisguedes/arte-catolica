@@ -1,11 +1,11 @@
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   description?: string;
   price: number;
   image?: string;
-  category_id: number;
-  artist_id: number;
+  category_id: string;
+  artist_id: string;
   category?: Category;
   artist?: Artist;
   created_at?: string;
@@ -13,7 +13,7 @@ export interface Product {
 }
 
 export interface Category {
-  id: number;
+  id: string;
   name: string;
   description?: string;
   created_at?: string;
@@ -21,7 +21,7 @@ export interface Category {
 }
 
 export interface Artist {
-  id: number;
+  id: string;
   name: string;
   bio?: string;
   image?: string;

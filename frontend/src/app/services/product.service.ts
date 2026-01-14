@@ -9,14 +9,14 @@ import { Product, Category } from '../models/product.model';
 export class ProductService {
   private apiService = inject(ApiService);
 
-  getProducts(categoryId?: number): Observable<Product[]> {
+  getProducts(categoryId?: string): Observable<Product[]> {
     const endpoint = categoryId ? `products?category_id=${categoryId}` : 'products';
     return this.apiService.get<{ data: Product[] }>(endpoint).pipe(
       map(response => response.data || response as any)
     );
   }
 
-  getProduct(id: number): Observable<Product> {
+  getProduct(id: string): Observable<Product> {
     return this.apiService.get<{ data: Product }>(`products/${id}`).pipe(
       map(response => response.data || response as any)
     );
@@ -28,7 +28,7 @@ export class ProductService {
     );
   }
 
-  getProductsByArtist(artistId: number): Observable<Product[]> {
+  getProductsByArtist(artistId: string): Observable<Product[]> {
     return this.apiService.get<{ data: Product[] }>(`artists/${artistId}/products`).pipe(
       map(response => response.data || response as any)
     );

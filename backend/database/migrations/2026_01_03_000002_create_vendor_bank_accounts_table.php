@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('vendor_bank_accounts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('vendor_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('vendor_id')->constrained()->onDelete('cascade');
             $table->string('bank_name');
             $table->string('account_holder_name');
             $table->string('iban'); // IBAN internacional

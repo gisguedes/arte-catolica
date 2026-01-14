@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('categories', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('slug')->unique();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
@@ -20,8 +20,8 @@ return new class extends Migration
 
         // Tabla de traducciones para multiidioma
         Schema::create('category_translations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('category_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('category_id')->constrained()->onDelete('cascade');
             $table->string('locale', 5); // 'es', 'en', etc.
             $table->string('name');
             $table->text('description')->nullable();
