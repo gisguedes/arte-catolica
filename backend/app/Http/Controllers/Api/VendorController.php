@@ -43,7 +43,7 @@ class VendorController extends Controller
         $vendor = Vendor::findOrFail($id);
 
         $products = $vendor->products()
-            ->with(['translations', 'images', 'category'])
+            ->with(['vendor.artistTypes', 'categories', 'materials', 'colors', 'translations', 'images'])
             ->where('is_active', true)
             ->get();
 

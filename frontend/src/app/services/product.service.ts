@@ -39,7 +39,7 @@ export class ProductService {
   }
 
   getProductsByArtist(artistId: string): Observable<Product[]> {
-    return this.apiService.get<{ data: Product[] }>(`artists/${artistId}/products`).pipe(
+    return this.apiService.get<{ data: Product[] }>(`vendors/${artistId}/products`).pipe(
       map(response => (response.data || response as any).map((p: Product) => this.normalizeProduct(p)))
     );
   }

@@ -37,6 +37,13 @@ export class ProductCardComponent {
     this.cartService.addToCart(this.product);
   }
 
+  ngOnInit(): void {
+    const name = this.product?.vendor?.name || this.product?.artist?.name || null;
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/3d6fb066-d5c2-417c-b90d-dfa24731bc3e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product-card.ts:ngOnInit',message:'product card artist label',data:{productId:this.product?.id,artistName:name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+    // #endregion
+  }
+
   formatPrice(price: number): string {
     return new Intl.NumberFormat('es-ES', {
       style: 'currency',
