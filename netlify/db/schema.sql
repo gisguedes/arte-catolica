@@ -20,6 +20,19 @@ CREATE TABLE IF NOT EXISTS vendors (
   updated_at timestamptz DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS users (
+  id uuid PRIMARY KEY,
+  name text NOT NULL,
+  surname text,
+  email text UNIQUE NOT NULL,
+  password text,
+  provider text,
+  provider_id text,
+  avatar text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS artist_types (
   id uuid PRIMARY KEY,
   slug text UNIQUE NOT NULL,
