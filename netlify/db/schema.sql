@@ -33,6 +33,65 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at timestamptz DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS addresses (
+  id uuid PRIMARY KEY,
+  user_id uuid REFERENCES users(id) ON DELETE CASCADE,
+  type text DEFAULT 'shipping',
+  first_name text NOT NULL,
+  last_name text NOT NULL,
+  address_line_1 text NOT NULL,
+  address_line_2 text,
+  city text NOT NULL,
+  state text,
+  postal_code text NOT NULL,
+  country text DEFAULT 'ES',
+  phone text,
+  is_default boolean DEFAULT false,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS payment_methods (
+  id uuid PRIMARY KEY,
+  user_id uuid REFERENCES users(id) ON DELETE CASCADE,
+  type text DEFAULT 'card',
+  provider text,
+  last_four text,
+  cardholder_name text,
+  expires_at date,
+  is_default boolean DEFAULT false,
+  metadata jsonb,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+  id uuid PRIMARY KEY,
+  user_id uuid REFERENCES users(id) ON DELETE CASCADE,
+  address_id uuid REFERENCES addresses(id) ON DELETE RESTRICT,
+  payment_method_id uuid REFERENCES payment_methods(id) ON DELETE RESTRICT,
+  order_number text UNIQUE NOT NULL,
+  status text DEFAULT 'pending',
+  subtotal numeric(10,2) NOT NULL,
+  tax numeric(10,2) DEFAULT 0,
+  shipping_cost numeric(10,2) DEFAULT 0,
+  total numeric(10,2) NOT NULL,
+  notes text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS order_items (
+  id uuid PRIMARY KEY,
+  order_id uuid REFERENCES orders(id) ON DELETE CASCADE,
+  product_id uuid REFERENCES products(id) ON DELETE RESTRICT,
+  quantity integer NOT NULL,
+  unit_price numeric(10,2) NOT NULL,
+  total_price numeric(10,2) NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS artist_types (
   id uuid PRIMARY KEY,
   slug text UNIQUE NOT NULL,

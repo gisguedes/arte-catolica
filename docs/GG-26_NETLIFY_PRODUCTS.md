@@ -32,6 +32,12 @@ Se exponen vía `/api` usando el redirect:
 - `GET /api/artist-types/:id`
 - `POST /api/register`
 - `POST /api/login`
+- `GET /api/orders`
+- `GET /api/orders/:id`
+- `POST /api/orders`
+- `PUT /api/orders/:id`
+- `PATCH /api/orders/:id`
+- `DELETE /api/orders/:id`
 
 ### Payload de ejemplo (POST/PUT)
 ```json
