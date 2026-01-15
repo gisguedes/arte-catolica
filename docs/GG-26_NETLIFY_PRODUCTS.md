@@ -6,6 +6,7 @@ Reemplazar los endpoints de productos del backend Laravel por Netlify Functions 
 ### Requisitos
 - Crear una base de datos en Netlify DB (Neon).
 - Definir la variable de entorno `NETLIFY_DATABASE_URL` en Netlify.
+- Definir la variable de entorno `JWT_SECRET` en Netlify.
 
 ### Esquema
 Ejecuta el SQL en `netlify/db/schema.sql` en tu instancia de Neon.
@@ -29,6 +30,8 @@ Se exponen vía `/api` usando el redirect:
 - `GET /api/colors/:id`
 - `GET /api/artist-types`
 - `GET /api/artist-types/:id`
+- `POST /api/register`
+- `POST /api/login`
 
 ### Payload de ejemplo (POST/PUT)
 ```json
