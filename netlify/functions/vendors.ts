@@ -136,12 +136,23 @@ const buildProductSelect = () => `
     ON pt.product_id = p.id AND pt.locale = $1
 `;
 
-const fetchVendors = async (includeInactive = false) => {
+const fetchVendors = async (includeInactive = false, userId?: string) => {
   const sql = getSql();
-  const query = `${buildVendorSelect()} ${
-    includeInactive ? '' : 'WHERE v.is_active = true'
-  } ORDER BY v.created_at DESC`;
-  return toRows(await sql(query));
+  const conditions: string[] = [];
+  const params: any[] = [];
+
+  if (!includeInactive) {
+    conditions.push('v.is_active = true');
+  }
+
+  if (userId) {
+    params.push(userId);
+    conditions.push(`v.user_id = $${params.length}`);
+  }
+
+  const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  const query = `${buildVendorSelect()} ${whereClause} ORDER BY v.created_at DESC`;
+  return toRows(await sql(query, params));
 };
 
 const fetchVendorById = async (id: string) => {
@@ -167,8 +178,10 @@ export const handler: Handler = async (event) => {
 
   try {
     if (method === 'GET' && !vendorId) {
+      const userId = event.queryStringParameters?.user_id;
       const vendors = await fetchVendors(
-        event.queryStringParameters?.include_inactive === 'true'
+        event.queryStringParameters?.include_inactive === 'true',
+        userId
       );
       return jsonResponse(200, { data: vendors });
     }
