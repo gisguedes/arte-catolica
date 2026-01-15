@@ -1,12 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:8000/api'; // URL del backend Laravel
+  private baseUrl = environment.apiUrl;
   private http = inject(HttpClient);
 
   // Métodos para autenticación (sin token, el interceptor lo agregará si existe)
@@ -15,11 +16,7 @@ export class ApiService {
       'Content-Type': 'application/json',
       Accept: 'application/json',
     });
-    return this.http.post(
-      `${this.baseUrl}/login`,
-      { email, password },
-      { headers }
-    );
+    return this.http.post(`${this.baseUrl}/login`, { email, password }, { headers });
   }
 
   register(userData: any): Observable<any> {
