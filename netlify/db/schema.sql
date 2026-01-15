@@ -20,6 +20,22 @@ CREATE TABLE IF NOT EXISTS vendors (
   updated_at timestamptz DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS artist_types (
+  id uuid PRIMARY KEY,
+  slug text UNIQUE NOT NULL,
+  name text NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS artist_type_vendor (
+  artist_type_id uuid REFERENCES artist_types(id) ON DELETE CASCADE,
+  vendor_id uuid REFERENCES vendors(id) ON DELETE CASCADE,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  UNIQUE (artist_type_id, vendor_id)
+);
+
 CREATE TABLE IF NOT EXISTS products (
   id uuid PRIMARY KEY,
   vendor_id uuid REFERENCES vendors(id) ON DELETE SET NULL,
