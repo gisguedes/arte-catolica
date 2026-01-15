@@ -92,6 +92,15 @@ CREATE TABLE IF NOT EXISTS order_items (
   updated_at timestamptz DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS cart_items (
+  user_id uuid REFERENCES users(id) ON DELETE CASCADE,
+  product_id uuid REFERENCES products(id) ON DELETE CASCADE,
+  quantity integer NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  PRIMARY KEY (user_id, product_id)
+);
+
 CREATE TABLE IF NOT EXISTS artist_types (
   id uuid PRIMARY KEY,
   slug text UNIQUE NOT NULL,
