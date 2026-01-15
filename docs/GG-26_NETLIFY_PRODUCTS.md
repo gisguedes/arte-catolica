@@ -18,6 +18,9 @@ Se exponen vía `/api` usando el redirect:
 - `PUT /api/products/:id`
 - `PATCH /api/products/:id`
 - `DELETE /api/products/:id`
+- `GET /api/vendors`
+- `GET /api/vendors/:id`
+- `GET /api/vendors/:id/products`
 
 ### Payload de ejemplo (POST/PUT)
 ```json
