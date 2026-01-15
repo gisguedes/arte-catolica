@@ -8,9 +8,8 @@
 Repositorio monorepo para el proyecto Arte Católica.
 
 Estructura:
-- **backend/** — PHP (Laravel)
 - **frontend/** — Angular
-- **infra/** — Docker, Nginx, scripts
+- **netlify/** — Netlify Functions y SQL (Neon)
 - **.github/** — Workflows y plantillas de PR/Issues
 - **docs/** — Guías y documentación del monorepo
 
@@ -24,8 +23,6 @@ Convenciones:
 ## 📦 Requisitos (local / macOS)
 
 - Git
-- Docker & Docker Compose (opcional para entornos aislados)
-- PHP 8.x y Composer (si se desarrolla sin contenedores)
 - Node.js >= 16, npm / pnpm, Angular CLI (si se desarrolla sin contenedores)
 - Make (opcional)
 
@@ -35,39 +32,17 @@ Convenciones:
 
 Opciones recomendadas:
 
-1) Desarrollar usando Docker (recomendado)
-
-- Copiar variables: `cp .env.example .env` (si aplica)
-- Levantar servicios: `docker compose up -d --build`
-- Ver logs: `docker compose logs -f`
-- Parar: `docker compose down`
-
-2) Desarrollar local (sin Docker)
-
-Backend:
-
-- `cd backend`
-- `composer install`
-- `cp .env.example .env`
-- `php artisan key:generate`
-- `php artisan migrate --seed`
-- `php artisan serve --host=127.0.0.1 --port=8000`
-
-Frontend:
+1) Desarrollar local (frontend)
 
 - `cd frontend`
 - `npm install` (o `pnpm install`)
 - `ng serve` — abre en `http://localhost:4200`
 
-Nota: ajustar variables de entorno para que el frontend apunte al backend correcto.
+Nota: el backend ahora es **Netlify Functions + Neon**. En dev puedes usar `/api` con proxy o `netlify dev`.
 
 ---
 
 ## 🧪 Tests
-
-Backend:
-
-- `cd backend && php artisan test`
 
 Frontend:
 
@@ -75,13 +50,12 @@ Frontend:
 
 Integración / E2E:
 
-- Revisar `infra/` o la carpeta de tests para orquestar ambientes de pruebas.
+- Revisar `docs/` para notas de despliegue y pruebas.
 
 ---
 
 ## 🛠️ Scripts útiles
 
-- `infra/scripts/*` — scripts de mantenimiento y despliegue (revisar y ejecutar con `sh`)
 - `Makefile` (si existe) — atajos comunes (`make build`, `make test`, etc.)
 
 ---
@@ -107,9 +81,7 @@ Integración / E2E:
 
 ## 🧾 Troubleshooting
 
-- Problemas de dependencias PHP: `composer clear-cache && composer install`
 - Problemas Node: borrar `node_modules` y lockfile, luego `npm install`
-- Docker: `docker compose down --volumes --remove-orphans` y volver a levantar
 
 ---
 

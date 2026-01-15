@@ -179,9 +179,9 @@ Cambio incompatible	MAJOR	1.4.0 → 2.0.0
 💡 Tips de productividad
 Usa GitLens en VS Code para ver historial y PRs por línea.
 
-Usa workspace .code-workspace para abrir FE + BE juntos.
+Usa workspace .code-workspace para abrir FE + Functions juntos.
 
-Crea tareas automatizadas (tasks.json) para docker compose up o ng serve.
+Crea tareas automatizadas (tasks.json) para ng serve o netlify dev.
 
 Modo concentración: Zen Mode (⌘K Z).
 
