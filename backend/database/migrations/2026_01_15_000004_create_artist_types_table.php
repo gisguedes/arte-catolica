@@ -19,7 +19,6 @@ return new class extends Migration
         });
 
         Schema::create('artist_type_vendor', function (Blueprint $table) {
-            $table->uuid('id')->primary();
             $table->foreignUuid('artist_type_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('vendor_id')->constrained()->onDelete('cascade');
             $table->timestamps();

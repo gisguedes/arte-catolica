@@ -18,12 +18,14 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
         ]);
 
-        // Crear usuario de prueba (no vendedor)
-        User::factory()->create([
-            'name' => 'Test',
-            'surname' => 'User',
-            'email' => 'test@example.com',
-            'password' => \Hash::make('password'),
-        ]);
+        // Crear o actualizar usuario de prueba (no vendedor)
+        User::updateOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test',
+                'surname' => 'User',
+                'password' => \Hash::make('password'),
+            ]
+        );
     }
 }

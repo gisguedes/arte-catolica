@@ -33,6 +33,7 @@ export class ProductsComponent implements OnInit {
   selectedSort = signal<'relevance' | 'price_low' | 'price_high'>('relevance');
   isLoading = signal(true);
   isHome = signal(true);
+  showFilters = signal(false);
 
   newsItems = signal([
     {
@@ -218,5 +219,49 @@ export class ProductsComponent implements OnInit {
 
   setSort(sort: 'relevance' | 'price_low' | 'price_high'): void {
     this.selectedSort.set(sort);
+  }
+
+  openFilters(): void {
+    this.showFilters.set(true);
+  }
+
+  closeFilters(): void {
+    this.showFilters.set(false);
+  }
+
+  applyFilters(): void {
+    this.closeFilters();
+  }
+
+  activeFilters(): string[] {
+    const items: string[] = [];
+    const sort = this.selectedSort();
+    if (sort === 'price_low') items.push('Precio más bajo');
+    if (sort === 'price_high') items.push('Precio más alto');
+
+    const categoryId = this.selectedCategoryId();
+    if (categoryId) {
+      const category = this.categories().find((item) => item.id === categoryId);
+      if (category) items.push(category.name);
+    }
+
+    const artistId = this.selectedArtistId();
+    if (artistId) {
+      const artist = this.artists().find((item) => item.id === artistId);
+      if (artist) items.push(artist.name);
+    }
+
+    const materialId = this.selectedMaterialId();
+    if (materialId) {
+      const material = this.materials().find((item) => item.id === materialId);
+      if (material) items.push(material.name);
+    }
+
+    const availability = this.selectedAvailability();
+    if (availability === 'in_stock') items.push('En stock');
+    if (availability === 'limited') items.push('Stock limitado');
+    if (availability === 'on_demand') items.push('Bajo demanda');
+
+    return items;
   }
 }

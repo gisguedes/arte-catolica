@@ -52,18 +52,22 @@ class CategorySeeder extends Seeder
         ];
 
         foreach ($categories as $categoryData) {
-            $category = Category::create([
-                'slug' => $categoryData['slug'],
-                'is_active' => true,
-            ]);
+            $category = Category::updateOrCreate(
+                ['slug' => $categoryData['slug']],
+                ['is_active' => true]
+            );
 
             foreach ($categoryData['translations'] as $locale => $translation) {
-                CategoryTranslation::create([
-                    'category_id' => $category->id,
-                    'locale' => $locale,
-                    'name' => $translation['name'],
-                    'description' => $translation['description'],
-                ]);
+                CategoryTranslation::updateOrCreate(
+                    [
+                        'category_id' => $category->id,
+                        'locale' => $locale,
+                    ],
+                    [
+                        'name' => $translation['name'],
+                        'description' => $translation['description'],
+                    ]
+                );
             }
         }
     }
