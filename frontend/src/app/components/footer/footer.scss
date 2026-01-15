@@ -1,6 +1,6 @@
 .footer {
-  background: #2c2c2c;
-  color: #fff;
+  background: var(--secondary-color);
+  color: var(--bg-white);
   padding: 3rem 0 1.5rem;
   margin-top: 4rem;
 
@@ -21,18 +21,18 @@
     h3 {
       font-size: 1.5rem;
       margin: 0 0 1rem 0;
-      color: #fff;
+      color: var(--bg-white);
     }
 
     h4 {
       font-size: 1.1rem;
       margin: 0 0 1rem 0;
-      color: #fff;
+      color: var(--bg-white);
       font-weight: 600;
     }
 
     p {
-      color: #ccc;
+      color: #e9e1d1;
       line-height: 1.6;
       margin: 0 0 1rem 0;
     }
@@ -46,12 +46,12 @@
         margin-bottom: 0.75rem;
 
         a {
-          color: #ccc;
+          color: #e9e1d1;
           text-decoration: none;
           transition: color 0.3s;
 
           &:hover {
-            color: var(--primary-color);
+            color: var(--primary-light);
           }
         }
       }
@@ -71,7 +71,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      color: var(--bg-white);
       transition: all 0.3s;
 
       &:hover {
@@ -91,11 +91,11 @@
     line-height: 1.8;
 
     strong {
-      color: #fff;
+      color: var(--bg-white);
     }
 
     a {
-      color: var(--primary-color);
+      color: var(--primary-light);
       text-decoration: none;
 
       &:hover {
@@ -110,7 +110,7 @@
     text-align: center;
 
     p {
-      color: #999;
+      color: #d9cfbf;
       margin: 0;
       font-size: 0.9rem;
     }

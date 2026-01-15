@@ -1,0 +1,89 @@
+<div class="artists-page">
+  <div class="container">
+    <div class="marketing-block">
+      <h1>Artistas</h1>
+      <p class="subtitle">Conoce a nuestros artistas y sus colecciones.</p>
+    </div>
+
+    <div class="loading" *ngIf="isLoading()">
+      <p>Cargando artistas...</p>
+    </div>
+
+    <div class="artists-grid" *ngIf="!isLoading()">
+      <a
+        *ngFor="let artist of artists()"
+        class="artist-card"
+        [class.active]="selectedArtistId() === artist.id"
+        [routerLink]="['/es/artist', artist.id]"
+      >
+        <div class="avatar">
+          <img [src]="artist.image || '/assets/placeholder-image.jpg'" [alt]="artist.name" />
+        </div>
+        <div class="info">
+          <h3>{{ artist.name }}</h3>
+          <p>{{ artist.bio || 'Artista destacado en arte sacro.' }}</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="filters" *ngIf="!isLoading()">
+      <div class="filter-group">
+        <label>Ordenar</label>
+        <select (change)="setSort($any($event.target).value)">
+          <option value="relevance">Más relevante</option>
+          <option value="price_low">Precio más bajo</option>
+          <option value="price_high">Precio más alto</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Artistas</label>
+        <select (change)="selectArtist($any($event.target).value || null)">
+          <option value="">Todos</option>
+          <option *ngFor="let artist of artists()" [value]="artist.id">
+            {{ artist.name }}
+          </option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Categorías</label>
+        <select (change)="filterByCategory($any($event.target).value || null)">
+          <option value="">Todas</option>
+          <option *ngFor="let category of categories()" [value]="category.id">
+            {{ category.name }}
+          </option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Material</label>
+        <select (change)="filterByMaterial($any($event.target).value || null)">
+          <option value="">Todos</option>
+          <option *ngFor="let material of materials()" [value]="material.id">
+            {{ material.name }}
+          </option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Disponibilidad</label>
+        <select (change)="filterByAvailability($any($event.target).value || null)">
+          <option value="">Todas</option>
+          <option value="in_stock">En stock</option>
+          <option value="limited">Stock limitado</option>
+          <option value="on_demand">Bajo demanda</option>
+        </select>
+      </div>
+      <button class="filter-clear" (click)="clearFilters()">Limpiar filtros</button>
+    </div>
+
+    <div class="products-grid" *ngIf="!isLoading()">
+      <app-product-card
+        *ngFor="let product of filteredProducts()"
+        [product]="product"
+      ></app-product-card>
+    </div>
+
+    <div class="no-results" *ngIf="!isLoading() && filteredProducts().length === 0">
+      <p>No hay productos para el artista seleccionado.</p>
+    </div>
+  </div>
+</div>
+

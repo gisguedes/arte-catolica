@@ -16,10 +16,15 @@ class ProductController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $query = Product::with(['vendor', 'categories', 'translations', 'images']);
+        $query = Product::with(['vendor.artistTypes', 'categories', 'materials', 'colors', 'translations', 'images']);
 
         // Filtrar por categoría si se proporciona
-        if ($request->has('category_id')) {
+        if ($request->has('category_slug')) {
+            $categorySlug = $request->category_slug;
+            $query->whereHas('categories', function ($q) use ($categorySlug) {
+                $q->where('categories.slug', $categorySlug);
+            });
+        } elseif ($request->has('category_id')) {
             $categoryId = $request->category_id;
             $query->whereHas('categories', function ($q) use ($categoryId) {
                 $q->where('categories.id', $categoryId);
@@ -39,7 +44,7 @@ class ProductController extends Controller
      */
     public function show(Request $request, string $id): ProductResource
     {
-        $product = Product::with(['vendor', 'categories', 'translations', 'images'])
+        $product = Product::with(['vendor.artistTypes', 'categories', 'materials', 'colors', 'translations', 'images'])
             ->findOrFail($id);
 
         return new ProductResource($product);

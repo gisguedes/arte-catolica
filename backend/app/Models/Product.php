@@ -18,6 +18,10 @@ class Product extends Model
         'vendor_id',
         'price',
         'stock',
+        'availability',
+        'height_cm',
+        'width_cm',
+        'depth_cm',
         'sku',
         'is_active',
         'is_featured',
@@ -28,6 +32,10 @@ class Product extends Model
         return [
             'price' => 'decimal:2',
             'stock' => 'integer',
+            'availability' => 'string',
+            'height_cm' => 'decimal:2',
+            'width_cm' => 'decimal:2',
+            'depth_cm' => 'decimal:2',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
         ];
@@ -42,6 +50,22 @@ class Product extends Model
     public function categories()
     {
         return $this->belongsToMany(Category::class)->withTimestamps();
+    }
+
+    // Alias de compatibilidad para código legacy
+    public function category()
+    {
+        return $this->categories();
+    }
+
+    public function materials()
+    {
+        return $this->belongsToMany(Material::class)->withTimestamps();
+    }
+
+    public function colors()
+    {
+        return $this->belongsToMany(Color::class)->withTimestamps();
     }
 
     public function translations()

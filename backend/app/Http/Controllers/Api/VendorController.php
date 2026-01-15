@@ -17,7 +17,7 @@ class VendorController extends Controller
      */
     public function index(): AnonymousResourceCollection
     {
-        $vendors = Vendor::with('user')
+        $vendors = Vendor::with(['user', 'artistTypes'])
             ->where('is_active', true)
             ->get();
 
@@ -29,7 +29,7 @@ class VendorController extends Controller
      */
     public function show(string $id): VendorResource
     {
-        $vendor = Vendor::with(['user'])
+        $vendor = Vendor::with(['user', 'artistTypes'])
             ->findOrFail($id);
 
         return new VendorResource($vendor);

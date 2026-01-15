@@ -43,7 +43,7 @@ export class LoginComponent {
 
       this.authService.login(this.loginForm.value).subscribe({
         next: () => {
-          this.router.navigate(['/profile']);
+          this.router.navigate(['/es/profile']);
         },
         error: (error) => {
           this.errorMessage = error.error?.message || 'Error al iniciar sesión';
@@ -66,10 +66,10 @@ export class LoginComponent {
             password: this.registerForm.value.password,
           }).subscribe({
             next: () => {
-              this.router.navigate(['/profile']);
+              this.router.navigate(['/es/profile']);
             },
             error: () => {
-              this.router.navigate(['/login']);
+              this.router.navigate(['/es/login']);
             },
           });
         },

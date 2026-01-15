@@ -1,0 +1,90 @@
+<div class="categories-page">
+  <div class="container">
+    <div class="marketing-block">
+      <h1>Categorías</h1>
+      <p class="subtitle">
+        Explora nuestras categorías de arte religioso y descubre colecciones pensadas para
+        cada devoción.
+      </p>
+    </div>
+
+    <div class="loading" *ngIf="isLoading()">
+      <p>Cargando categorías...</p>
+    </div>
+
+    <div class="categories-grid" *ngIf="!isLoading()">
+      <button
+        *ngFor="let category of categories()"
+        class="category-card"
+        [class.active]="selectedCategoryId() === category.id"
+        (click)="selectCategory(category.id)"
+      >
+        <h3>{{ category.name }}</h3>
+        <p>{{ category.description }}</p>
+      </button>
+    </div>
+
+    <div class="filters" *ngIf="!isLoading()">
+      <div class="filter-group">
+        <label>Ordenar</label>
+        <select (change)="setSort($any($event.target).value)">
+          <option value="relevance">Más relevante</option>
+          <option value="price_low">Precio más bajo</option>
+          <option value="price_high">Precio más alto</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Categorías</label>
+        <select
+          [value]="selectedCategoryId() || ''"
+          (change)="selectCategory($any($event.target).value || null)"
+        >
+          <option value="">Todas</option>
+          <option *ngFor="let category of categories()" [value]="category.id">
+            {{ category.name }}
+          </option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Artistas</label>
+        <select (change)="filterByArtist($any($event.target).value || null)">
+          <option value="">Todos</option>
+          <option *ngFor="let artist of artists()" [value]="artist.id">
+            {{ artist.name }}
+          </option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Material</label>
+        <select (change)="filterByMaterial($any($event.target).value || null)">
+          <option value="">Todos</option>
+          <option *ngFor="let material of materials()" [value]="material.id">
+            {{ material.name }}
+          </option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Disponibilidad</label>
+        <select (change)="filterByAvailability($any($event.target).value || null)">
+          <option value="">Todas</option>
+          <option value="in_stock">En stock</option>
+          <option value="limited">Stock limitado</option>
+          <option value="on_demand">Bajo demanda</option>
+        </select>
+      </div>
+      <button class="filter-clear" (click)="clearFilters()">Limpiar filtros</button>
+    </div>
+
+    <div class="products-grid" *ngIf="!isLoading()">
+      <app-product-card
+        *ngFor="let product of filteredProducts()"
+        [product]="product"
+      ></app-product-card>
+    </div>
+
+    <div class="no-results" *ngIf="!isLoading() && filteredProducts().length === 0">
+      <p>No hay productos para la categoría seleccionada.</p>
+    </div>
+  </div>
+</div>
+

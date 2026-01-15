@@ -41,7 +41,7 @@ export class AuthService {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     this.currentUser.set(null);
-    this.router.navigate(['/login']);
+    this.router.navigate(['/es/login']);
   }
 
   register(userData: any): Observable<any> {

@@ -2,7 +2,7 @@
   <div class="container">
     <div class="header">
       <h1>Perfil de Comprador</h1>
-      <a routerLink="/profile" class="back-link">← Volver al área personal</a>
+      <a routerLink="/es/profile" class="back-link">← Volver al área personal</a>
     </div>
 
     <div class="tabs">
@@ -50,7 +50,7 @@
         <h2 class="section-title">Historial de Pedidos</h2>
         <div class="empty-state" *ngIf="orders().length === 0">
           <p>No has realizado ningún pedido aún</p>
-          <a routerLink="/" class="btn-primary">Explorar Productos</a>
+          <a routerLink="/es/products" class="btn-primary">Explorar Productos</a>
         </div>
       </div>
     </div>
@@ -61,7 +61,7 @@
         <h2>Mis Favoritos</h2>
         <div class="empty-state" *ngIf="favorites().length === 0">
           <p>No tienes productos favoritos</p>
-          <a routerLink="/" class="btn-primary">Explorar Productos</a>
+          <a routerLink="/es/products" class="btn-primary">Explorar Productos</a>
         </div>
         <div class="favorites-grid" *ngIf="favorites().length > 0">
           <!-- Favorites will be displayed here -->

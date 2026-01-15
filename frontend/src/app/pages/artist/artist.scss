@@ -56,6 +56,47 @@
           margin-bottom: 1.5rem;
         }
 
+        .artist-meta {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 0.75rem 2rem;
+          margin-bottom: 1.5rem;
+
+          div {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+          }
+        }
+
+        .meta-label {
+          font-size: 0.85rem;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          color: var(--text-light);
+          font-weight: 600;
+        }
+
+        .meta-value {
+          font-size: 1rem;
+          color: var(--text-dark);
+        }
+
+        .meta-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+
+        .meta-tag {
+          padding: 0.35rem 0.75rem;
+          border-radius: 999px;
+          background: var(--bg-soft);
+          color: var(--text-dark);
+          font-size: 0.9rem;
+          font-weight: 600;
+        }
+
         .artist-contact {
           display: flex;
           gap: 1.5rem;
