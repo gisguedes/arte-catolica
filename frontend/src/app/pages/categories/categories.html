@@ -45,55 +45,55 @@
           <button class="filters-close" (click)="closeFilters()">×</button>
         </div>
         <div class="filters">
-      <div class="filter-group">
-        <label>Ordenar</label>
-        <select (change)="setSort($any($event.target).value)">
-          <option value="relevance">Más relevante</option>
-          <option value="price_low">Precio más bajo</option>
-          <option value="price_high">Precio más alto</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>Categorías</label>
-        <select
-          [value]="selectedCategoryId() || ''"
-          (change)="selectCategory($any($event.target).value || null)"
-        >
-          <option value="">Todas</option>
-          <option *ngFor="let category of categories()" [value]="category.id">
-            {{ category.name }}
-          </option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>Artistas</label>
-        <select (change)="filterByArtist($any($event.target).value || null)">
-          <option value="">Todos</option>
-          <option *ngFor="let artist of artists()" [value]="artist.id">
-            {{ artist.name }}
-          </option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>Material</label>
-        <select (change)="filterByMaterial($any($event.target).value || null)">
-          <option value="">Todos</option>
-          <option *ngFor="let material of materials()" [value]="material.id">
-            {{ material.name }}
-          </option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>Disponibilidad</label>
-        <select (change)="filterByAvailability($any($event.target).value || null)">
-          <option value="">Todas</option>
-          <option value="in_stock">En stock</option>
-          <option value="limited">Stock limitado</option>
-          <option value="on_demand">Bajo demanda</option>
-        </select>
-      </div>
+          <div class="filter-group">
+            <label>Ordenar</label>
+            <select (change)="setSort($any($event.target).value)">
+              <option value="relevance">Más relevante</option>
+              <option value="price_low">Precio más bajo</option>
+              <option value="price_high">Precio más alto</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Categorías</label>
+            <select
+              [value]="selectedCategoryId() || ''"
+              (change)="selectCategory($any($event.target).value || null)"
+            >
+              <option value="">Todas</option>
+              <option *ngFor="let category of categories()" [value]="category.id">
+                {{ category.name }}
+              </option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Artistas</label>
+            <select (change)="filterByArtist($any($event.target).value || null)">
+              <option value="">Todos</option>
+              <option *ngFor="let artist of artists()" [value]="artist.id">
+                {{ artist.name }}
+              </option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Material</label>
+            <select (change)="filterByMaterial($any($event.target).value || null)">
+              <option value="">Todos</option>
+              <option *ngFor="let material of materials()" [value]="material.id">
+                {{ material.name }}
+              </option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Disponibilidad</label>
+            <select (change)="filterByAvailability($any($event.target).value || null)">
+              <option value="">Todas</option>
+              <option value="in_stock">En stock</option>
+              <option value="limited">Stock limitado</option>
+              <option value="on_demand">Bajo demanda</option>
+            </select>
+          </div>
           <div class="filters-actions">
-      <button class="filter-clear" (click)="clearFilters()">Limpiar filtros</button>
+            <button class="filter-clear" (click)="clearFilters()">Limpiar filtros</button>
             <button class="filter-apply" (click)="applyFilters()">Aplicar filtros</button>
           </div>
         </div>
