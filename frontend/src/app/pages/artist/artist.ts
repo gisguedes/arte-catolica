@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ArtistService } from '../../services/artist.service';
@@ -21,6 +21,7 @@ export class ArtistComponent implements OnInit {
   artist = signal<Artist | null>(null);
   products = signal<Product[]>([]);
   isLoading = signal(true);
+  featuredProducts = computed(() => this.products().slice(0, 4));
   ngOnInit(): void {
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/3d6fb066-d5c2-417c-b90d-dfa24731bc3e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'artist.ts:ngOnInit',message:'artist page init',data:{url:typeof window !== 'undefined' ? window.location?.href : null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
