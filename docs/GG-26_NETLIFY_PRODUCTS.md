@@ -38,6 +38,18 @@ Se exponen vía `/api` usando el redirect:
 - `PUT /api/orders/:id`
 - `PATCH /api/orders/:id`
 - `DELETE /api/orders/:id`
+- `GET /api/addresses`
+- `GET /api/addresses/:id`
+- `POST /api/addresses`
+- `PUT /api/addresses/:id`
+- `PATCH /api/addresses/:id`
+- `DELETE /api/addresses/:id`
+- `GET /api/payment-methods`
+- `GET /api/payment-methods/:id`
+- `POST /api/payment-methods`
+- `PUT /api/payment-methods/:id`
+- `PATCH /api/payment-methods/:id`
+- `DELETE /api/payment-methods/:id`
 
 ### Payload de ejemplo (POST/PUT)
 ```json
