@@ -50,6 +50,10 @@ Se exponen vía `/api` usando el redirect:
 - `PUT /api/payment-methods/:id`
 - `PATCH /api/payment-methods/:id`
 - `DELETE /api/payment-methods/:id`
+- `GET /api/cart?user_id=:id`
+- `POST /api/cart`
+- `DELETE /api/cart?user_id=:id&product_id=:id`
+- `DELETE /api/cart/clear?user_id=:id`
 
 ### Payload de ejemplo (POST/PUT)
 ```json
