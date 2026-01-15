@@ -1,7 +1,7 @@
 .navbar {
   background-color: var(--bg-white);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 1rem 0;
+  box-shadow: 0 1px 6px rgba(15, 35, 71, 0.08);
+  padding: 0.9rem 0;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -16,14 +16,20 @@
   }
 
   .navbar-brand {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
     text-decoration: none;
     transition: color 0.3s;
+    display: inline-flex;
+    align-items: center;
 
     &:hover {
       color: var(--primary-dark);
+    }
+
+    .brand-logo {
+      height: 64px;
+      max-width: 320px;
+      width: auto;
+      object-fit: contain;
     }
   }
 
@@ -33,18 +39,22 @@
     align-items: center;
 
     a {
+      font-family: var(--font-display);
       color: var(--text-medium);
       text-decoration: none;
       font-weight: 500;
       transition: color 0.3s;
       position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
 
       &:hover {
-        color: var(--primary-color);
+        color: var(--secondary-color);
       }
 
       &.active {
-        color: var(--primary-color);
+        color: var(--secondary-color);
         
         &::after {
           content: '';
@@ -58,6 +68,13 @@
       }
     }
 
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      flex-shrink: 0;
+    }
+
     .cart-link {
       display: flex;
       align-items: center;
@@ -66,7 +83,7 @@
 
       .cart-badge {
         background-color: var(--primary-color);
-        color: white;
+        color: var(--bg-white);
         border-radius: 50%;
         width: 20px;
         height: 20px;

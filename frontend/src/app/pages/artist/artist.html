@@ -12,6 +12,24 @@
         <div class="artist-details">
           <h1>{{ artist()!.name }}</h1>
           <p class="artist-bio" *ngIf="artist()!.bio">{{ artist()!.bio }}</p>
+          <div class="artist-meta">
+            <div *ngIf="artistLocation()">
+              <span class="meta-label">Localización</span>
+              <span class="meta-value">{{ artistLocation() }}</span>
+            </div>
+            <div *ngIf="artist()!.artist_types?.length">
+              <span class="meta-label">Tipo de artista</span>
+              <div class="meta-tags">
+                <span class="meta-tag" *ngFor="let type of artist()!.artist_types">
+                  {{ type.name }}
+                </span>
+              </div>
+            </div>
+            <div *ngIf="artist()!.opening_date">
+              <span class="meta-label">Fecha de abertura</span>
+              <span class="meta-value">{{ artist()!.opening_date | date: 'longDate' }}</span>
+            </div>
+          </div>
           <div class="artist-contact" *ngIf="artist()!.email || artist()!.website">
             <a *ngIf="artist()!.email" [href]="'mailto:' + artist()!.email" class="contact-link">
               {{ artist()!.email }}
@@ -21,6 +39,16 @@
             </a>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="artist-products" *ngIf="artist() && !isLoading() && featuredProducts().length > 0">
+      <h2>Principales productos</h2>
+      <div class="products-grid">
+        <app-product-card
+          *ngFor="let product of featuredProducts()"
+          [product]="product"
+        ></app-product-card>
       </div>
     </div>
 

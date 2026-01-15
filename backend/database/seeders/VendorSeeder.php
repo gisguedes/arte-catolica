@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Vendor;
+use App\Models\ArtistType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -30,6 +31,11 @@ class VendorSeeder extends Seeder
                     'nif' => '12345678A',
                     'bio' => 'Artista especializada en pinturas religiosas tradicionales',
                     'website' => 'https://mariagonzalez.art',
+                    'city' => 'Sevilla',
+                    'country' => 'España',
+                    'postal_code' => '41001',
+                    'opening_date' => '2014-05-12',
+                    'artist_types' => ['pintura-sacra', 'arte-devocional'],
                 ],
             ],
             [
@@ -47,6 +53,11 @@ class VendorSeeder extends Seeder
                     'nif' => '87654321B',
                     'bio' => 'Escultor de arte sacro con más de 20 años de experiencia',
                     'website' => 'https://juanmartinez.art',
+                    'city' => 'Toledo',
+                    'country' => 'España',
+                    'postal_code' => '45001',
+                    'opening_date' => '2001-09-03',
+                    'artist_types' => ['escultura-religiosa'],
                 ],
             ],
             [
@@ -63,17 +74,52 @@ class VendorSeeder extends Seeder
                     'phone' => '+34 600 345 678',
                     'nif' => '11223344C',
                     'bio' => 'Creadora de iconos bizantinos y arte ortodoxo',
+                    'city' => 'Valencia',
+                    'country' => 'España',
+                    'postal_code' => '46001',
+                    'opening_date' => '2018-03-18',
+                    'artist_types' => ['iconografia', 'arte-devocional'],
                 ],
             ],
         ];
 
-        foreach ($vendors as $vendorData) {
-            $user = User::create($vendorData['user']);
+        $artistTypeMap = [
+            'pintura-sacra' => 'Pintura sacra',
+            'arte-devocional' => 'Arte devocional',
+            'escultura-religiosa' => 'Escultura religiosa',
+            'iconografia' => 'Iconografía',
+        ];
 
-            Vendor::create(array_merge($vendorData['vendor'], [
-                'user_id' => $user->id,
-                'is_active' => true,
-            ]));
+        foreach ($vendors as $vendorData) {
+            $user = User::firstOrCreate(
+                ['email' => $vendorData['user']['email']],
+                $vendorData['user']
+            );
+
+            $artistTypeSlugs = $vendorData['vendor']['artist_types'] ?? [];
+            $vendorPayload = $vendorData['vendor'];
+            unset($vendorPayload['artist_types']);
+
+            $vendor = Vendor::updateOrCreate(
+                ['email' => $vendorData['vendor']['email']],
+                array_merge($vendorPayload, [
+                    'user_id' => $user->id,
+                    'is_active' => true,
+                ])
+            );
+
+            $artistTypeIds = [];
+            foreach ($artistTypeSlugs as $slug) {
+                $name = $artistTypeMap[$slug] ?? ucfirst(str_replace('-', ' ', $slug));
+                $artistTypeIds[] = ArtistType::firstOrCreate(
+                    ['slug' => $slug],
+                    ['name' => $name]
+                )->id;
+            }
+
+            if (!empty($artistTypeIds)) {
+                $vendor->artistTypes()->sync($artistTypeIds);
+            }
         }
     }
 }

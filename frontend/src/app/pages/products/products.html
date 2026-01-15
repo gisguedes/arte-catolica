@@ -1,64 +1,65 @@
 <div class="home-page">
-  <!-- Carrusel de Noticias -->
-  <app-news-carousel [news]="newsItems()"></app-news-carousel>
+  <!-- Carrusel de Noticias (solo home) -->
+  <app-news-carousel *ngIf="isHome()" [news]="newsItems()"></app-news-carousel>
 
   <div class="container">
-    <!-- Cards de Navegación -->
-    <div class="navigation-cards">
-      <a routerLink="/" class="nav-card">
-        <div class="nav-icon">🖼️</div>
-        <h3>Productos</h3>
-        <p>Explora nuestra colección de arte católico</p>
-      </a>
-      
-      <a routerLink="/" [queryParams]="{category_id: categories()[0]?.id}" class="nav-card" *ngIf="categories().length > 0">
-        <div class="nav-icon">📂</div>
-        <h3>Categorías</h3>
-        <p>Navega por nuestras categorías</p>
-      </a>
-      
-      <a routerLink="/" class="nav-card">
-        <div class="nav-icon">🎨</div>
-        <h3>Artistas</h3>
-        <p>Conoce a nuestros artistas</p>
-      </a>
-    </div>
-
-    <!-- Categorías destacadas -->
-    <section class="section" *ngIf="categories().length > 0">
-      <h2 class="section-title">Categorías</h2>
-      <div class="categories-grid">
-        <a
-          *ngFor="let category of categories().slice(0, 6)"
-          routerLink="/"
-          [queryParams]="{category_id: category.id}"
-          class="category-card"
-        >
-          <h3>{{ category.name }}</h3>
-          <p>{{ category.description }}</p>
-        </a>
-      </div>
-    </section>
-
-    <!-- Productos destacados -->
+    <!-- Productos (home o catálogo) -->
     <section class="section">
-      <h2 class="section-title">Productos Destacados</h2>
+      <h2 class="section-title" *ngIf="isHome()">Productos Destacados</h2>
+      <div class="marketing-block" *ngIf="!isHome()">
+        <h2>Productos</h2>
+        <p>
+          Descubre piezas únicas con historia y significado. Arte religioso seleccionado con criterios
+          de calidad y autenticidad.
+        </p>
+      </div>
+
       <div class="filters">
-        <button
-          class="filter-btn"
-          [class.active]="selectedCategoryId() === null"
-          (click)="clearFilter()"
-        >
-          Todos
-        </button>
-        <button
-          *ngFor="let category of categories().slice(0, 5)"
-          class="filter-btn"
-          [class.active]="selectedCategoryId() === category.id"
-          (click)="filterByCategory(category.id)"
-        >
-          {{ category.name }}
-        </button>
+        <div class="filter-group">
+          <label>Ordenar</label>
+          <select (change)="setSort($any($event.target).value)">
+            <option value="relevance">Más relevante</option>
+            <option value="price_low">Precio más bajo</option>
+            <option value="price_high">Precio más alto</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Categorías</label>
+          <select (change)="filterByCategory($any($event.target).value || null)">
+            <option value="">Todas</option>
+            <option *ngFor="let category of categories()" [value]="category.id">
+              {{ category.name }}
+            </option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Artistas</label>
+          <select (change)="filterByArtist($any($event.target).value || null)">
+            <option value="">Todos</option>
+            <option *ngFor="let artist of artists()" [value]="artist.id">
+              {{ artist.name }}
+            </option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Material</label>
+          <select (change)="filterByMaterial($any($event.target).value || null)">
+            <option value="">Todos</option>
+            <option *ngFor="let material of materials()" [value]="material.id">
+              {{ material.name }}
+            </option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Disponibilidad</label>
+          <select (change)="filterByAvailability($any($event.target).value || null)">
+            <option value="">Todas</option>
+            <option value="in_stock">En stock</option>
+            <option value="limited">Stock limitado</option>
+            <option value="on_demand">Bajo demanda</option>
+          </select>
+        </div>
+        <button class="filter-clear" (click)="clearFilter()">Limpiar filtros</button>
       </div>
 
       <div class="loading" *ngIf="isLoading()">
@@ -67,17 +68,17 @@
 
       <div class="products-grid" *ngIf="!isLoading()">
         <app-product-card
-          *ngFor="let product of products().slice(0, 12)"
+          *ngFor="let product of filteredProducts().slice(0, 12)"
           [product]="product"
         ></app-product-card>
       </div>
 
-      <div class="no-products" *ngIf="!isLoading() && products().length === 0">
-        <p>No se encontraron productos en esta categoría.</p>
+      <div class="no-products" *ngIf="!isLoading() && filteredProducts().length === 0">
+        <p>No se encontraron productos con estos filtros.</p>
       </div>
 
-      <div class="view-all" *ngIf="!isLoading() && products().length > 0">
-        <a routerLink="/" class="btn-secondary">Ver Todos los Productos</a>
+      <div class="view-all" *ngIf="isHome() && !isLoading() && filteredProducts().length > 0">
+        <a routerLink="/es/products" class="btn-secondary">Ver Todos los Productos</a>
       </div>
     </section>
   </div>

@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\ArtistTypeResource;
 
 class VendorResource extends JsonResource
 {
@@ -24,6 +25,11 @@ class VendorResource extends JsonResource
             'bio' => $this->bio,
             'image' => $this->image,
             'website' => $this->website,
+            'city' => $this->city,
+            'country' => $this->country,
+            'postal_code' => $this->postal_code,
+            'opening_date' => $this->opening_date,
+            'artist_types' => ArtistTypeResource::collection($this->whenLoaded('artistTypes')),
             'is_active' => $this->is_active,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

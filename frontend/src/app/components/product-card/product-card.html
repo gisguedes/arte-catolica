@@ -1,15 +1,43 @@
 <div class="product-card">
-  <a [routerLink]="['/artist', product.artist_id]" class="artist-link">
-    Por {{ product.artist?.name || 'Artista' }}
+  <a
+    [routerLink]="['/es/artist', product.artist_id || product.vendor?.id]"
+    class="artist-link"
+  >
+    Por {{ product.artist?.name || product.vendor?.name || 'Artista' }}
   </a>
   <div class="card-content">
-    <div class="product-image">
-      <img [src]="product.image || '/assets/placeholder-image.jpg'" [alt]="product.name" />
-    </div>
-    <div class="product-info">
-      <h3 class="product-name">{{ product.name }}</h3>
-      <p class="product-price">${{ product.price.toFixed(2) }}</p>
-    </div>
+    <a [routerLink]="['/es/products', product.id]" class="product-link">
+      <div class="product-image">
+        <img [src]="currentImage()" [alt]="product.name" />
+        <button
+          class="gallery-arrow left"
+          *ngIf="hasGallery()"
+          (click)="prevImage($event)"
+          aria-label="Imagen anterior"
+        >
+          ‹
+        </button>
+        <button
+          class="gallery-arrow right"
+          *ngIf="hasGallery()"
+          (click)="nextImage($event)"
+          aria-label="Imagen siguiente"
+        >
+          ›
+        </button>
+        <div class="gallery-dots" *ngIf="hasGallery()">
+          <span
+            class="dot"
+            *ngFor="let index of galleryIndices()"
+            [class.active]="index === imageIndex()"
+          ></span>
+        </div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">{{ product.name }}</h3>
+        <p class="product-price">{{ formatPrice(product.price) }}</p>
+      </div>
+    </a>
   </div>
   <button class="add-to-cart-btn" (click)="addToCart($event)">
     Agregar al Carrito

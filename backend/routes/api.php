@@ -25,3 +25,5 @@ Route::apiResource('vendors', VendorController::class)->only(['index', 'show']);
 
 // Ruta adicional para productos de un vendor
 Route::get('vendors/{id}/products', [VendorController::class, 'products']);
+// Alias para compatibilidad con "artists" en el frontend
+Route::get('artists/{id}/products', [VendorController::class, 'products']);

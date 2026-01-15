@@ -48,7 +48,7 @@
     min-height: 400px;
   }
 
-  .slide {
+    .slide {
     position: absolute;
     top: 0;
     left: 0;
@@ -66,7 +66,7 @@
       display: flex;
       align-items: center;
       min-height: 400px;
-      padding: 3rem;
+      padding: 3rem 5.5rem;
       color: white;
 
       .slide-image {
@@ -148,7 +148,7 @@
   .news-carousel {
     .slide .slide-content {
       flex-direction: column;
-      padding: 2rem;
+      padding: 2rem 3.5rem;
 
       .slide-image {
         max-width: 100%;

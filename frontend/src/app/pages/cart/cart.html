@@ -4,7 +4,7 @@
 
     <div class="empty-cart" *ngIf="totalItems() === 0">
       <p>Tu carrito está vacío</p>
-      <a routerLink="/" class="continue-shopping-btn">Continuar Comprando</a>
+      <a routerLink="/es/products" class="continue-shopping-btn">Continuar Comprando</a>
     </div>
 
     <div class="cart-content" *ngIf="totalItems() > 0">
@@ -19,11 +19,11 @@
           <div class="item-details">
             <h3>{{ item.product.name }}</h3>
             <p class="artist-name">
-              Por <a [routerLink]="['/artist', item.product.artist_id]">
-                {{ item.product.artist?.name || 'Artista' }}
+              Por <a [routerLink]="['/es/artist', item.product.artist_id || item.product.vendor?.id]">
+                {{ item.product.artist?.name || item.product.vendor?.name || 'Artista' }}
               </a>
             </p>
-            <p class="item-price">${{ item.product.price.toFixed(2) }}</p>
+            <p class="item-price">{{ formatPrice(item.product.price) }}</p>
           </div>
           <div class="item-quantity">
             <label>Cantidad:</label>
@@ -34,7 +34,7 @@
             </div>
           </div>
           <div class="item-total">
-            <p class="total-price">${{ (item.product.price * item.quantity).toFixed(2) }}</p>
+            <p class="total-price">{{ formatPrice(item.product.price * item.quantity) }}</p>
             <button class="remove-btn" (click)="removeItem(item.product.id)">Eliminar</button>
           </div>
         </div>

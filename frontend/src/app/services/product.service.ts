@@ -9,16 +9,26 @@ import { Product, Category } from '../models/product.model';
 export class ProductService {
   private apiService = inject(ApiService);
 
-  getProducts(categoryId?: string): Observable<Product[]> {
-    const endpoint = categoryId ? `products?category_id=${categoryId}` : 'products';
+  private normalizeProduct(product: Product): Product {
+    return {
+      ...product,
+      price: Number(product.price ?? 0),
+      height_cm: product.height_cm !== undefined ? Number(product.height_cm) : undefined,
+      width_cm: product.width_cm !== undefined ? Number(product.width_cm) : undefined,
+      depth_cm: product.depth_cm !== undefined ? Number(product.depth_cm) : undefined,
+    };
+  }
+
+  getProducts(categorySlug?: string): Observable<Product[]> {
+    const endpoint = categorySlug ? `products?category_slug=${categorySlug}` : 'products';
     return this.apiService.get<{ data: Product[] }>(endpoint).pipe(
-      map(response => response.data || response as any)
+      map(response => (response.data || response as any).map((p: Product) => this.normalizeProduct(p)))
     );
   }
 
   getProduct(id: string): Observable<Product> {
     return this.apiService.get<{ data: Product }>(`products/${id}`).pipe(
-      map(response => response.data || response as any)
+      map(response => this.normalizeProduct(response.data || response as any))
     );
   }
 
@@ -30,7 +40,7 @@ export class ProductService {
 
   getProductsByArtist(artistId: string): Observable<Product[]> {
     return this.apiService.get<{ data: Product[] }>(`artists/${artistId}/products`).pipe(
-      map(response => response.data || response as any)
+      map(response => (response.data || response as any).map((p: Product) => this.normalizeProduct(p)))
     );
   }
 }

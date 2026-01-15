@@ -24,6 +24,10 @@ class Vendor extends Model
         'bio',
         'image',
         'website',
+        'city',
+        'country',
+        'postal_code',
+        'opening_date',
         'is_active',
     ];
 
@@ -31,6 +35,7 @@ class Vendor extends Model
     {
         return [
             'is_active' => 'boolean',
+            'opening_date' => 'date',
         ];
     }
 
@@ -50,6 +55,11 @@ class Vendor extends Model
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function artistTypes()
+    {
+        return $this->belongsToMany(ArtistType::class)->withTimestamps();
     }
 
     public function bankAccounts()

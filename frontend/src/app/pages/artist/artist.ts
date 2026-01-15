@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ArtistService } from '../../services/artist.service';
@@ -21,6 +21,14 @@ export class ArtistComponent implements OnInit {
   artist = signal<Artist | null>(null);
   products = signal<Product[]>([]);
   isLoading = signal(true);
+  featuredProducts = computed(() => {
+    const list = this.products();
+    const featured = list.filter((product) => product.is_featured);
+    if (featured.length > 0) {
+      return featured.slice(0, 3);
+    }
+    return list.slice(0, 3);
+  });
 
   ngOnInit(): void {
     const artistId = this.route.snapshot.paramMap.get('id');
@@ -48,6 +56,15 @@ export class ArtistComponent implements OnInit {
       next: (products) => this.products.set(products),
       error: (error) => console.error('Error loading artist products:', error),
     });
+  }
+
+  artistLocation(): string {
+    const artist = this.artist();
+    if (!artist) {
+      return '';
+    }
+    const parts = [artist.city, artist.postal_code, artist.country].filter(Boolean);
+    return parts.join(', ');
   }
 }
 

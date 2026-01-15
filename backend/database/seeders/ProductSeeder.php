@@ -3,6 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\Color;
+use App\Models\Material;
+use App\Models\MaterialTranslation;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductTranslation;
@@ -18,153 +21,135 @@ class ProductSeeder extends Seeder
     {
         $vendors = Vendor::all();
         $categories = Category::all();
+        $materials = collect();
+        $colors = collect();
+        $imagePool = [
+            [
+                'https://images.unsplash.com/photo-1459666644539-a9755287d6b0?auto=format&fit=crop&w=1200&q=80',
+                'https://images.unsplash.com/photo-1459156212016-c812468e2115?auto=format&fit=crop&w=1200&q=80',
+            ],
+            [
+                'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80',
+                'https://images.unsplash.com/photo-1452827073306-6e6e661baf57?auto=format&fit=crop&w=1200&q=80',
+            ],
+            [
+                'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=80',
+                'https://images.unsplash.com/photo-1442550528053-c431ecb55509?auto=format&fit=crop&w=1200&q=80',
+            ],
+        ];
 
         if ($vendors->isEmpty() || $categories->isEmpty()) {
             $this->command->warn('No hay vendedores o categorías. Ejecuta primero VendorSeeder y CategorySeeder.');
             return;
         }
 
-        $products = [
-            [
-                'category_slug' => 'pinturas',
-                'vendor_email' => 'maria@artecatolica.com',
-                'price' => 350.00,
-                'stock' => 5,
-                'sku' => 'PINT-001',
-                'translations' => [
-                    'es' => [
-                        'name' => 'Virgen de Guadalupe',
-                        'description' => 'Hermosa pintura al óleo de la Virgen de Guadalupe, realizada en lienzo de alta calidad.',
-                    ],
-                    'en' => [
-                        'name' => 'Our Lady of Guadalupe',
-                        'description' => 'Beautiful oil painting of Our Lady of Guadalupe, made on high-quality canvas.',
-                    ],
-                ],
-            ],
-            [
-                'category_slug' => 'pinturas',
-                'vendor_email' => 'maria@artecatolica.com',
-                'price' => 450.00,
-                'stock' => 3,
-                'sku' => 'PINT-002',
-                'translations' => [
-                    'es' => [
-                        'name' => 'Sagrado Corazón de Jesús',
-                        'description' => 'Pintura devocional del Sagrado Corazón de Jesús con marco dorado.',
-                    ],
-                    'en' => [
-                        'name' => 'Sacred Heart of Jesus',
-                        'description' => 'Devotional painting of the Sacred Heart of Jesus with gold frame.',
-                    ],
-                ],
-            ],
-            [
-                'category_slug' => 'esculturas',
-                'vendor_email' => 'juan@artecatolica.com',
-                'price' => 280.00,
-                'stock' => 8,
-                'sku' => 'ESC-001',
-                'translations' => [
-                    'es' => [
-                        'name' => 'Cristo Crucificado',
-                        'description' => 'Escultura de madera tallada a mano, representando a Cristo en la cruz.',
-                    ],
-                    'en' => [
-                        'name' => 'Crucified Christ',
-                        'description' => 'Hand-carved wood sculpture representing Christ on the cross.',
-                    ],
-                ],
-            ],
-            [
-                'category_slug' => 'esculturas',
-                'vendor_email' => 'juan@artecatolica.com',
-                'price' => 320.00,
-                'stock' => 6,
-                'sku' => 'ESC-002',
-                'translations' => [
-                    'es' => [
-                        'name' => 'Virgen María',
-                        'description' => 'Escultura de la Virgen María en mármol blanco.',
-                    ],
-                    'en' => [
-                        'name' => 'Virgin Mary',
-                        'description' => 'White marble sculpture of the Virgin Mary.',
-                    ],
-                ],
-            ],
-            [
-                'category_slug' => 'iconos',
-                'vendor_email' => 'ana@artecatolica.com',
-                'price' => 180.00,
-                'stock' => 10,
-                'sku' => 'ICO-001',
-                'translations' => [
-                    'es' => [
-                        'name' => 'Icono de San Miguel Arcángel',
-                        'description' => 'Icono bizantino pintado a mano sobre tabla de madera.',
-                    ],
-                    'en' => [
-                        'name' => 'Icon of Saint Michael the Archangel',
-                        'description' => 'Hand-painted Byzantine icon on wood panel.',
-                    ],
-                ],
-            ],
-            [
-                'category_slug' => 'crucifijos',
-                'vendor_email' => 'juan@artecatolica.com',
-                'price' => 95.00,
-                'stock' => 15,
-                'sku' => 'CRU-001',
-                'translations' => [
-                    'es' => [
-                        'name' => 'Crucifijo de Bronce',
-                        'description' => 'Crucifijo artesanal en bronce con base de madera.',
-                    ],
-                    'en' => [
-                        'name' => 'Bronze Crucifix',
-                        'description' => 'Handcrafted bronze crucifix with wood base.',
-                    ],
-                ],
-            ],
+        $vendorList = $vendors->values();
+        $vendorCount = $vendorList->count();
+
+        $materialList = [
+            ['slug' => 'oleo-lienzo', 'es' => 'Óleo sobre lienzo', 'en' => 'Oil on canvas'],
+            ['slug' => 'madera-tallada', 'es' => 'Madera tallada', 'en' => 'Carved wood'],
+            ['slug' => 'pan-oro', 'es' => 'Pan de oro', 'en' => 'Gold leaf'],
+            ['slug' => 'bronce', 'es' => 'Bronce', 'en' => 'Bronze'],
+            ['slug' => 'marmol', 'es' => 'Mármol', 'en' => 'Marble'],
         ];
 
-        foreach ($products as $productData) {
-            $category = $categories->firstWhere('slug', $productData['category_slug']);
-            $vendor = $vendors->firstWhere('email', $productData['vendor_email']);
+        foreach ($materialList as $materialData) {
+            $material = Material::firstOrCreate(
+                ['slug' => $materialData['slug']],
+                ['is_active' => true]
+            );
 
-            if (!$category || !$vendor) {
-                continue;
+            MaterialTranslation::updateOrCreate(
+                ['material_id' => $material->id, 'locale' => 'es'],
+                ['name' => $materialData['es']]
+            );
+
+            MaterialTranslation::updateOrCreate(
+                ['material_id' => $material->id, 'locale' => 'en'],
+                ['name' => $materialData['en']]
+            );
+
+            $materials->push($material);
+        }
+
+        $colorList = [
+            ['name' => 'Dorado', 'hex' => '#c9a24a'],
+            ['name' => 'Azul profundo', 'hex' => '#0f2347'],
+            ['name' => 'Marfil', 'hex' => '#f5f0e6'],
+            ['name' => 'Burdeos', 'hex' => '#5a2d36'],
+        ];
+
+        foreach ($colorList as $colorData) {
+            $colors->push(Color::firstOrCreate(
+                ['hex' => $colorData['hex']],
+                [
+                    'name' => $colorData['name'],
+                    'is_active' => true,
+                ]
+            ));
+        }
+
+        foreach ($categories as $index => $category) {
+            for ($i = 1; $i <= 3; $i++) {
+                $vendor = $vendorList[$index % $vendorCount];
+                $skuPrefix = strtoupper(substr($category->slug, 0, 3));
+                $sku = sprintf('%s-%02d', $skuPrefix, $i);
+                $availability = $i === 3 ? 'on_demand' : ($i === 2 ? 'limited' : 'in_stock');
+                $imageSet = $imagePool[($index + $i) % count($imagePool)];
+                $categoryNameEs = $category->translate('es')?->name ?? ucfirst($category->slug);
+                $categoryNameEn = $category->translate('en')?->name ?? ucfirst($category->slug);
+                $product = Product::updateOrCreate(
+                    ['sku' => $sku],
+                    [
+                        'vendor_id' => $vendor->id,
+                        'price' => 90 + ($i * 35) + ($index * 10),
+                        'stock' => $availability === 'on_demand' ? 0 : (5 + $i),
+                        'availability' => $availability,
+                        'height_cm' => $i === 1 ? 30 : ($i === 2 ? 40 : 50),
+                        'width_cm' => $i === 1 ? 40 : ($i === 2 ? 60 : 70),
+                        'depth_cm' => $i === 1 ? 4 : ($i === 2 ? 6 : 8),
+                        'is_active' => true,
+                        'is_featured' => $i === 1,
+                    ]
+                );
+
+                $product->categories()->sync([$category->id]);
+                $product->materials()->sync($materials->shuffle()->take(2)->pluck('id'));
+                $product->colors()->sync($colors->shuffle()->take(2)->pluck('id'));
+
+                ProductTranslation::updateOrCreate(
+                    ['product_id' => $product->id, 'locale' => 'es'],
+                    [
+                        'name' => "{$categoryNameEs} {$i}",
+                        'description' => "Pieza única de {$categoryNameEs} inspirada en el arte sacro.",
+                    ]
+                );
+
+                ProductTranslation::updateOrCreate(
+                    ['product_id' => $product->id, 'locale' => 'en'],
+                    [
+                        'name' => "{$categoryNameEn} {$i}",
+                        'description' => "Unique {$categoryNameEn} piece inspired by sacred art.",
+                    ]
+                );
+
+                ProductImage::updateOrCreate(
+                    ['product_id' => $product->id, 'order' => 1],
+                    [
+                        'image_path' => $imageSet[0],
+                        'is_primary' => true,
+                    ]
+                );
+
+                ProductImage::updateOrCreate(
+                    ['product_id' => $product->id, 'order' => 2],
+                    [
+                        'image_path' => $imageSet[1],
+                        'is_primary' => false,
+                    ]
+                );
             }
-
-            $product = Product::create([
-                'vendor_id' => $vendor->id,
-                'price' => $productData['price'],
-                'stock' => $productData['stock'],
-                'sku' => $productData['sku'],
-                'is_active' => true,
-                'is_featured' => false,
-            ]);
-
-            $product->categories()->attach($category->id);
-
-            // Crear traducciones
-            foreach ($productData['translations'] as $locale => $translation) {
-                ProductTranslation::create([
-                    'product_id' => $product->id,
-                    'locale' => $locale,
-                    'name' => $translation['name'],
-                    'description' => $translation['description'],
-                ]);
-            }
-
-            // Crear imagen de ejemplo (placeholder)
-            ProductImage::create([
-                'product_id' => $product->id,
-                'image_path' => '/images/products/placeholder.jpg',
-                'order' => 1,
-                'is_primary' => true,
-            ]);
         }
     }
 }

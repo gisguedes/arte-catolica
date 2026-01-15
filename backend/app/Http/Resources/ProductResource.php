@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\VendorResource;
+use App\Http\Resources\MaterialResource;
+use App\Http\Resources\ColorResource;
 
 class ProductResource extends JsonResource
 {
@@ -23,6 +25,10 @@ class ProductResource extends JsonResource
             'vendor_id' => $this->vendor_id,
             'price' => $this->price,
             'stock' => $this->stock,
+            'availability' => $this->availability,
+            'height_cm' => $this->height_cm,
+            'width_cm' => $this->width_cm,
+            'depth_cm' => $this->depth_cm,
             'sku' => $this->sku,
             'is_active' => $this->is_active,
             'is_featured' => $this->is_featured,
@@ -33,6 +39,8 @@ class ProductResource extends JsonResource
             'image' => $this->image,
             'vendor' => new VendorResource($this->whenLoaded('vendor')),
             'categories' => CategoryResource::collection($this->whenLoaded('categories')),
+            'materials' => MaterialResource::collection($this->whenLoaded('materials')),
+            'colors' => ColorResource::collection($this->whenLoaded('colors')),
             'translations' => $this->whenLoaded('translations'),
             'images' => $this->whenLoaded('images'),
         ];

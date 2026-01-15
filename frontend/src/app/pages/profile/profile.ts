@@ -30,9 +30,9 @@ export class ProfileComponent {
   selectRole(role: 'buyer' | 'seller'): void {
     this.selectedRole.set(role);
     if (role === 'buyer') {
-      this.router.navigate(['/profile/buyer']);
+      this.router.navigate(['/es/profile/buyer']);
     } else if (role === 'seller') {
-      this.router.navigate(['/profile/seller']);
+      this.router.navigate(['/es/profile/seller']);
     }
   }
 }

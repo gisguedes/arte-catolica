@@ -1,0 +1,121 @@
+<div class="product-detail">
+  <div class="container">
+    <a routerLink="/es/products" class="back-link">← Volver a productos</a>
+
+    <div class="loading" *ngIf="isLoading()">
+      <p>Cargando producto...</p>
+    </div>
+
+    <div class="error" *ngIf="!isLoading() && errorMessage()">
+      <p>{{ errorMessage() }}</p>
+      <a routerLink="/es/products" class="btn-secondary">Volver al catálogo</a>
+    </div>
+
+    <div class="detail-grid" *ngIf="!isLoading() && product()">
+      <div class="image-block">
+        <div class="image-frame">
+          <img [src]="currentImage()" [alt]="product()?.name" />
+          <button
+            class="gallery-arrow left"
+            *ngIf="hasGallery()"
+            (click)="prevImage()"
+            aria-label="Imagen anterior"
+          >
+            ‹
+          </button>
+          <button
+            class="gallery-arrow right"
+            *ngIf="hasGallery()"
+            (click)="nextImage()"
+            aria-label="Imagen siguiente"
+          >
+            ›
+          </button>
+        </div>
+        <div class="meta-links">
+          <a
+            *ngIf="product()?.vendor"
+            [routerLink]="['/es/artist', product()?.vendor?.id]"
+          >
+            Por {{ product()?.vendor?.name }}
+          </a>
+          <span *ngIf="product()?.vendor && product()?.categories?.length">·</span>
+          <a
+            *ngIf="product()?.categories?.length"
+            [routerLink]="['/es/categories']"
+            [queryParams]="{category_slug: product()?.categories?.[0]?.slug}"
+          >
+            En {{ product()?.categories?.[0]?.name }}
+          </a>
+        </div>
+      </div>
+
+      <div class="info-block">
+        <h1>{{ product()?.name }}</h1>
+        <p class="price">{{ formatPrice(product()?.price || 0) }}</p>
+        <p class="description" *ngIf="product()?.description">
+          {{ product()?.description }}
+        </p>
+        <p class="description muted" *ngIf="!product()?.description">
+          Descripción disponible próximamente.
+        </p>
+
+        <div class="details">
+          <div class="detail-row">
+            <span>Stock disponible</span>
+            <strong>{{ product()?.stock ?? 0 }}</strong>
+          </div>
+          <div class="detail-row">
+            <span>Disponibilidad</span>
+            <strong>{{ availabilityLabel() }}</strong>
+          </div>
+          <div class="detail-row">
+            <span>Previsión de entrega</span>
+            <strong>{{ deliveryEstimate() }}</strong>
+          </div>
+          <div class="detail-row" *ngIf="shippingFrom()">
+            <span>Envío desde</span>
+            <strong>{{ shippingFrom() }}</strong>
+          </div>
+          <div class="detail-row" *ngIf="product()?.height_cm || product()?.width_cm || product()?.depth_cm">
+            <span>Dimensiones</span>
+            <strong>
+              {{ product()?.height_cm || '-' }} x {{ product()?.width_cm || '-' }} x {{ product()?.depth_cm || '-' }} cm
+            </strong>
+          </div>
+        </div>
+
+        <div class="material-tags" *ngIf="product()?.materials?.length">
+          <h4>Material</h4>
+          <span *ngFor="let material of product()?.materials" class="tag">
+            {{ material.name }}
+          </span>
+        </div>
+
+        <div class="color-dots" *ngIf="product()?.colors?.length">
+          <h4>Colores disponibles</h4>
+          <span
+            *ngFor="let color of product()?.colors"
+            class="dot"
+            [style.background]="color.hex"
+            [title]="color.name"
+          ></span>
+        </div>
+
+        <div class="categories" *ngIf="product()?.categories?.length">
+          <a
+            class="category"
+            *ngFor="let category of product()?.categories"
+            [routerLink]="['/es/categories']"
+            [queryParams]="{category_slug: category.slug}"
+          >
+            {{ category.name }}
+          </a>
+        </div>
+
+        <button class="add-to-cart-btn" (click)="addToCart()">Agregar al Carrito</button>
+      </div>
+    </div>
+  </div>
+</div>
+
