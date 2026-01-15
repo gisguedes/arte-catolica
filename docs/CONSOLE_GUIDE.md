@@ -72,21 +72,12 @@ npm run start
 
 👉 Abre luego http://localhost:4200
 
-⚙️ Backend (Laravel)
-cd backend
-cp .env.example .env
-php artisan key:generate
-php artisan migrate
-php artisan serve
-
-
-👉 Abre luego http://localhost:8000
+⚙️ Backend (Netlify Functions)
+Se ejecuta en Netlify o mediante `netlify dev` si necesitas Functions locales.
 
 🔗 Links útiles
 Tema	                        Comando o enlace
 Ver versión de Node	            node -v
-Ver versión de PHP	            php -v
-Ver versión de Composer	        composer -V
 Ver versión de Angular	        ng version
 Listar branches Git	            git branch
 Cambiar de rama	                git switch nombre_rama

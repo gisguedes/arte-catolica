@@ -1,7 +1,7 @@
 # 🔄 CI — Integración Continua (GitHub Actions)
 
 ## 🎯 Objetivo
-Garantizar la calidad del código del **frontend (Angular)** y del **backend (Laravel)** antes de cualquier merge.
+Garantizar la calidad del código del **frontend (Angular)** y de las **Netlify Functions** antes de cualquier merge.
 
 ---
 
@@ -9,42 +9,27 @@ Garantizar la calidad del código del **frontend (Angular)** y del **backend (La
 
 Archivo: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)
 
-Ejecuta dos jobs en paralelo:
+Ejecuta jobs de validación:
 
 | Job | Descripción |
 |-----|--------------|
-| **Backend (Laravel)** | Verifica formato, estática y tests Pest contra PostgreSQL 16. |
+| **Functions** | Lint/formato y build TS/JS para Netlify Functions. |
 | **Frontend (Angular)** | Ejecuta lint, tests y build en Node 22. |
 
 ---
 
-## 🧩 Backend (Laravel)
+## 🧩 Functions (Netlify)
 
 ### 🧱 Stack
-- PHP 8.3  
-- PostgreSQL 16  
-- Extensiones: `mbstring`, `pdo_pgsql`, `zip`  
-- Composer con caché  
+- Node.js  
+- npm  
+- TypeScript/JavaScript  
 
 ### 🧭 Flujo de ejecución
 1. **Checkout** del código.  
-2. **Instalación de dependencias** con Composer.  
-3. **Creación automática de `.env`** en CI:  
-   - Base: `.env.example`  
-   - Sobrescribe claves DB para Postgres local.  
-4. **Espera de base de datos** (`pg_isready`).  
-5. **Migraciones** (`php artisan migrate`).  
-6. **Calidad y tests**:  
-   - `vendor/bin/phpcs` (PSR-12)  
-   - `vendor/bin/phpstan analyse`  
-   - `vendor/bin/pest --colors=always`
-
-### 🧠 Nota
-El orden recomendado localmente es:
-format → phpcbf → phpcs → phpstan → pest
-
-yaml
-Copiar código
+2. **Instalación** con `npm ci`.  
+3. **Lint/format** (si aplica).  
+4. **Build** (si aplica).  
 
 ---
 
@@ -67,19 +52,14 @@ Copiar código
 ## ⚡ Optimizaciones de CI
 
 - **Caches**
-  - Composer: `backend/vendor`  
   - npm: `frontend/node_modules`  
-- **Servicios**
-  - PostgreSQL 16 disponible en `127.0.0.1:5432`.  
-- **Generación dinámica de `.env`**
-  - Permite correr tests y migraciones sin subir archivos sensibles.
 
 ---
 
 ## 🛡️ Branch Protection
 
 - Merge permitido solo con **checks verdes**:  
-  - `CI / Backend (Laravel)`  
+  - `CI / Functions`  
   - `CI / Frontend (Angular)`  
 - Revisión obligatoria (CODEOWNERS).  
 - Historia lineal (`Require linear history`).  
@@ -93,9 +73,6 @@ Copiar código
 
 | Problema | Causa | Solución |
 |-----------|--------|-----------|
-| `DB connection refused` | Postgres aún no está listo | Incrementa `--health-retries` o el bucle `Wait for Postgres`. |
-| `PHPStan too strict` | Nivel muy alto | Baja `level` en `phpstan.neon` a 5 y súbelo progresivamente. |
-| `Health check timeout` | DB lenta o carga alta | Aumenta `sleep` en el bucle o el número de intentos. |
 | `Angular test runner fails` | Configuración de Jest/Karma | Verifica `@angular-devkit/build-angular` instalado. |
 
 ---
@@ -111,10 +88,8 @@ Para entornos `staging` o `production`, usa:
 
 ## 🧾 Resumen
 
-✅ 2 jobs paralelos (FE + BE)  
-✅ PostgreSQL 16 en CI  
-✅ .env generado automáticamente  
-✅ Caches Composer + npm  
+✅ Jobs para FE + Functions  
+✅ Caches npm  
 ✅ Lint, análisis y tests antes de merge  
 ✅ Protección de rama con checks verdes  
 

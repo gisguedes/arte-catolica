@@ -48,21 +48,20 @@ Copiar código
 
 ## ✅ CI y Branch Protection
 - El PR **solo puede mergearse con checks verdes**:
-  - `CI / Backend (Laravel)`
+  - `CI / Functions`
   - `CI / Frontend (Angular)`
 - Se requiere **revisión** (CODEOWNERS asigna automáticamente a los revisores).
 
 ---
 
 ## 🧪 Testing mínimo requerido
-- **Backend**: tests Pest para reglas o servicios tocados.  
+- **Functions**: tests unitarios si aplica.  
 - **Frontend**: tests unitarios de componentes o servicios afectados.  
 - Evita mocks de integraciones externas salvo que sean imprescindibles.
 
 ---
 
 ## 🛡️ Estándares de código
-- **PHP** → PSR-12 (PHPCS) + PHPStan (Larastan, nivel ajustable)  
 - **TS/JS** → eslint + formateo consistente  
 - **Commits** → ver [.github/COMMIT_CONVENTIONS.md](../.github/COMMIT_CONVENTIONS.md)
 
