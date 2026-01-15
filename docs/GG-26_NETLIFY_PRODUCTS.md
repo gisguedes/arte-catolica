@@ -27,6 +27,8 @@ Se exponen vía `/api` usando el redirect:
 - `GET /api/materials/:id`
 - `GET /api/colors`
 - `GET /api/colors/:id`
+- `GET /api/artist-types`
+- `GET /api/artist-types/:id`
 
 ### Payload de ejemplo (POST/PUT)
 ```json
