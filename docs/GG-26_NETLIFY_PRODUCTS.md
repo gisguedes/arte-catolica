@@ -23,6 +23,10 @@ Se exponen vía `/api` usando el redirect:
 - `GET /api/vendors/:id/products`
 - `GET /api/categories`
 - `GET /api/categories/:id`
+- `GET /api/materials`
+- `GET /api/materials/:id`
+- `GET /api/colors`
+- `GET /api/colors/:id`
 
 ### Payload de ejemplo (POST/PUT)
 ```json
