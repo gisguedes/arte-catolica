@@ -1,0 +1,12 @@
+[build]
+  command = "cd frontend && npm run build"
+  publish = "frontend/dist/app/browser"
+
+[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+

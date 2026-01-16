@@ -28,5 +28,3 @@ bootstrap/cache/*
 # Misc
 coverage/
 EOF
-# Local Netlify folder
-.netlify
