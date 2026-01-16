@@ -36,7 +36,8 @@ Opciones recomendadas:
 
 - `cd frontend`
 - `npm install` (o `pnpm install`)
-- `ng serve` — abre en `http://localhost:4200`
+- `ng serve --proxy-config proxy.conf.json` — abre en `http://localhost:4200`
+- usa `apiUrl: '/api'` en `frontend/src/environments/environment.ts`
 
 2) Backend local (Node/Express)
 
@@ -44,6 +45,7 @@ Opciones recomendadas:
 - `npm install`
 - crear `.env` (ver `docs/API_ENV.md`)
 - `npm run dev` — API en `http://localhost:8000`
+- health check: `http://localhost:8000/api/health`
 
 ---
 

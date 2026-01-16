@@ -22,7 +22,7 @@
 ### 🛠️ Cómo usarlo
 
 1️⃣ Abre `frontend/src/environments/environment.ts`
-2️⃣ Usa `apiUrl: '/api'` para el backend local.
+2️⃣ Usa `apiUrl: '/api'` para el backend local (Node/Express).
 3️⃣ Guarda y **reinicia** el servidor con `npm start`.
 
 > 💡 En desarrollo se recomienda usar el preset `/api` (proxy) para evitar errores CORS.
@@ -53,11 +53,24 @@ Sirve para redirigir automáticamente todas las peticiones `/api/...` al backend
 
 ```bash
 cd frontend
-npm start
+ng serve --proxy-config proxy.conf.json
 ```
 
 > 💡 Usa `apiUrl: '/api'` y el proxy si necesitas evitar CORS.
 > Frontend disponible en: **[http://localhost:4200](http://localhost:4200)** *(puede variar si el puerto está ocupado).*
+
+---
+
+#### ⚙️ Levantar el backend (API Node/Express)
+
+```bash
+cd api
+npm install
+npm run dev
+```
+
+> ✅ API disponible en: **[http://localhost:8000](http://localhost:8000)**  
+> 🔗 Health check: **[http://localhost:8000/api/health](http://localhost:8000/api/health)**
 
 ---
 
