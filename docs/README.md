@@ -3,7 +3,7 @@
 Bienvenido a la documentación técnica del proyecto **Arte Católica**, un monorepo que integra:
 
 - 🖥️ **Frontend (Angular)**
-- ⚙️ **Backend externo**
+- ⚙️ **Netlify Functions + Neon (PostgreSQL)**
 - 🔄 **CI/CD automatizado con GitHub Actions**
 - 🔗 **Integración con Jira Cloud**
 
@@ -78,7 +78,7 @@ gh pr view <PR_NUMBER>
 ```plaintext
 arte-catolica/
 ├── frontend/                    → Angular (Node 22)
-├── (backend externo)            → API fuera del repo
+├── netlify/                     → Netlify Functions + SQL (Neon)
 ├── .github/workflows/           → Workflows CI/CD (ci.yml, jira.yml, etc.)
 ├── docs/                        → Documentación técnica
 └── scripts/                     → Scripts utilitarios (CLI y DevOps)

@@ -2,7 +2,7 @@
 
 ## 🧩 1) Variables de entorno (Frontend)
 
-🎯 **Objetivo:** que el frontend (Angular) sepa a qué backend debe conectarse según el entorno.
+🎯 **Objetivo:** que el frontend (Angular) sepa a qué backend (Netlify Functions) debe conectarse según el entorno.
 
 📂 **Ubicación:**
 `frontend/src/environments/`
@@ -22,7 +22,7 @@
 ### 🛠️ Cómo usarlo
 
 1️⃣ Abre `frontend/src/environments/environment.ts`
-2️⃣ Ajusta `apiUrl` al backend que uses.
+2️⃣ Usa `apiUrl: '/api'` para Netlify Functions.
 3️⃣ Guarda y **reinicia** el servidor con `npm start`.
 
 > 💡 En desarrollo se recomienda usar el preset `/api` (proxy) para evitar errores CORS.
@@ -64,18 +64,24 @@ npm start
 #### 🔍 Verificación rápida
 
 1️⃣ Abre Angular → carga sin errores.
-2️⃣ En pestaña *Network*, las llamadas a `/api/*` responden desde tu backend.
+2️⃣ En pestaña *Network*, las llamadas a `/api/*` responden desde Netlify Functions.
 3️⃣ Si todo va bien, el entorno local está listo para desarrollo.
 
 ---
 
-### 🚀 Entorno STAGING/PROD
+### 🚀 Entorno STAGING/PROD (Netlify)
 
-🌍 **Frontend + Backend externos**
+🌍 **Frontend + Functions en Netlify**
 
 #### 🔗 Accesos
-* **Frontend:** URL del hosting
-* **Backend:** URL del API
+* **Frontend:** URL de Netlify (ej. `https://artecatolica.netlify.app`)
+* **Functions:** `/.netlify/functions/*` (proxy por `/api/*`)
+
+#### ⚙️ Operaciones comunes
+* Se actualiza automáticamente con push a `master`.
+* Variables requeridas:
+  - `NETLIFY_DATABASE_URL`
+  - `JWT_SECRET`
 
 #### 🔍 Verificación rápida tras un deploy
 1️⃣ `GET /api/products` responde `200`.
