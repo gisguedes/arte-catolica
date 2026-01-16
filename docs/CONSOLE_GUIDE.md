@@ -67,15 +67,17 @@ Volver al directorio raíz del proyecto	cd ~/Dev/arte-catolica
 🖥️ Frontend (Angular)
 cd frontend
 npm ci
-npm run start
+ng serve --proxy-config proxy.conf.json
 
 
 👉 Abre luego http://localhost:4200
+👉 Usa apiUrl: '/api' en frontend/src/environments/environment.ts
 
 ⚙️ Backend (API local)
 cd api
 npm install
 npm run dev
+👉 Health check: http://localhost:8000/api/health
 
 🔗 Links útiles
 Tema	                        Comando o enlace

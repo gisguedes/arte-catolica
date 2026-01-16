@@ -8,7 +8,7 @@ Frontend Angular para la aplicación Arte Católica, desarrollado con Angular 20
 - **TypeScript** para tipado estático
 - **SCSS** para estilos avanzados
 - **Routing** configurado
-- **HttpClient** para comunicación con el backend Laravel
+- **HttpClient** para comunicación con el backend Node/Express
 - **Servicio API** para integración con el backend
 
 ## Estructura del Proyecto
@@ -37,9 +37,10 @@ src/
 
 ## Configuración del Backend
 
-El servicio API está configurado para comunicarse con el backend Laravel en:
+El servicio API está configurado para comunicarse con el backend Node/Express en:
 
-- URL base: `http://localhost:8000/api`
+- URL base local (directo): `http://127.0.0.1:8000/api`
+- URL base local (proxy): `/api` con `proxy.conf.json`
 
 ## Desarrollo
 
@@ -49,15 +50,24 @@ El servicio API está configurado para comunicarse con el backend Laravel en:
    npm install
    ```
 
-2. Ejecuta el servidor de desarrollo:
+2. Levanta el backend local (API Node/Express):
 
    ```bash
-   npm start
+   cd ../api
+   npm install
+   npm run dev
    ```
 
-3. Abre http://localhost:4200 en tu navegador
+3. Ejecuta el servidor de desarrollo del frontend (con proxy recomendado):
 
-## Integración con Laravel
+   ```bash
+   cd ../frontend
+   ng serve --proxy-config proxy.conf.json
+   ```
+
+4. Abre http://localhost:4200 en tu navegador
+
+## Integración con el Backend
 
 El servicio `ApiService` proporciona métodos para:
 
