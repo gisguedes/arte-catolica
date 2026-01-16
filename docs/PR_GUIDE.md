@@ -48,14 +48,12 @@ Copiar código
 
 ## ✅ CI y Branch Protection
 - El PR **solo puede mergearse con checks verdes**:
-  - `CI / Functions`
   - `CI / Frontend (Angular)`
 - Se requiere **revisión** (CODEOWNERS asigna automáticamente a los revisores).
 
 ---
 
 ## 🧪 Testing mínimo requerido
-- **Functions**: tests unitarios si aplica.  
 - **Frontend**: tests unitarios de componentes o servicios afectados.  
 - Evita mocks de integraciones externas salvo que sean imprescindibles.
 
