@@ -1,7 +1,7 @@
 # 🔄 CI — Integración Continua (GitHub Actions)
 
 ## 🎯 Objetivo
-Garantizar la calidad del código del **frontend (Angular)** y de las **Netlify Functions** antes de cualquier merge.
+Garantizar la calidad del código del **frontend (Angular)** antes de cualquier merge.
 
 ---
 
@@ -13,23 +13,13 @@ Ejecuta jobs de validación:
 
 | Job | Descripción |
 |-----|--------------|
-| **Functions** | Lint/formato y build TS/JS para Netlify Functions. |
 | **Frontend (Angular)** | Ejecuta lint, tests y build en Node 22. |
 
 ---
 
-## 🧩 Functions (Netlify)
+## 🧩 Backend
 
-### 🧱 Stack
-- Node.js  
-- npm  
-- TypeScript/JavaScript  
-
-### 🧭 Flujo de ejecución
-1. **Checkout** del código.  
-2. **Instalación** con `npm ci`.  
-3. **Lint/format** (si aplica).  
-4. **Build** (si aplica).  
+No está incluido en este repositorio.
 
 ---
 
@@ -59,7 +49,6 @@ Ejecuta jobs de validación:
 ## 🛡️ Branch Protection
 
 - Merge permitido solo con **checks verdes**:  
-  - `CI / Functions`  
   - `CI / Frontend (Angular)`  
 - Revisión obligatoria (CODEOWNERS).  
 - Historia lineal (`Require linear history`).  
@@ -88,7 +77,7 @@ Para entornos `staging` o `production`, usa:
 
 ## 🧾 Resumen
 
-✅ Jobs para FE + Functions  
+✅ Jobs para FE  
 ✅ Caches npm  
 ✅ Lint, análisis y tests antes de merge  
 ✅ Protección de rama con checks verdes  
