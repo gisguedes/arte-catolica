@@ -72,8 +72,10 @@ npm run start
 
 👉 Abre luego http://localhost:4200
 
-⚙️ Backend (Netlify Functions)
-Se ejecuta en Netlify o mediante `netlify dev` si necesitas Functions locales.
+⚙️ Backend (API local)
+cd api
+npm install
+npm run dev
 
 🔗 Links útiles
 Tema	                        Comando o enlace
