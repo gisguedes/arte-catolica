@@ -9,7 +9,7 @@ Repositorio monorepo para el proyecto Arte Católica.
 
 Estructura:
 - **frontend/** — Angular
-- **netlify/** — Netlify Functions y SQL (Neon)
+- **api/** — Backend local (Node/Express)
 - **.github/** — Workflows y plantillas de PR/Issues
 - **docs/** — Guías y documentación del monorepo
 
@@ -38,7 +38,12 @@ Opciones recomendadas:
 - `npm install` (o `pnpm install`)
 - `ng serve` — abre en `http://localhost:4200`
 
-Nota: el backend ahora es **Netlify Functions + Neon**. En dev puedes usar `/api` con proxy o `netlify dev`.
+2) Backend local (Node/Express)
+
+- `cd api`
+- `npm install`
+- crear `.env` (ver `docs/API_ENV.md`)
+- `npm run dev` — API en `http://localhost:8000`
 
 ---
 

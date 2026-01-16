@@ -181,7 +181,7 @@ Usa GitLens en VS Code para ver historial y PRs por línea.
 
 Usa workspace .code-workspace para abrir FE + Functions juntos.
 
-Crea tareas automatizadas (tasks.json) para ng serve o netlify dev.
+Crea tareas automatizadas (tasks.json) para ng serve o la API local.
 
 Modo concentración: Zen Mode (⌘K Z).
 
