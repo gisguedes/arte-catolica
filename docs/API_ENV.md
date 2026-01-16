@@ -11,3 +11,5 @@ Notas:
 - `DATABASE_URL` puede ser Neon o Postgres local.
 - Si usas Neon, agrega `sslmode=require`.
 
+
+
