@@ -7,12 +7,15 @@ const router = express.Router();
 const buildCategorySelect = () => `
   SELECT
     c.id,
-    c.slug,
+    c.alias,
+    c.image_url,
     c.is_active,
     c.created_at,
     c.updated_at,
     COALESCE(ct.name, '') AS name,
-    COALESCE(ct.description, '') AS description
+    COALESCE(ct.description, '') AS description,
+    COALESCE(ct.slug, '') AS slug,
+    ct.content
   FROM categories c
   LEFT JOIN category_translations ct
     ON ct.category_id = c.id AND ct.locale = $1
@@ -51,6 +54,9 @@ router.get('/:id', async (req, res) => {
 });
 
 module.exports = router;
+
+
+
 
 
 

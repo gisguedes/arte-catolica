@@ -1,186 +1,95 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ArtistService } from '../../services/artist.service';
-import { ProductService } from '../../services/product.service';
-import { ProductCardComponent } from '../../components/product-card/product-card';
-import { Artist, Product, Category, Material } from '../../models/product.model';
+import { Artist, ArtistType } from '../../models/product.model';
 
 @Component({
   selector: 'app-artists',
   standalone: true,
-  imports: [CommonModule, RouterLink, ProductCardComponent],
+  imports: [CommonModule, RouterLink],
   templateUrl: './artists.html',
   styleUrl: './artists.scss',
 })
 export class ArtistsComponent implements OnInit {
   private artistService = inject(ArtistService);
-  private productService = inject(ProductService);
+  private route = inject(ActivatedRoute);
 
   artists = signal<Artist[]>([]);
-  categories = signal<Category[]>([]);
-  materials = signal<Material[]>([]);
-  products = signal<Product[]>([]);
-  selectedArtistId = signal<string | null>(null);
-  selectedCategoryId = signal<string | null>(null);
-  selectedMaterialId = signal<string | null>(null);
-  selectedAvailability = signal<string | null>(null);
-  selectedSort = signal<'relevance' | 'price_low' | 'price_high'>('relevance');
+  artistTypes = signal<ArtistType[]>([]);
+  selectedTypeId = signal<string | null>(null);
   isLoading = signal(true);
-  showFilters = signal(false);
 
-  filteredProducts = computed(() => {
-    let list = [...this.products()];
+  currentType = computed(() => {
+    const id = this.selectedTypeId();
+    return id ? (this.artistTypes().find((t) => t.id === id) ?? null) : null;
+  });
 
-    const artistId = this.selectedArtistId();
-    if (artistId) {
-      list = list.filter((product) => {
-        const id = product.artist_id || product.vendor?.id || product.vendor_id;
-        return id === artistId;
-      });
-    }
+  filteredArtists = computed(() => {
+    const typeId = this.selectedTypeId();
+    const list = this.artists();
 
-    const categoryId = this.selectedCategoryId();
-    if (categoryId) {
-      list = list.filter((product) =>
-        product.categories?.some((category) => category.id === categoryId)
-      );
-    }
+    if (!typeId) return list;
 
-    const materialId = this.selectedMaterialId();
-    if (materialId) {
-      list = list.filter((product) =>
-        product.materials?.some((material) => material.id === materialId)
-      );
-    }
-
-    const availability = this.selectedAvailability();
-    if (availability) {
-      list = list.filter((product) => {
-        const productAvailability = product.availability ?? 'in_stock';
-        if (availability === 'in_stock') {
-          return productAvailability === 'in_stock';
-        }
-        return productAvailability === availability;
-      });
-    }
-
-    const sort = this.selectedSort();
-    if (sort === 'price_low') {
-      list.sort((a, b) => a.price - b.price);
-    } else if (sort === 'price_high') {
-      list.sort((a, b) => b.price - a.price);
-    }
-
-    return list;
+    return list.filter((artist) => artist.artist_types?.some((t) => t.id === typeId));
   });
 
   ngOnInit(): void {
+    this.route.paramMap.subscribe((params) => {
+      const slug = params.get('typeSlug');
+      const types = this.artistTypes();
+      if (!slug) {
+        this.selectedTypeId.set(null);
+        return;
+      }
+      const type = types.find((t) => t.slug === slug);
+      this.selectedTypeId.set(type?.id ?? null);
+    });
+
+    this.artistService.getArtistTypes().subscribe({
+      next: (types) => {
+        this.artistTypes.set(Array.isArray(types) ? types : []);
+        this.applyTypeFromRoute();
+      },
+      error: () => this.artistTypes.set([]),
+    });
+
     this.artistService.getArtists().subscribe({
       next: (artists) => {
         this.artists.set(Array.isArray(artists) ? artists : []);
+        this.isLoading.set(false);
       },
       error: () => {
         this.artists.set([]);
-      },
-    });
-
-    this.productService.getCategories().subscribe({
-      next: (categories) => {
-        this.categories.set(Array.isArray(categories) ? categories : []);
-      },
-      error: () => this.categories.set([]),
-    });
-
-    this.productService.getProducts().subscribe({
-      next: (products) => {
-        this.products.set(Array.isArray(products) ? products : []);
-        const materials = new Map<string, Material>();
-        for (const product of this.products()) {
-          for (const material of product.materials ?? []) {
-            materials.set(material.id, material);
-          }
-        }
-        this.materials.set([...materials.values()]);
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.products.set([]);
         this.isLoading.set(false);
       },
     });
   }
 
-  selectArtist(artistId: string | null): void {
-    this.selectedArtistId.set(artistId);
-  }
-
-  filterByCategory(categoryId: string | null): void {
-    this.selectedCategoryId.set(categoryId);
-  }
-
-  filterByMaterial(materialId: string | null): void {
-    this.selectedMaterialId.set(materialId);
-  }
-
-  filterByAvailability(availability: string | null): void {
-    this.selectedAvailability.set(availability);
-  }
-
-  setSort(sort: 'relevance' | 'price_low' | 'price_high'): void {
-    this.selectedSort.set(sort);
-  }
-
-  clearFilters(): void {
-    this.selectedArtistId.set(null);
-    this.selectedCategoryId.set(null);
-    this.selectedMaterialId.set(null);
-    this.selectedAvailability.set(null);
-    this.selectedSort.set('relevance');
-  }
-
-  openFilters(): void {
-    this.showFilters.set(true);
-  }
-
-  closeFilters(): void {
-    this.showFilters.set(false);
-  }
-
-  applyFilters(): void {
-    this.closeFilters();
-  }
-
-  activeFilters(): string[] {
-    const items: string[] = [];
-    const sort = this.selectedSort();
-    if (sort === 'price_low') items.push('Precio más bajo');
-    if (sort === 'price_high') items.push('Precio más alto');
-
-    const artistId = this.selectedArtistId();
-    if (artistId) {
-      const artist = this.artists().find((item) => item.id === artistId);
-      if (artist) items.push(artist.name);
+  private applyTypeFromRoute(): void {
+    const slug = this.route.snapshot.paramMap.get('typeSlug');
+    if (!slug) {
+      this.selectedTypeId.set(null);
+      return;
     }
+    const type = this.artistTypes().find((t) => t.slug === slug);
+    this.selectedTypeId.set(type?.id ?? null);
+  }
 
-    const categoryId = this.selectedCategoryId();
-    if (categoryId) {
-      const category = this.categories().find((item) => item.id === categoryId);
-      if (category) items.push(category.name);
-    }
+  isTypeSelected(typeId: string): boolean {
+    return this.selectedTypeId() === typeId;
+  }
 
-    const materialId = this.selectedMaterialId();
-    if (materialId) {
-      const material = this.materials().find((item) => item.id === materialId);
-      if (material) items.push(material.name);
-    }
-
-    const availability = this.selectedAvailability();
-    if (availability === 'in_stock') items.push('En stock');
-    if (availability === 'limited') items.push('Stock limitado');
-    if (availability === 'on_demand') items.push('Bajo demanda');
-
-    return items;
+  getTypeIcon(alias: string | undefined): string {
+    if (!alias) return 'sculptor';
+    const icons: Record<string, string> = {
+      sculptor: 'sculptor',
+      painter: 'painter',
+      iconographer: 'iconographer',
+      goldsmith: 'goldsmith',
+      illustrator: 'illustrator',
+      'textile-artisan': 'textile',
+    };
+    return icons[alias] ?? 'sculptor';
   }
 }
-

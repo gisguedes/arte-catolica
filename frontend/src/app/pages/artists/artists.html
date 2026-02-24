@@ -1,5 +1,11 @@
 <div class="artists-page">
   <div class="container">
+    <div class="breadcrumb" *ngIf="currentType()">
+      <a routerLink="/es/artists">Artistas</a>
+      <span class="sep">›</span>
+      <span class="current">{{ currentType()?.name }}</span>
+    </div>
+
     <div class="marketing-block">
       <h1>Artistas</h1>
       <p class="subtitle">Conoce a nuestros artistas y sus colecciones.</p>
@@ -9,11 +15,129 @@
       <p>Cargando artistas...</p>
     </div>
 
+    <div class="type-filters" *ngIf="!isLoading() && artistTypes().length">
+      <a routerLink="/es/artists" class="type-chip" [class.active]="!selectedTypeId()">Todos</a>
+      <a
+        *ngFor="let type of artistTypes()"
+        [routerLink]="['/es/artists', type.slug]"
+        class="type-chip"
+        [class.active]="isTypeSelected(type.id)"
+      >
+        <span class="type-icon">
+          <ng-container [ngSwitch]="getTypeIcon(type.alias)">
+            <!-- Escultor: busto/estatua -->
+            <svg
+              *ngSwitchCase="'sculptor'"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="6" r="3" />
+              <path d="M8 21v-3a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3" />
+              <path d="M7 12h10l-2 6H9z" />
+            </svg>
+            <!-- Pintor: pincel -->
+            <svg
+              *ngSwitchCase="'painter'"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 19l3-3 3 3" />
+              <path d="M18 16l-4-4" />
+              <path d="M3 21l3-3" />
+              <path d="M21 3l-9 9" />
+              <path d="M12 19l-3-3" />
+            </svg>
+            <!-- Iconógrafo: figura estilizada / icono -->
+            <svg
+              *ngSwitchCase="'iconographer'"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M8 8h8" />
+              <path d="M8 12h8" />
+              <path d="M12 16c-1.5 0-2.5-1-3-2" />
+            </svg>
+            <!-- Orfebre: anillo / metal -->
+            <svg
+              *ngSwitchCase="'goldsmith'"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+              <path
+                d="M5.64 5.64l1.42 1.42M16.94 16.94l1.42 1.42M5.64 18.36l1.42-1.42M16.94 7.06l1.42-1.42"
+              />
+            </svg>
+            <!-- Ilustrador: lápiz -->
+            <svg
+              *ngSwitchCase="'illustrator'"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 19l7-7 3 3-7 7-3-3z" />
+              <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+            </svg>
+            <!-- Artesano textil: tejido -->
+            <svg
+              *ngSwitchCase="'textile'"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M4 4h4v4H4zM10 4h4v4h-4zM16 4h4v4h-4z" />
+              <path d="M4 10h4v4H4zM10 10h4v4h-4zM16 10h4v4h-4z" />
+              <path d="M4 16h4v4H4zM10 16h4v4h-4zM16 16h4v4h-4z" />
+            </svg>
+            <svg
+              *ngSwitchDefault
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <circle cx="12" cy="6" r="3" />
+              <path d="M8 21v-3a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3" />
+              <path d="M7 12h10l-2 6H9z" />
+            </svg>
+          </ng-container>
+        </span>
+        <span class="type-name">{{ type.name }}</span>
+      </a>
+    </div>
+
+    <div class="type-description" *ngIf="currentType()?.description">
+      <p>{{ currentType()?.description }}</p>
+    </div>
+
     <div class="artists-grid" *ngIf="!isLoading()">
       <a
-        *ngFor="let artist of artists()"
+        *ngFor="let artist of filteredArtists()"
         class="artist-card"
-        [class.active]="selectedArtistId() === artist.id"
         [routerLink]="['/es/artist', artist.id]"
       >
         <div class="avatar">
@@ -26,88 +150,8 @@
       </a>
     </div>
 
-    <button class="filter-toggle" (click)="openFilters()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path d="M3 5h18M6 12h12M10 19h4" stroke-width="1.8" stroke-linecap="round" />
-      </svg>
-      Filtros
-    </button>
-
-    <div class="filters-summary" *ngIf="activeFilters().length > 0">
-      <span class="summary-label">Filtros activos:</span>
-      <span class="summary-chip" *ngFor="let filter of activeFilters()">{{ filter }}</span>
-      <button class="summary-clear" (click)="clearFilters()">Limpiar</button>
-    </div>
-
-    <div class="filters-modal" *ngIf="showFilters()">
-      <div class="filters-backdrop" (click)="closeFilters()"></div>
-      <div class="filters-panel">
-        <div class="filters-header">
-          <h3>Filtros</h3>
-          <button class="filters-close" (click)="closeFilters()">×</button>
-        </div>
-        <div class="filters">
-          <div class="filter-group">
-            <label>Ordenar</label>
-            <select (change)="setSort($any($event.target).value)">
-              <option value="relevance">Más relevante</option>
-              <option value="price_low">Precio más bajo</option>
-              <option value="price_high">Precio más alto</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>Artistas</label>
-            <select (change)="selectArtist($any($event.target).value || null)">
-              <option value="">Todos</option>
-              <option *ngFor="let artist of artists()" [value]="artist.id">
-                {{ artist.name }}
-              </option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>Categorías</label>
-            <select (change)="filterByCategory($any($event.target).value || null)">
-              <option value="">Todas</option>
-              <option *ngFor="let category of categories()" [value]="category.id">
-                {{ category.name }}
-              </option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>Material</label>
-            <select (change)="filterByMaterial($any($event.target).value || null)">
-              <option value="">Todos</option>
-              <option *ngFor="let material of materials()" [value]="material.id">
-                {{ material.name }}
-              </option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>Disponibilidad</label>
-            <select (change)="filterByAvailability($any($event.target).value || null)">
-              <option value="">Todas</option>
-              <option value="in_stock">En stock</option>
-              <option value="limited">Stock limitado</option>
-              <option value="on_demand">Bajo demanda</option>
-            </select>
-          </div>
-          <div class="filters-actions">
-            <button class="filter-clear" (click)="clearFilters()">Limpiar filtros</button>
-            <button class="filter-apply" (click)="applyFilters()">Aplicar filtros</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="products-grid" *ngIf="!isLoading()">
-      <app-product-card
-        *ngFor="let product of filteredProducts()"
-        [product]="product"
-      ></app-product-card>
-    </div>
-
-    <div class="no-results" *ngIf="!isLoading() && filteredProducts().length === 0">
-      <p>No hay productos para el artista seleccionado.</p>
+    <div class="no-results" *ngIf="!isLoading() && filteredArtists().length === 0">
+      <p>No hay artistas para el tipo seleccionado.</p>
     </div>
   </div>
 </div>

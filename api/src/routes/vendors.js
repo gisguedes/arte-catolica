@@ -4,7 +4,7 @@ const { getLocale } = require('../utils');
 
 const router = express.Router();
 
-const buildVendorSelect = () => `
+const buildVendorSelect = (localeParam = '$1') => `
   SELECT
     v.id,
     v.name,
@@ -27,12 +27,14 @@ const buildVendorSelect = () => `
         SELECT jsonb_agg(
           jsonb_build_object(
             'id', at.id,
-            'slug', at.slug,
-            'name', at.name
+            'alias', at.alias,
+            'slug', COALESCE(att.slug, at.alias, ''),
+            'name', COALESCE(att.name, at.alias, '')
           )
         )
         FROM artist_type_vendor atv
         JOIN artist_types at ON at.id = atv.artist_type_id
+        LEFT JOIN artist_type_translations att ON att.artist_type_id = at.id AND att.locale = ${localeParam}
         WHERE atv.vendor_id = v.id
       ),
       '[]'::jsonb
@@ -80,14 +82,15 @@ router.get('/', async (req, res) => {
 
   if (userId) {
     params.push(userId);
-    conditions.push(`v.user_id = $${params.length}`);
+    conditions.push(`v.user_id = $${params.length + 1}`);
   }
 
   const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-  const sql = `${buildVendorSelect()} ${whereClause} ORDER BY v.created_at DESC`;
+  const locale = getLocale(req);
+  const sql = `${buildVendorSelect('$1')} ${whereClause} ORDER BY v.created_at DESC`;
 
   try {
-    const result = await query(sql, params);
+    const result = await query(sql, [locale, ...params]);
     res.json({ data: result.rows });
   } catch (error) {
     console.error('Vendors list error', error);
@@ -96,10 +99,11 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-  const sql = `${buildVendorSelect()} WHERE v.id = $1 LIMIT 1`;
+  const locale = getLocale(req);
+  const sql = `${buildVendorSelect('$1')} WHERE v.id = $2 LIMIT 1`;
 
   try {
-    const result = await query(sql, [req.params.id]);
+    const result = await query(sql, [locale, req.params.id]);
     if (!result.rows[0]) {
       return res.status(404).json({ message: 'Artista no encontrado' });
     }
@@ -124,6 +128,9 @@ router.get('/:id/products', async (req, res) => {
 });
 
 module.exports = router;
+
+
+
 
 
 

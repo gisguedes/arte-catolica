@@ -1,11 +1,19 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, effect, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { ArtistService } from '../../services/artist.service';
 import { ProductCardComponent } from '../../components/product-card/product-card';
 import { NewsCarouselComponent } from '../../components/news-carousel/news-carousel';
-import { Product, Category, Artist, Material } from '../../models/product.model';
+import {
+  Product,
+  Category,
+  Artist,
+  Material,
+  Technique,
+  MaterialCharacteristicOption,
+  ArtistType,
+} from '../../models/product.model';
 
 @Component({
   selector: 'app-products',
@@ -25,15 +33,48 @@ export class ProductsComponent implements OnInit {
   featuredArtists = signal<Artist[]>([]);
   artists = signal<Artist[]>([]);
   materials = signal<Material[]>([]);
-  selectedCategoryId = signal<string | null>(null);
+  techniques = signal<Technique[]>([]);
+  artistTypes = signal<ArtistType[]>([]);
+
+  materialCharacteristicsOptions = computed((): MaterialCharacteristicOption[] => {
+    const seen = new Set<string>();
+    const out: MaterialCharacteristicOption[] = [];
+    for (const m of this.materials()) {
+      const chars = Array.isArray(m.characteristics) ? m.characteristics : [];
+      for (const charName of chars) {
+        const key = `${m.id}|${charName}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          out.push({ materialId: m.id, materialName: m.name, charName });
+        }
+      }
+    }
+    out.sort((a, b) => (a.materialName + a.charName).localeCompare(b.materialName + b.charName));
+    return out;
+  });
+  selectedCategoryIds = signal<string[]>([]);
+  selectedTypeIds = signal<string[]>([]);
+  selectedTechniqueIds = signal<string[]>([]);
   selectedCategorySlug = signal<string | null>(null);
-  selectedArtistId = signal<string | null>(null);
-  selectedMaterialId = signal<string | null>(null);
-  selectedAvailability = signal<string | null>(null);
+  selectedArtistIds = signal<string[]>([]);
+  selectedMaterialIds = signal<string[]>([]);
+  selectedCharacteristicPairs = signal<{ materialId: string; charName: string }[]>([]);
+  selectedAvailability = signal<string[]>([]);
   selectedSort = signal<'relevance' | 'price_low' | 'price_high'>('relevance');
   isLoading = signal(true);
   isHome = signal(true);
   showFilters = signal(false);
+  showSort = signal(false);
+  expandedFilterGroups = signal<Record<string, boolean>>({
+    categories: true,
+    type: false,
+    artists: false,
+    techniques: false,
+    materialAndCharacteristics: false,
+    availability: false,
+  });
+  pageSize = signal(12);
+  currentPage = signal(1);
 
   newsItems = signal([
     {
@@ -59,36 +100,56 @@ export class ProductsComponent implements OnInit {
   filteredProducts = computed(() => {
     let list = [...this.products()];
 
-    const categoryId = this.selectedCategoryId();
-    if (categoryId) {
+    const categoryIds = this.selectedCategoryIds();
+    if (categoryIds.length > 0) {
       list = list.filter((product) =>
-        product.categories?.some((category) => category.id === categoryId)
+        product.categories?.some((category) => categoryIds.includes(category.id)),
       );
     }
 
-    const artistId = this.selectedArtistId();
-    if (artistId) {
+    const typeIds = this.selectedTypeIds();
+    if (typeIds.length > 0) {
       list = list.filter((product) => {
-        const id = product.artist_id || product.vendor?.id || product.vendor_id;
-        return id === artistId;
+        const vendor = product.vendor ?? product.artist;
+        return vendor?.artist_types?.some((t) => typeIds.includes(t.id)) ?? false;
       });
     }
 
-    const materialId = this.selectedMaterialId();
-    if (materialId) {
+    const artistIds = this.selectedArtistIds();
+    if (artistIds.length > 0) {
+      list = list.filter((product) => {
+        const id = product.artist_id || product.vendor?.id || product.vendor_id;
+        return id ? artistIds.includes(id) : false;
+      });
+    }
+
+    const materialIds = this.selectedMaterialIds();
+    if (materialIds.length > 0) {
       list = list.filter((product) =>
-        product.materials?.some((material) => material.id === materialId)
+        product.materials?.some((material) => materialIds.includes(material.id)),
       );
     }
 
+    const charPairs = this.selectedCharacteristicPairs();
+    if (charPairs.length > 0) {
+      list = list.filter((product) =>
+        product.materials?.some((m) => {
+          const chars = Array.isArray(m.characteristics) ? m.characteristics : [];
+          return charPairs.some((p) => p.materialId === m.id && chars.includes(p.charName));
+        }),
+      );
+    }
+
+    const techniqueIds = this.selectedTechniqueIds();
+    if (techniqueIds.length > 0) {
+      list = list.filter((product) => product.techniques?.some((t) => techniqueIds.includes(t.id)));
+    }
+
     const availability = this.selectedAvailability();
-    if (availability) {
+    if (availability.length > 0) {
       list = list.filter((product) => {
         const productAvailability = product.availability ?? 'in_stock';
-        if (availability === 'in_stock') {
-          return productAvailability === 'in_stock';
-        }
-        return productAvailability === availability;
+        return availability.includes(productAvailability);
       });
     }
 
@@ -102,6 +163,26 @@ export class ProductsComponent implements OnInit {
     return list;
   });
 
+  totalPages = computed(() => Math.ceil(this.filteredProducts().length / this.pageSize()));
+
+  pageNumbers = computed(() => {
+    const total = this.totalPages();
+    return total > 0 ? Array.from({ length: total }, (_, index) => index + 1) : [];
+  });
+
+  pagedProducts = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredProducts().slice(start, start + this.pageSize());
+  });
+
+  constructor() {
+    effect(() => {
+      this.filteredProducts();
+      this.currentPage.set(1);
+    });
+    this.updatePageSize();
+  }
+
   ngOnInit(): void {
     this.isHome.set(this.router.url.includes('/es/home'));
     this.router.events.subscribe((event) => {
@@ -111,7 +192,7 @@ export class ProductsComponent implements OnInit {
     });
 
     // Escuchar cambios en query params
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       const categorySlug = params['category_slug'] ?? null;
       this.selectedCategorySlug.set(categorySlug);
       this.applyCategorySlug();
@@ -120,7 +201,17 @@ export class ProductsComponent implements OnInit {
     this.loadCategories();
     this.loadFeaturedArtists();
     this.loadArtists();
+    this.loadArtistTypes();
+    this.loadTechniques();
+    this.loadMaterials();
     this.loadProducts();
+  }
+
+  loadArtistTypes(): void {
+    this.artistService.getArtistTypes().subscribe({
+      next: (types) => this.artistTypes.set(Array.isArray(types) ? types : []),
+      error: () => this.artistTypes.set([]),
+    });
   }
 
   loadCategories(): void {
@@ -159,18 +250,22 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  loadTechniques(): void {
+    this.productService.getTechniques().subscribe({
+      next: (techniques) => {
+        this.techniques.set(Array.isArray(techniques) ? techniques : []);
+      },
+      error: () => {
+        this.techniques.set([]);
+      },
+    });
+  }
+
   loadProducts(): void {
     this.isLoading.set(true);
     this.productService.getProducts().subscribe({
       next: (products) => {
         this.products.set(Array.isArray(products) ? products : []);
-        const materials = new Map<string, Material>();
-        for (const product of this.products()) {
-          for (const material of product.materials ?? []) {
-            materials.set(material.id, material);
-          }
-        }
-        this.materials.set([...materials.values()]);
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -181,6 +276,15 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  loadMaterials(): void {
+    this.productService.getMaterials().subscribe({
+      next: (materials) => {
+        this.materials.set(Array.isArray(materials) ? materials : []);
+      },
+      error: () => this.materials.set([]),
+    });
+  }
+
   applyCategorySlug(): void {
     const categorySlug = this.selectedCategorySlug();
     if (!categorySlug) {
@@ -188,37 +292,152 @@ export class ProductsComponent implements OnInit {
     }
     const category = this.categories().find((item) => item.slug === categorySlug);
     if (category) {
-      this.selectedCategoryId.set(category.id);
+      this.addSelection(this.selectedCategoryIds, category.id);
     }
   }
 
-  filterByCategory(categoryId: string | null): void {
-    this.selectedCategoryId.set(categoryId);
+  toggleCategory(categoryId: string): void {
+    this.toggleSelection(this.selectedCategoryIds, categoryId);
   }
 
   clearFilter(): void {
-    this.selectedCategoryId.set(null);
+    this.selectedCategoryIds.set([]);
     this.selectedCategorySlug.set(null);
-    this.selectedArtistId.set(null);
-    this.selectedMaterialId.set(null);
-    this.selectedAvailability.set(null);
+    this.selectedTypeIds.set([]);
+    this.selectedArtistIds.set([]);
+    this.selectedMaterialIds.set([]);
+    this.selectedCharacteristicPairs.set([]);
+    this.selectedTechniqueIds.set([]);
+    this.selectedAvailability.set([]);
     this.selectedSort.set('relevance');
+    this.closeFilters();
   }
 
-  filterByArtist(artistId: string | null): void {
-    this.selectedArtistId.set(artistId);
+  toggleArtist(artistId: string): void {
+    this.toggleSelection(this.selectedArtistIds, artistId);
   }
 
-  filterByMaterial(materialId: string | null): void {
-    this.selectedMaterialId.set(materialId);
+  toggleType(typeId: string): void {
+    this.toggleSelection(this.selectedTypeIds, typeId);
   }
 
-  filterByAvailability(availability: string | null): void {
-    this.selectedAvailability.set(availability);
+  toggleMaterial(materialId: string): void {
+    const material = this.materials().find((m) => m.id === materialId);
+    const chars = material
+      ? Array.isArray(material.characteristics)
+        ? material.characteristics
+        : []
+      : [];
+    const isSelected = this.selectedMaterialIds().includes(materialId);
+    if (isSelected) {
+      this.selectedMaterialIds.set(this.selectedMaterialIds().filter((id) => id !== materialId));
+      this.selectedCharacteristicPairs.set(
+        this.selectedCharacteristicPairs().filter((p) => p.materialId !== materialId),
+      );
+    } else {
+      this.selectedMaterialIds.set([...this.selectedMaterialIds(), materialId]);
+      const pairs = [...this.selectedCharacteristicPairs()];
+      for (const charName of chars) {
+        if (!pairs.some((p) => p.materialId === materialId && p.charName === charName)) {
+          pairs.push({ materialId, charName });
+        }
+      }
+      this.selectedCharacteristicPairs.set(pairs);
+    }
+  }
+
+  toggleCharacteristic(materialId: string, charName: string): void {
+    const list = this.selectedCharacteristicPairs();
+    const key = `${materialId}|${charName}`;
+    const idx = list.findIndex((p) => p.materialId === materialId && p.charName === charName);
+    if (idx >= 0) {
+      this.selectedCharacteristicPairs.set(list.filter((_, i) => i !== idx));
+    } else {
+      this.selectedCharacteristicPairs.set([...list, { materialId, charName }]);
+    }
+  }
+
+  isFilterGroupExpanded(key: string): boolean {
+    return !!this.expandedFilterGroups()[key];
+  }
+
+  toggleFilterGroup(key: string): void {
+    const g = this.expandedFilterGroups();
+    this.expandedFilterGroups.set({ ...g, [key]: !g[key] });
+  }
+
+  isCharacteristicSelected(materialId: string, charName: string): boolean {
+    return this.selectedCharacteristicPairs().some(
+      (p) => p.materialId === materialId && p.charName === charName,
+    );
+  }
+
+  toggleTechnique(techniqueId: string): void {
+    this.toggleSelection(this.selectedTechniqueIds, techniqueId);
+  }
+
+  toggleAvailability(availability: string): void {
+    this.toggleSelection(this.selectedAvailability, availability);
   }
 
   setSort(sort: 'relevance' | 'price_low' | 'price_high'): void {
     this.selectedSort.set(sort);
+  }
+
+  sortLabel(): string {
+    const sort = this.selectedSort();
+    if (sort === 'price_low') return 'Precio más bajo';
+    if (sort === 'price_high') return 'Precio más alto';
+    return 'Más relevante';
+  }
+
+  setPage(page: number): void {
+    const total = this.totalPages();
+    if (total === 0) {
+      this.currentPage.set(1);
+      return;
+    }
+    const next = Math.min(Math.max(page, 1), total);
+    this.currentPage.set(next);
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updatePageSize();
+  }
+
+  private updatePageSize(): void {
+    if (typeof window === 'undefined') {
+      this.pageSize.set(12);
+      return;
+    }
+    const next = window.innerWidth <= 1024 ? 10 : 12;
+    if (this.pageSize() !== next) {
+      this.pageSize.set(next);
+      this.currentPage.set(1);
+    }
+  }
+
+  private toggleSelection(
+    listSignal: { (): string[]; set: (value: string[]) => void },
+    value: string,
+  ): void {
+    const list = listSignal();
+    if (list.includes(value)) {
+      listSignal.set(list.filter((item) => item !== value));
+      return;
+    }
+    listSignal.set([...list, value]);
+  }
+
+  private addSelection(
+    listSignal: { (): string[]; set: (value: string[]) => void },
+    value: string,
+  ): void {
+    const list = listSignal();
+    if (!list.includes(value)) {
+      listSignal.set([...list, value]);
+    }
   }
 
   openFilters(): void {
@@ -229,38 +448,56 @@ export class ProductsComponent implements OnInit {
     this.showFilters.set(false);
   }
 
+  toggleSort(): void {
+    this.showSort.set(!this.showSort());
+  }
+
+  closeSort(): void {
+    this.showSort.set(false);
+  }
+
   applyFilters(): void {
     this.closeFilters();
   }
 
   activeFilters(): string[] {
     const items: string[] = [];
-    const sort = this.selectedSort();
-    if (sort === 'price_low') items.push('Precio más bajo');
-    if (sort === 'price_high') items.push('Precio más alto');
 
-    const categoryId = this.selectedCategoryId();
-    if (categoryId) {
+    for (const categoryId of this.selectedCategoryIds()) {
       const category = this.categories().find((item) => item.id === categoryId);
       if (category) items.push(category.name);
     }
 
-    const artistId = this.selectedArtistId();
-    if (artistId) {
+    for (const typeId of this.selectedTypeIds()) {
+      const t = this.artistTypes().find((item) => item.id === typeId);
+      if (t) items.push(t.name);
+    }
+
+    for (const artistId of this.selectedArtistIds()) {
       const artist = this.artists().find((item) => item.id === artistId);
       if (artist) items.push(artist.name);
     }
 
-    const materialId = this.selectedMaterialId();
-    if (materialId) {
+    for (const techniqueId of this.selectedTechniqueIds()) {
+      const technique = this.techniques().find((item) => item.id === techniqueId);
+      if (technique) items.push(technique.name);
+    }
+
+    for (const materialId of this.selectedMaterialIds()) {
       const material = this.materials().find((item) => item.id === materialId);
       if (material) items.push(material.name);
     }
 
-    const availability = this.selectedAvailability();
-    if (availability === 'in_stock') items.push('En stock');
-    if (availability === 'limited') items.push('Stock limitado');
-    if (availability === 'on_demand') items.push('Bajo demanda');
+    for (const p of this.selectedCharacteristicPairs()) {
+      const m = this.materials().find((x) => x.id === p.materialId);
+      items.push(m ? `${m.name} - ${p.charName}` : p.charName);
+    }
+
+    for (const availability of this.selectedAvailability()) {
+      if (availability === 'in_stock') items.push('En stock');
+      if (availability === 'limited') items.push('Stock limitado');
+      if (availability === 'on_demand') items.push('Bajo demanda');
+    }
 
     return items;
   }

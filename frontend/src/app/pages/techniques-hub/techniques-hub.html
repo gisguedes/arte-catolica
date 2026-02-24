@@ -1,0 +1,38 @@
+<div class="techniques-hub-page">
+  <div class="container">
+    <div class="breadcrumb">
+      <a [routerLink]="['/', locale(), 'products']">{{ 'nav.products' | t }}</a>
+      <span class="sep">›</span>
+      <span class="current">{{ 'techniques.title' | t }}</span>
+    </div>
+
+    <div class="marketing-block">
+      <h1>{{ 'techniques.title' | t }}</h1>
+      <p class="subtitle">{{ 'techniques.subtitle' | t }}</p>
+    </div>
+
+    <div class="loading" *ngIf="isLoading()">
+      <p>{{ 'techniques.loading' | t }}</p>
+    </div>
+
+    <div class="techniques-grid" *ngIf="!isLoading()">
+      <a
+        *ngFor="let technique of techniques()"
+        [routerLink]="['/', locale(), 'techniques', technique.slug]"
+        class="technique-card"
+      >
+        <div class="technique-card-content">
+          <h3>{{ technique.name }}</h3>
+          <p *ngIf="technique.description">{{ technique.description }}</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="no-results" *ngIf="!isLoading() && techniques().length === 0">
+      <p>{{ 'techniques.noTechniques' | t }}</p>
+      <a [routerLink]="['/', locale(), 'products']" class="back-link">{{
+        'techniques.backToProducts' | t
+      }}</a>
+    </div>
+  </div>
+</div>
