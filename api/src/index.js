@@ -11,6 +11,7 @@ const categoriesRouter = require('./routes/categories');
 const materialsRouter = require('./routes/materials');
 const colorsRouter = require('./routes/colors');
 const artistTypesRouter = require('./routes/artist-types');
+const techniquesRouter = require('./routes/techniques');
 const authRouter = require('./routes/auth');
 const ordersRouter = require('./routes/orders');
 const addressesRouter = require('./routes/addresses');
@@ -36,6 +37,7 @@ app.use('/api/categories', categoriesRouter);
 app.use('/api/materials', materialsRouter);
 app.use('/api/colors', colorsRouter);
 app.use('/api/artist-types', artistTypesRouter);
+app.use('/api/techniques', techniquesRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/addresses', addressesRouter);
 app.use('/api/payment-methods', paymentMethodsRouter);
@@ -44,6 +46,9 @@ app.use('/api/cart', cartRouter);
 app.listen(port, () => {
   console.log(`API listening on http://localhost:${port}`);
 });
+
+
+
 
 
 

@@ -8,6 +8,7 @@ import { provideHttpClient, withInterceptorsFromDi, withInterceptors } from '@an
 
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth.interceptor';
+import { localeInterceptor } from './interceptors/locale.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,7 +17,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(
       withInterceptorsFromDi(),
-      withInterceptors([authInterceptor])
+      withInterceptors([authInterceptor, localeInterceptor]),
     ),
   ],
 };

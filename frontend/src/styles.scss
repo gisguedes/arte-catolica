@@ -1,5 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Nunito:wght@400;500;600;700&display=swap');
 
 * {
   margin: 0;
@@ -22,11 +22,14 @@
   --success-color: #2f7a5a;
   --warning-color: #c9942d;
   --error-color: #b8463a;
-  --font-display: "Playfair Display", "Times New Roman", serif;
-  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: 'Nunito', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-body:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   font-family: var(--font-body);
   color: var(--text-dark);
@@ -34,7 +37,11 @@ html, body {
   line-height: 1.6;
 }
 
-h1, h2, h3, .title, .section-title {
+h1,
+h2,
+h3,
+.title,
+.section-title {
   font-family: var(--font-display);
   letter-spacing: 0.2px;
 }

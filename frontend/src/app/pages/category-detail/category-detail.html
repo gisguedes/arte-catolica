@@ -1,0 +1,379 @@
+<div class="category-detail-page">
+  <div class="container">
+    <div class="breadcrumb" *ngIf="currentCategory()">
+      <a routerLink="/es/categories">Categorías</a>
+      <span class="sep">›</span>
+      <span class="current">{{ currentCategory()?.name }}</span>
+    </div>
+
+    <div class="marketing-block" *ngIf="currentCategory()">
+      <h1>{{ currentCategory()?.name }}</h1>
+      <p class="subtitle" *ngIf="currentCategory()?.description">
+        {{ currentCategory()?.description }}
+      </p>
+      <div
+        *ngIf="currentCategory()?.content"
+        class="category-content"
+        [innerHTML]="currentCategory()?.content"
+      ></div>
+    </div>
+
+    <div class="products-with-filters">
+      <aside class="filters-sidebar" [class.open]="showFilters()">
+        <div class="filters-sidebar-inner">
+          <div class="filters-header">
+            <h3>Filtros</h3>
+            <button
+              class="filters-close"
+              type="button"
+              (click)="closeFilters()"
+              aria-label="Cerrar"
+            >
+              ×
+            </button>
+          </div>
+          <div class="filters-summary" *ngIf="activeFilters().length > 0">
+            <span class="summary-label">Activos:</span>
+            <span class="summary-chip" *ngFor="let filter of activeFilters()">{{ filter }}</span>
+          </div>
+          <div class="filters">
+            <div class="filter-group">
+              <button
+                class="filter-group-header"
+                type="button"
+                (click)="toggleFilterGroup('categories')"
+              >
+                <span class="filter-label">Categorías</span>
+                <span
+                  class="filter-group-chevron"
+                  [class.expanded]="isFilterGroupExpanded('categories')"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </button>
+              <div class="filter-options" *ngIf="isFilterGroupExpanded('categories')">
+                <label class="filter-option" *ngFor="let category of categories()">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedCategoryIds().includes(category.id)"
+                    (change)="toggleCategory(category.id)"
+                  />
+                  <span>{{ category.name }}</span>
+                </label>
+              </div>
+            </div>
+            <div class="filter-group">
+              <button
+                class="filter-group-header"
+                type="button"
+                (click)="toggleFilterGroup('artists')"
+              >
+                <span class="filter-label">Artistas</span>
+                <span
+                  class="filter-group-chevron"
+                  [class.expanded]="isFilterGroupExpanded('artists')"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </button>
+              <div class="filter-options" *ngIf="isFilterGroupExpanded('artists')">
+                <label class="filter-option" *ngFor="let artist of artists()">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedArtistIds().includes(artist.id)"
+                    (change)="toggleArtist(artist.id)"
+                  />
+                  <span>{{ artist.name }}</span>
+                </label>
+              </div>
+            </div>
+            <div class="filter-group">
+              <button
+                class="filter-group-header"
+                type="button"
+                (click)="toggleFilterGroup('material')"
+              >
+                <span class="filter-label">Material</span>
+                <span
+                  class="filter-group-chevron"
+                  [class.expanded]="isFilterGroupExpanded('material')"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </button>
+              <div class="filter-options" *ngIf="isFilterGroupExpanded('material')">
+                <label class="filter-option" *ngFor="let material of materials()">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedMaterialIds().includes(material.id)"
+                    (change)="toggleMaterial(material.id)"
+                  />
+                  <span>{{ material.name }}</span>
+                </label>
+              </div>
+            </div>
+            <div class="filter-group">
+              <button
+                class="filter-group-header"
+                type="button"
+                (click)="toggleFilterGroup('characteristics')"
+              >
+                <span class="filter-label">Características</span>
+                <span
+                  class="filter-group-chevron"
+                  [class.expanded]="isFilterGroupExpanded('characteristics')"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </button>
+              <div class="filter-options" *ngIf="isFilterGroupExpanded('characteristics')">
+                <label class="filter-option" *ngFor="let opt of materialCharacteristicsOptions()">
+                  <input
+                    type="checkbox"
+                    [checked]="isCharacteristicSelected(opt.materialId, opt.charName)"
+                    (change)="toggleCharacteristic(opt.materialId, opt.charName)"
+                  />
+                  <span>{{ opt.materialName }} – {{ opt.charName }}</span>
+                </label>
+              </div>
+            </div>
+            <div class="filter-group">
+              <button
+                class="filter-group-header"
+                type="button"
+                (click)="toggleFilterGroup('techniques')"
+              >
+                <span class="filter-label">Técnicas</span>
+                <span
+                  class="filter-group-chevron"
+                  [class.expanded]="isFilterGroupExpanded('techniques')"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </button>
+              <div class="filter-options" *ngIf="isFilterGroupExpanded('techniques')">
+                <label class="filter-option" *ngFor="let technique of techniques()">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedTechniqueIds().includes(technique.id)"
+                    (change)="toggleTechnique(technique.id)"
+                  />
+                  <span>{{ technique.name }}</span>
+                </label>
+              </div>
+            </div>
+            <div class="filter-group">
+              <button
+                class="filter-group-header"
+                type="button"
+                (click)="toggleFilterGroup('availability')"
+              >
+                <span class="filter-label">Disponibilidad</span>
+                <span
+                  class="filter-group-chevron"
+                  [class.expanded]="isFilterGroupExpanded('availability')"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </button>
+              <div class="filter-options" *ngIf="isFilterGroupExpanded('availability')">
+                <label class="filter-option">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedAvailability().includes('in_stock')"
+                    (change)="toggleAvailability('in_stock')"
+                  />
+                  <span>En stock</span>
+                </label>
+                <label class="filter-option">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedAvailability().includes('limited')"
+                    (change)="toggleAvailability('limited')"
+                  />
+                  <span>Stock limitado</span>
+                </label>
+                <label class="filter-option">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedAvailability().includes('on_demand')"
+                    (change)="toggleAvailability('on_demand')"
+                  />
+                  <span>Bajo demanda</span>
+                </label>
+              </div>
+            </div>
+            <div class="filters-actions">
+              <button class="filter-clear" type="button" (click)="clearFilters()">
+                Ver todos los productos
+              </button>
+              <button class="filter-apply" type="button" (click)="applyFilters()">Aplicar</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <div class="products-main">
+        <div class="filters-toolbar">
+          <button class="filter-toggle" type="button" (click)="openFilters()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M3 5h18M6 12h12M10 19h4" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+            <span class="label-text">Filtros</span>
+            <span class="filter-count" *ngIf="activeFilters().length > 0">{{
+              activeFilters().length
+            }}</span>
+          </button>
+          <button class="sort-toggle" type="button" (click)="toggleSort()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path
+                d="M7 4v16M7 20l-3-3M7 20l3-3"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M17 4v16M17 4l-3 3M17 4l3 3"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span class="label-text">Ordenación: {{ sortLabel() }}</span>
+          </button>
+        </div>
+
+        <div class="sort-options" *ngIf="showSort()">
+          <button
+            class="sort-option"
+            [class.active]="selectedSort() === 'relevance'"
+            (click)="setSort('relevance'); closeSort()"
+          >
+            Más relevante
+          </button>
+          <button
+            class="sort-option"
+            [class.active]="selectedSort() === 'price_low'"
+            (click)="setSort('price_low'); closeSort()"
+          >
+            Precio más bajo
+          </button>
+          <button
+            class="sort-option"
+            [class.active]="selectedSort() === 'price_high'"
+            (click)="setSort('price_high'); closeSort()"
+          >
+            Precio más alto
+          </button>
+        </div>
+
+        <div class="filters-backdrop" *ngIf="showFilters()" (click)="closeFilters()"></div>
+
+        <div class="loading" *ngIf="isLoading()">
+          <p>Cargando productos...</p>
+        </div>
+
+        <div class="products-grid" *ngIf="!isLoading()">
+          <app-product-card
+            *ngFor="let product of pagedProducts()"
+            [product]="product"
+          ></app-product-card>
+        </div>
+
+        <div class="no-results" *ngIf="!isLoading() && filteredProducts().length === 0">
+          <p>No hay productos para la categoría seleccionada.</p>
+          <a routerLink="/es/categories" class="back-link">Volver a categorías</a>
+        </div>
+
+        <div class="pagination" *ngIf="totalPages() > 1">
+          <button class="page-btn" [disabled]="currentPage() === 1" (click)="setPage(1)">
+            « Primero
+          </button>
+          <button
+            class="page-btn"
+            [disabled]="currentPage() === 1"
+            (click)="setPage(currentPage() - 1)"
+          >
+            ‹
+          </button>
+          <button
+            class="page-number"
+            *ngFor="let page of pageNumbers()"
+            [class.active]="page === currentPage()"
+            (click)="setPage(page)"
+          >
+            {{ page }}
+          </button>
+          <button
+            class="page-btn"
+            [disabled]="currentPage() === totalPages()"
+            (click)="setPage(currentPage() + 1)"
+          >
+            ›
+          </button>
+          <button
+            class="page-btn"
+            [disabled]="currentPage() === totalPages()"
+            (click)="setPage(totalPages())"
+          >
+            Último »
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

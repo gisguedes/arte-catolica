@@ -17,10 +17,24 @@ export interface Product {
   width_cm?: number;
   depth_cm?: number;
   materials?: Material[];
+  techniques?: Technique[];
   colors?: ColorOption[];
   images?: ProductImage[];
   created_at?: string;
   updated_at?: string;
+}
+
+export interface ShippingCalendar {
+  origin_country?: string;
+  origin_postal_code?: string;
+  destination_country?: string;
+  destination_postal_code?: string;
+  destination_region?: string | null;
+  ship_dates: string[];
+  blocked_dates?: string[];
+  default_ship_date?: string | null;
+  transit_days_min: number;
+  transit_days_max: number;
 }
 
 export interface Category {
@@ -28,6 +42,9 @@ export interface Category {
   slug: string;
   name: string;
   description?: string;
+  /** Descripción larga con HTML para formatear (página de detalle) */
+  content?: string | null;
+  image_url?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -64,6 +81,15 @@ export interface Material {
   id: string;
   slug: string;
   name: string;
+  /** Características del material (nombres traducidos) */
+  characteristics?: string[] | null;
+}
+
+/** Par material + característica para filtros */
+export interface MaterialCharacteristicOption {
+  materialId: string;
+  materialName: string;
+  charName: string;
 }
 
 export interface ColorOption {
@@ -74,7 +100,16 @@ export interface ColorOption {
 
 export interface ArtistType {
   id: string;
+  alias?: string;
   slug: string;
   name: string;
+  description?: string | null;
 }
 
+export interface Technique {
+  id: string;
+  alias?: string;
+  slug: string;
+  name: string;
+  description?: string | null;
+}

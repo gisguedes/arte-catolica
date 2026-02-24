@@ -1,8 +1,18 @@
-import { Component, Input, inject, signal, computed } from '@angular/core';
+import {
+  Component,
+  Input,
+  inject,
+  signal,
+  computed,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Product } from '../../models/product.model';
 import { CartService } from '../../services/cart.service';
+import { ProductService } from '../../services/product.service';
 
 @Component({
   selector: 'app-product-card',
@@ -11,11 +21,13 @@ import { CartService } from '../../services/cart.service';
   templateUrl: './product-card.html',
   styleUrl: './product-card.scss',
 })
-export class ProductCardComponent {
+export class ProductCardComponent implements OnInit, OnChanges {
   @Input({ required: true }) product!: Product;
 
   private cartService = inject(CartService);
+  private productService = inject(ProductService);
   imageIndex = signal(0);
+  firstShipDate = signal<string | null>(null);
 
   currentImage = computed(() => {
     const images = this.product.images ?? [];
@@ -24,6 +36,10 @@ export class ProductCardComponent {
     }
     return this.product.image || '/assets/placeholder-image.jpg';
   });
+
+  artistCountry = computed(
+    () => this.product?.vendor?.country ?? this.product?.artist?.country ?? null,
+  );
 
   hasGallery = computed(() => (this.product.images?.length ?? 0) > 1);
   galleryIndices = computed(() => {
@@ -38,10 +54,62 @@ export class ProductCardComponent {
   }
 
   ngOnInit(): void {
+    this.loadFirstShipDate();
     const name = this.product?.vendor?.name || this.product?.artist?.name || null;
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/3d6fb066-d5c2-417c-b90d-dfa24731bc3e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product-card.ts:ngOnInit',message:'product card artist label',data:{productId:this.product?.id,artistName:name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/3d6fb066-d5c2-417c-b90d-dfa24731bc3e', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'product-card.ts:ngOnInit',
+        message: 'product card artist label',
+        data: { productId: this.product?.id, artistName: name },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'H5',
+      }),
+    }).catch(() => {});
     // #endregion
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['product'] && !changes['product'].firstChange) {
+      this.firstShipDate.set(null);
+      this.loadFirstShipDate();
+    }
+  }
+
+  private loadFirstShipDate(): void {
+    const id = this.product?.id;
+    if (!id) return;
+    const destination = this.product?.vendor
+      ? { country: this.product.vendor.country, postal_code: this.product.vendor.postal_code }
+      : undefined;
+    this.productService.getShippingCalendar(id, destination).subscribe({
+      next: (cal) => {
+        const date = cal.default_ship_date ?? cal.ship_dates?.[0] ?? null;
+        this.firstShipDate.set(date);
+      },
+      error: () => this.firstShipDate.set(null),
+    });
+  }
+
+  /** Emoji de bandera a partir del código ISO de país (ej. ES → 🇪🇸) */
+  countryFlag(countryCode: string | null | undefined): string {
+    if (!countryCode || countryCode.length !== 2) return '';
+    const code = countryCode.toUpperCase();
+    return String.fromCodePoint(...[...code].map((c) => 0x1f1e6 - 65 + c.charCodeAt(0)));
+  }
+
+  /** Formato dd/mm/yyyy para la primera fecha de entrega */
+  formatDateDDMMYYYY(dateKey: string | null): string {
+    if (!dateKey) return '';
+    const [y, m, d] = dateKey.split('-').map(Number);
+    const day = (d ?? 0).toString().padStart(2, '0');
+    const month = (m ?? 0).toString().padStart(2, '0');
+    const year = y ?? 0;
+    return `${day}/${month}/${year}`;
   }
 
   formatPrice(price: number): string {
@@ -69,6 +137,4 @@ export class ProductCardComponent {
       this.imageIndex.set((this.imageIndex() - 1 + total) % total);
     }
   }
-
 }
-

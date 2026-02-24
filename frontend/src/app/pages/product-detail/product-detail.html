@@ -1,6 +1,8 @@
 <div class="product-detail">
   <div class="container">
-    <a routerLink="/es/products" class="back-link">← Volver a productos</a>
+    <a [routerLink]="['/', locale(), 'products']" class="back-link">{{
+      'productDetail.back' | t
+    }}</a>
 
     <div class="loading" *ngIf="isLoading()">
       <p>Cargando producto...</p>
@@ -8,25 +10,37 @@
 
     <div class="error" *ngIf="!isLoading() && errorMessage()">
       <p>{{ errorMessage() }}</p>
-      <a routerLink="/es/products" class="btn-secondary">Volver al catálogo</a>
+      <a [routerLink]="['/', locale(), 'products']" class="btn-secondary">{{
+        'productDetail.backToCatalog' | t
+      }}</a>
     </div>
 
     <div class="detail-grid" *ngIf="!isLoading() && product()">
       <div class="image-block">
-        <div class="image-frame">
+        <div
+          class="image-frame"
+          (click)="openFullscreen()"
+          role="button"
+          tabindex="0"
+          (keydown.enter)="openFullscreen()"
+          (keydown.space)="openFullscreen(); $event.preventDefault()"
+          aria-label="Ver imagen a pantalla completa"
+        >
           <img [src]="currentImage()" [alt]="product()?.name" />
           <button
+            type="button"
             class="gallery-arrow left"
             *ngIf="hasGallery()"
-            (click)="prevImage()"
+            (click)="prevImage(); $event.stopPropagation()"
             aria-label="Imagen anterior"
           >
             ‹
           </button>
           <button
+            type="button"
             class="gallery-arrow right"
             *ngIf="hasGallery()"
-            (click)="nextImage()"
+            (click)="nextImage(); $event.stopPropagation()"
             aria-label="Imagen siguiente"
           >
             ›
@@ -35,17 +49,52 @@
         <div class="meta-links">
           <a
             *ngIf="product()?.vendor"
-            [routerLink]="['/es/artist', product()?.vendor?.id]"
+            class="meta-link"
+            [routerLink]="['/', locale(), 'artist', product()?.vendor?.id]"
+            [attr.aria-label]="'Artista: ' + product()?.vendor?.name"
           >
-            Por {{ product()?.vendor?.name }}
+            <svg
+              class="meta-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21a8 8 0 0 1 16 0" />
+            </svg>
+            <span class="meta-text">{{ product()?.vendor?.name }}</span>
+            <span
+              *ngIf="artistCountry()"
+              class="meta-flag"
+              [title]="artistCountry()"
+              aria-hidden="true"
+              >{{ countryFlag(artistCountry()) }}</span
+            >
           </a>
-          <span *ngIf="product()?.vendor && product()?.categories?.length">·</span>
+          <span *ngIf="product()?.vendor && product()?.categories?.length" class="meta-sep">·</span>
           <a
             *ngIf="product()?.categories?.length"
-            [routerLink]="['/es/categories']"
-            [queryParams]="{category_slug: product()?.categories?.[0]?.slug}"
+            class="meta-link"
+            [routerLink]="['/', locale(), 'categories', product()?.categories?.[0]?.slug]"
+            [attr.aria-label]="'Categoría: ' + product()?.categories?.[0]?.name"
           >
-            En {{ product()?.categories?.[0]?.name }}
+            <svg
+              class="meta-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />
+            </svg>
+            <span class="meta-text">{{ product()?.categories?.[0]?.name }}</span>
           </a>
         </div>
       </div>
@@ -62,26 +111,64 @@
 
         <div class="details">
           <div class="detail-row">
-            <span>Stock disponible</span>
-            <strong>{{ product()?.stock ?? 0 }}</strong>
-          </div>
-          <div class="detail-row">
             <span>Disponibilidad</span>
             <strong>{{ availabilityLabel() }}</strong>
           </div>
           <div class="detail-row">
             <span>Previsión de entrega</span>
-            <strong>{{ deliveryEstimate() }}</strong>
+            <button class="delivery-link" type="button" (click)="openCalendarModal()">
+              <span class="delivery-date">{{ firstAvailableDateLabel() }}</span>
+              <svg
+                class="delivery-calendar-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            </button>
           </div>
           <div class="detail-row" *ngIf="shippingFrom()">
             <span>Envío desde</span>
             <strong>{{ shippingFrom() }}</strong>
           </div>
-          <div class="detail-row" *ngIf="product()?.height_cm || product()?.width_cm || product()?.depth_cm">
-            <span>Dimensiones</span>
-            <strong>
-              {{ product()?.height_cm || '-' }} x {{ product()?.width_cm || '-' }} x {{ product()?.depth_cm || '-' }} cm
+          <div
+            class="detail-row"
+            *ngIf="product()?.height_cm || product()?.width_cm || product()?.depth_cm"
+          >
+            <span class="dimension-label">
+              Dimensiones
+              <span
+                class="dimension-info"
+                title="Medidas: ancho x alto x profundidad (cm)"
+                aria-label="Medidas: ancho por alto por profundidad en centímetros"
+                >i</span
+              >
+            </span>
+            <strong title="Medidas: ancho x alto x profundidad (cm)">
+              {{ product()?.height_cm || '-' }} x {{ product()?.width_cm || '-' }} x
+              {{ product()?.depth_cm || '-' }} cm
             </strong>
+          </div>
+        </div>
+
+        <div class="technique-tags" *ngIf="product()?.techniques?.length">
+          <h4>Técnicas</h4>
+          <div class="tag-list">
+            <a
+              *ngFor="let technique of product()?.techniques"
+              [routerLink]="['/', locale(), 'techniques', technique.slug]"
+              class="tag tag-link"
+            >
+              {{ technique.name }}
+            </a>
           </div>
         </div>
 
@@ -102,20 +189,78 @@
           ></span>
         </div>
 
-        <div class="categories" *ngIf="product()?.categories?.length">
-          <a
-            class="category"
-            *ngFor="let category of product()?.categories"
-            [routerLink]="['/es/categories']"
-            [queryParams]="{category_slug: category.slug}"
-          >
-            {{ category.name }}
-          </a>
-        </div>
-
         <button class="add-to-cart-btn" (click)="addToCart()">Agregar al Carrito</button>
       </div>
     </div>
   </div>
 </div>
 
+<div class="calendar-modal" *ngIf="showCalendarModal()">
+  <div class="calendar-backdrop" (click)="closeCalendarModal()"></div>
+  <div class="calendar-panel">
+    <div class="calendar-panel-header">
+      <h3>Calendario de envíos</h3>
+      <button class="calendar-close" (click)="closeCalendarModal()">×</button>
+    </div>
+    <div class="calendar-header">
+      <button class="calendar-nav" (click)="goPrevMonth()">‹</button>
+      <span class="month-label">{{ monthLabel() }}</span>
+      <button class="calendar-nav" (click)="goNextMonth()">›</button>
+    </div>
+    <div class="calendar-grid">
+      <span class="weekday" *ngFor="let day of ['L', 'M', 'X', 'J', 'V', 'S', 'D']">
+        {{ day }}
+      </span>
+      <ng-container *ngFor="let day of calendarDays()">
+        <span *ngIf="day.isPlaceholder" class="day placeholder"></span>
+        <button
+          *ngIf="!day.isPlaceholder"
+          class="day"
+          [class.available]="day.isAvailable"
+          [class.selected]="day.isSelected"
+          [disabled]="!day.isAvailable"
+          (click)="selectShipDate(day.key)"
+        >
+          {{ day.label }}
+        </button>
+      </ng-container>
+    </div>
+    <p class="delivery-range" *ngIf="deliveryRangeLabel()">
+      {{ deliveryRangeLabel() }}
+    </p>
+  </div>
+</div>
+
+<div
+  class="fullscreen-lightbox"
+  *ngIf="showFullscreen()"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Vista de imagen a pantalla completa"
+>
+  <div class="lightbox-backdrop" (click)="closeFullscreen()"></div>
+  <button type="button" class="lightbox-close" (click)="closeFullscreen()" aria-label="Cerrar">
+    ×
+  </button>
+  <button
+    type="button"
+    class="lightbox-arrow left"
+    *ngIf="hasGallery()"
+    (click)="prevImage(); $event.stopPropagation()"
+    aria-label="Imagen anterior"
+  >
+    ‹
+  </button>
+  <div class="lightbox-image-wrap" (click)="$event.stopPropagation()">
+    <img [src]="currentImage()" [alt]="product()?.name" />
+  </div>
+  <button
+    type="button"
+    class="lightbox-arrow right"
+    *ngIf="hasGallery()"
+    (click)="nextImage(); $event.stopPropagation()"
+    aria-label="Imagen siguiente"
+  >
+    ›
+  </button>
+</div>

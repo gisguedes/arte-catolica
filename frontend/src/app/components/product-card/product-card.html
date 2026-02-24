@@ -2,8 +2,29 @@
   <a
     [routerLink]="['/es/artist', product.artist_id || product.vendor?.id]"
     class="artist-link"
+    [attr.aria-label]="'Artista: ' + (product.artist?.name || product.vendor?.name || 'Artista')"
   >
-    Por {{ product.artist?.name || product.vendor?.name || 'Artista' }}
+    <svg
+      class="artist-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21a8 8 0 0 1 16 0" />
+    </svg>
+    <span class="artist-name">{{ product.artist?.name || product.vendor?.name || 'Artista' }}</span>
+    <span
+      *ngIf="artistCountry()"
+      class="artist-flag"
+      [title]="artistCountry()"
+      aria-hidden="true"
+      >{{ countryFlag(artistCountry()) }}</span
+    >
   </a>
   <div class="card-content">
     <a [routerLink]="['/es/products', product.id]" class="product-link">
@@ -36,11 +57,26 @@
       <div class="product-info">
         <h3 class="product-name">{{ product.name }}</h3>
         <p class="product-price">{{ formatPrice(product.price) }}</p>
+        <p class="product-delivery" *ngIf="firstShipDate()">
+          <svg
+            class="delivery-calendar-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          Entrega desde {{ formatDateDDMMYYYY(firstShipDate()) }}
+        </p>
       </div>
     </a>
   </div>
-  <button class="add-to-cart-btn" (click)="addToCart($event)">
-    Agregar al Carrito
-  </button>
+  <button class="add-to-cart-btn" (click)="addToCart($event)">Agregar al Carrito</button>
 </div>
-
