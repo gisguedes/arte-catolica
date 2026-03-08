@@ -129,7 +129,9 @@
 
       <div class="info-block">
         <h1>{{ product()?.name }}</h1>
-        <p class="price">{{ formatPrice(product()?.price || 0) }}</p>
+        <p class="price" *ngIf="product()?.status !== 'archived'">
+          {{ formatPrice(product()?.price || 0) }}
+        </p>
         <p class="description" *ngIf="product()?.description">
           {{ product()?.description }}
         </p>
@@ -138,7 +140,7 @@
         </p>
 
         <div class="details">
-          <div class="detail-row">
+          <div class="detail-row" *ngIf="product()?.status !== 'archived'">
             <span>Disponibilidad</span>
             <strong>{{ availabilityLabel() }}</strong>
           </div>
@@ -217,7 +219,13 @@
           ></span>
         </div>
 
-        <button class="add-to-cart-btn" (click)="addToCart()">Agregar al Carrito</button>
+        <button
+          class="add-to-cart-btn"
+          *ngIf="product()?.status !== 'archived'"
+          (click)="addToCart()"
+        >
+          Agregar al Carrito
+        </button>
       </div>
     </div>
   </div>

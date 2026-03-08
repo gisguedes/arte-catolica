@@ -2,7 +2,7 @@
   <div class="container">
     <div
       class="inactive-banner"
-      *ngIf="artist() && !isLoading() && (artist() as any)?.status === 'archived'"
+      *ngIf="artist() && !isLoading() && artistStatus() === 'archived'"
     >
       Este artista ya no está activo.
     </div>
