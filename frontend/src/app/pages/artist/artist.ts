@@ -159,7 +159,13 @@ export class ArtistComponent implements OnInit {
 
   toggleFavoriteArtist(): void {
     const a = this.artist();
-    if (!a || !this.authService.authenticated()) return;
+    if (!a) return;
+    if (!this.authService.authenticated()) {
+      const base = `/${this.localeService.locale()}/login`;
+      const returnUrl = encodeURIComponent(this.router.url);
+      this.router.navigateByUrl(`${base}?returnUrl=${returnUrl}`);
+      return;
+    }
     this.favoritesService.toggleFavoriteArtist(a.id);
   }
 
