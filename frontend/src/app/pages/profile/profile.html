@@ -1,37 +1,69 @@
 <div class="profile-container">
   <div class="container">
     <h1>Mi Área Personal</h1>
-    
-    <div class="user-info">
-      <div class="avatar">
-        <span>{{ user()?.name?.charAt(0) }}{{ user()?.surname?.charAt(0) }}</span>
-      </div>
-      <div class="user-details">
-        <h2>{{ user()?.name }} {{ user()?.surname }}</h2>
-        <p>{{ user()?.email }}</p>
-      </div>
-    </div>
 
-    <div class="role-selection" *ngIf="selectedRole() === null">
-      <h3>Elige tu tipo de perfil</h3>
-      <p class="subtitle">Puedes tener ambos perfiles activos</p>
-      
-      <div class="role-cards">
-        <div class="role-card" (click)="selectRole('buyer')">
-          <div class="icon">🛒</div>
-          <h4>Comprador</h4>
-          <p>Gestiona tus pedidos, favoritos y direcciones de entrega</p>
-          <span class="badge" *ngIf="hasBuyerProfile()">Activo</span>
-        </div>
-        
-        <div class="role-card" (click)="selectRole('seller')">
-          <div class="icon">🎨</div>
-          <h4>Vendedor</h4>
-          <p>Gestiona tus productos, pedidos y datos profesionales</p>
-          <span class="badge" *ngIf="hasSellerProfile()">Activo</span>
-        </div>
-      </div>
+    <div class="options-grid">
+      <a
+        [routerLink]="['/', locale(), 'profile', 'buyer']"
+        [queryParams]="{ tab: 'personal' }"
+        class="option-card"
+      >
+        <span class="option-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21a8 8 0 0 1 16 0" />
+          </svg>
+        </span>
+        <h3>Mis datos personales</h3>
+        <p>Edita tu nombre, apellidos y email</p>
+      </a>
+
+      <a
+        [routerLink]="['/', locale(), 'profile', 'buyer']"
+        [queryParams]="{ tab: 'orders' }"
+        class="option-card"
+      >
+        <span class="option-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+        </span>
+        <h3>Últimas compras</h3>
+        <p>Historial de tus pedidos</p>
+      </a>
+
+      <a
+        [routerLink]="['/', locale(), 'profile', 'buyer']"
+        [queryParams]="{ tab: 'favorites' }"
+        class="option-card"
+      >
+        <span class="option-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+            />
+          </svg>
+        </span>
+        <h3>Mis favoritos</h3>
+        <p>Productos que te gustan</p>
+      </a>
+
+      <a
+        *ngIf="showSellerOption()"
+        [routerLink]="['/', locale(), 'profile', 'seller']"
+        class="option-card"
+      >
+        <span class="option-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+          </svg>
+        </span>
+        <h3>Perfil vendedor</h3>
+        <p>Gestiona tus productos y pedidos</p>
+      </a>
     </div>
   </div>
 </div>
-

@@ -9,9 +9,11 @@ import {
   effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
+import { FavoritesService } from '../../services/favorites.service';
+import { AuthService } from '../../services/auth.service';
 import { LocaleService } from '../../services/locale.service';
 import { Product, ShippingCalendar, Material } from '../../models/product.model';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -28,6 +30,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   private productService = inject(ProductService);
   private cartService = inject(CartService);
   private localeService = inject(LocaleService);
+  private favoritesService = inject(FavoritesService);
+  authService = inject(AuthService);
 
   locale = this.localeService.locale;
 
@@ -107,6 +111,9 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    if (this.authService.authenticated()) {
+      this.favoritesService.loadFavorites();
+    }
     const productId = this.route.snapshot.paramMap.get('id');
     if (!productId) {
       this.errorMessage.set('Producto no encontrado');
@@ -116,8 +123,14 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
     this.productService.getProduct(productId).subscribe({
       next: (product) => {
+        const status = product?.status || 'approved';
+        if (status === 'cancelled') {
+          this.router.navigate(['/', this.localeService.getCurrentLocale(), 'products']);
+          return;
+        }
         this.product.set(product);
         this.isLoading.set(false);
+        this.errorMessage.set('');
         this.loadShippingCalendar(productId, product);
       },
       error: () => {
@@ -176,6 +189,17 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
   closeFullscreen(): void {
     this.showFullscreen.set(false);
+  }
+
+  isFavorite(): boolean {
+    const p = this.product();
+    return p ? this.authService.authenticated() && this.favoritesService.isFavorite(p.id) : false;
+  }
+
+  toggleFavorite(): void {
+    const p = this.product();
+    if (!p || !this.authService.authenticated()) return;
+    this.favoritesService.toggleFavorite(p.id);
   }
 
   @HostListener('document:keydown.escape')

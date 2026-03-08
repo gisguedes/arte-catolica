@@ -1,8 +1,10 @@
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal, effect } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { ViewportScroller } from '@angular/common';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
+import { AuthService } from './services/auth.service';
+import { FavoritesService } from './services/favorites.service';
 import { NavbarComponent } from './components/navbar/navbar';
 import { FooterComponent } from './components/footer/footer';
 import { LocaleService } from './services/locale.service';
@@ -18,6 +20,13 @@ export class AppComponent implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   private localeService = inject(LocaleService);
+  private authService = inject(AuthService);
+  private favoritesService = inject(FavoritesService);
+
+  private loadFavoritesEffect = effect(() => {
+    const u = this.authService.user();
+    if (u?.id) this.favoritesService.loadFavorites();
+  });
 
   constructor(
     private readonly router: Router,

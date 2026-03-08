@@ -1,11 +1,39 @@
 <div class="artist-page">
   <div class="container">
+    <div
+      class="inactive-banner"
+      *ngIf="artist() && !isLoading() && (artist() as any)?.status === 'archived'"
+    >
+      Este artista ya no está activo.
+    </div>
+
     <div class="loading" *ngIf="isLoading()">
       <p>Cargando información del artista...</p>
     </div>
 
     <div class="artist-info" *ngIf="artist() && !isLoading()">
       <div class="artist-header">
+        <button
+          *ngIf="authService.authenticated()"
+          type="button"
+          class="favorite-btn"
+          [class.active]="isFavoriteArtist()"
+          (click)="toggleFavoriteArtist()"
+          [attr.aria-label]="isFavoriteArtist() ? 'Quitar de favoritos' : 'Añadir a favoritos'"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            [attr.fill]="isFavoriteArtist() ? 'currentColor' : 'none'"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+            />
+          </svg>
+        </button>
         <div class="artist-image" *ngIf="artist()?.image">
           <img [src]="artist()!.image" [alt]="artist()!.name" />
         </div>

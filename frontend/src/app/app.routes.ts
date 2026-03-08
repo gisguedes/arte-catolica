@@ -1,10 +1,12 @@
 import { Routes } from '@angular/router';
 import { ProductsComponent } from './pages/products/products';
 import { LoginComponent } from './pages/login/login';
+import { ResetPasswordComponent } from './pages/reset-password/reset-password';
 import { ArtistComponent } from './pages/artist/artist';
 import { CartComponent } from './pages/cart/cart';
 import { ProfileComponent } from './pages/profile/profile';
 import { BuyerProfileComponent } from './pages/profile/buyer/buyer';
+import { OrderDetailComponent } from './pages/profile/buyer/order-detail/order-detail';
 import { SellerProfileComponent } from './pages/profile/seller/seller';
 import { ProductDetailComponent } from './pages/product-detail/product-detail';
 import { CategoriesComponent } from './pages/categories/categories';
@@ -29,9 +31,15 @@ export const routes: Routes = [
   { path: 'artists/:typeSlug', redirectTo: 'es/artists/:typeSlug', pathMatch: 'full' },
   { path: 'about', redirectTo: 'es/about', pathMatch: 'full' },
   { path: 'login', redirectTo: 'es/login', pathMatch: 'full' },
+  { path: 'reset-password', redirectTo: 'es/reset-password', pathMatch: 'full' },
   { path: 'cart', redirectTo: 'es/cart', pathMatch: 'full' },
   { path: 'profile', redirectTo: 'es/profile', pathMatch: 'full' },
   { path: 'profile/buyer', redirectTo: 'es/profile/buyer', pathMatch: 'full' },
+  {
+    path: 'profile/buyer/orders/:id',
+    redirectTo: 'es/profile/buyer/orders/:id',
+    pathMatch: 'full',
+  },
   { path: 'profile/seller', redirectTo: 'es/profile/seller', pathMatch: 'full' },
   { path: 'artist/:id', redirectTo: 'es/artist/:id', pathMatch: 'full' },
   { path: 'health', redirectTo: 'es/health', pathMatch: 'full' },
@@ -50,10 +58,12 @@ export const routes: Routes = [
       { path: 'artists/:typeSlug', component: ArtistsComponent },
       { path: 'about', component: AboutComponent },
       { path: 'login', component: LoginComponent },
+      { path: 'reset-password', component: ResetPasswordComponent },
       { path: 'cart', component: CartComponent },
       { path: 'artist/:id', component: ArtistComponent },
       { path: 'profile', component: ProfileComponent },
       { path: 'profile/buyer', component: BuyerProfileComponent },
+      { path: 'profile/buyer/orders/:id', component: OrderDetailComponent },
       { path: 'profile/seller', component: SellerProfileComponent },
       { path: 'health', component: HealthComponent },
     ],
@@ -73,10 +83,12 @@ export const routes: Routes = [
       { path: 'artists/:typeSlug', component: ArtistsComponent },
       { path: 'about', component: AboutComponent },
       { path: 'login', component: LoginComponent },
+      { path: 'reset-password', component: ResetPasswordComponent },
       { path: 'cart', component: CartComponent },
       { path: 'artist/:id', component: ArtistComponent },
       { path: 'profile', component: ProfileComponent },
       { path: 'profile/buyer', component: BuyerProfileComponent },
+      { path: 'profile/buyer/orders/:id', component: OrderDetailComponent },
       { path: 'profile/seller', component: SellerProfileComponent },
       { path: 'health', component: HealthComponent },
     ],

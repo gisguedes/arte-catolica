@@ -1,0 +1,174 @@
+.order-detail {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem;
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .loading,
+  .error {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+  }
+
+  .order-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #333;
+    }
+
+    .order-status {
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+
+      &[data-status='delivered'],
+      &[data-status='entregado'] {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      &[data-status='shipping'],
+      &[data-status='shipped'],
+      &[data-status='in_transit'] {
+        background: #cce5ff;
+        color: #004085;
+      }
+
+      &[data-status='pending'],
+      &[data-status='planned'],
+      &[data-status='planificado'] {
+        background: #fff3cd;
+        color: #856404;
+      }
+    }
+  }
+
+  .order-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 2rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .order-section h2,
+  .info-block h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    color: #333;
+  }
+
+  .order-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .order-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+
+    .item-image {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .item-details {
+      flex: 1;
+
+      h3 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1rem;
+        color: #333;
+      }
+
+      .item-meta {
+        margin: 0;
+        font-size: 0.875rem;
+        color: #666;
+      }
+
+      .item-total {
+        margin: 0.5rem 0 0 0;
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .product-unavailable {
+        margin: 0.5rem 0 0 0;
+        font-size: 0.85rem;
+        color: #dc3545;
+        font-style: italic;
+      }
+    }
+
+    &.cancelled {
+      opacity: 0.75;
+      .item-image {
+        filter: grayscale(50%);
+      }
+    }
+  }
+
+  .order-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .info-block {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+
+    p {
+      margin: 0.25rem 0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+  }
+
+  .totals {
+    p {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.5rem 0;
+    }
+
+    .total-row {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #dee2e6;
+    }
+  }
+}

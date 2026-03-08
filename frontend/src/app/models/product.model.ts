@@ -1,6 +1,9 @@
+export type ProductStatus = 'in_review' | 'approved' | 'archived' | 'cancelled';
+
 export interface Product {
   id: string;
   name: string;
+  status?: ProductStatus;
   description?: string;
   price: number;
   image?: string;
@@ -49,9 +52,12 @@ export interface Category {
   updated_at?: string;
 }
 
+export type ArtistStatus = 'in_review' | 'approved' | 'archived' | 'cancelled';
+
 export interface Artist {
   id: string;
   name: string;
+  status?: ArtistStatus;
   /** Descripción breve para la card de artistas/vendors */
   short_description?: string | null;
   /** Descripción larga para la página de detalle del artista */

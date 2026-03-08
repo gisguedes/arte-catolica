@@ -78,6 +78,9 @@
         >
           La contraseña debe tener al menos 8 caracteres
         </span>
+        <a class="forgot-password-link" [routerLink]="['/', locale(), 'reset-password']">
+          ¿Olvidaste tu contraseña?
+        </a>
       </div>
 
       <div class="error-message" *ngIf="errorMessage">

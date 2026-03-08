@@ -27,6 +27,17 @@ export class ApiService {
     return this.http.post(`${this.baseUrl}/logout`, {});
   }
 
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, password: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/reset-password`, {
+      token,
+      password,
+    });
+  }
+
   // Métodos genéricos para CRUD (el interceptor agregará el token automáticamente)
   get<T>(endpoint: string): Observable<T> {
     return this.http.get<T>(`${this.baseUrl}/${endpoint}`);
@@ -38,6 +49,10 @@ export class ApiService {
 
   put<T>(endpoint: string, data: any): Observable<T> {
     return this.http.put<T>(`${this.baseUrl}/${endpoint}`, data);
+  }
+
+  patch<T>(endpoint: string, data: any): Observable<T> {
+    return this.http.patch<T>(`${this.baseUrl}/${endpoint}`, data);
   }
 
   delete<T>(endpoint: string): Observable<T> {

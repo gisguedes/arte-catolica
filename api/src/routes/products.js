@@ -52,6 +52,7 @@ const buildProductSelect = () => `
     p.sku,
     p.is_active,
     p.is_featured,
+    COALESCE(p.status, 'approved') AS status,
     p.created_at,
     p.updated_at,
     COALESCE(pt.name, '') AS name,
@@ -198,7 +199,7 @@ router.get('/', async (req, res) => {
   } = req.query;
 
   const params = [locale];
-  let whereClause = 'p.is_active = true';
+  let whereClause = "(COALESCE(p.status, 'approved') = 'approved')";
 
   if (materialSlug) {
     params.push(Array.isArray(materialSlug) ? materialSlug : [materialSlug]);

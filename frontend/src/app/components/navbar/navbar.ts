@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostListener, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
@@ -16,6 +16,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 export class NavbarComponent {
   private authService = inject(AuthService);
   private cartService = inject(CartService);
+  router = inject(Router);
   private localeService = inject(LocaleService);
   private el = inject(ElementRef);
 
@@ -26,6 +27,14 @@ export class NavbarComponent {
   isMenuOpen = signal(false);
   isCatalogOpen = signal(false);
   isLangOpen = signal(false);
+  isAreaOpen = signal(false);
+
+  loginUrlWithReturn(): string {
+    const base = `/${this.locale()}/login`;
+    const current = this.router.url;
+    if (!current || current === '/' || current.startsWith('/login')) return base;
+    return `${base}?returnUrl=${encodeURIComponent(current)}`;
+  }
 
   toggleCatalog(): void {
     this.isCatalogOpen.update((v) => !v);
@@ -36,11 +45,20 @@ export class NavbarComponent {
     if (!this.el.nativeElement.contains(event.target)) {
       this.closeCatalog();
       this.closeLang();
+      this.closeArea();
     }
   }
 
   closeCatalog(): void {
     this.isCatalogOpen.set(false);
+  }
+
+  toggleArea(): void {
+    this.isAreaOpen.update((v) => !v);
+  }
+
+  closeArea(): void {
+    this.isAreaOpen.set(false);
   }
 
   toggleLang(): void {
@@ -70,5 +88,6 @@ export class NavbarComponent {
     this.isMenuOpen.set(false);
     this.closeCatalog();
     this.closeLang();
+    this.closeArea();
   }
 }

@@ -9,6 +9,18 @@ const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'insecure-secret';
 
+function getUserIdFromToken(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  try {
+    const token = authHeader.slice(7);
+    const decoded = jwt.verify(token, JWT_SECRET);
+    return decoded.sub;
+  } catch {
+    return null;
+  }
+}
+
 function validatePassword(password) {
   const p = String(password);
   if (p.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
@@ -59,6 +71,84 @@ router.post('/register', async (req, res) => {
     res.status(201).json({ token, user });
   } catch (error) {
     console.error('Register error', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+});
+
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body || {};
+  if (!email) {
+    return res.status(400).json({ message: 'Email es requerido' });
+  }
+
+  try {
+    const result = await query(
+      'SELECT id FROM users WHERE email = $1 AND provider = $2 LIMIT 1',
+      [email.toLowerCase().trim(), 'email']
+    );
+    const user = result.rows[0];
+
+    if (user) {
+      await query('DELETE FROM password_reset_tokens WHERE user_id = $1', [user.id]);
+      const insert = await query(
+        `INSERT INTO password_reset_tokens (user_id, token, expires_at)
+         VALUES ($1, uuid_generate_v4(), NOW() + INTERVAL '1 hour')
+         RETURNING token`,
+        [user.id]
+      );
+      const token = insert.rows[0].token;
+      const baseUrl = process.env.FRONTEND_URL || process.env.APP_URL || 'http://localhost:4200';
+      const resetLink = `${baseUrl}/es/reset-password?token=${token}`;
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[DEV] Enlace para restablecer contraseña:', resetLink);
+      }
+
+      // TODO: Enviar email con nodemailer cuando esté configurado
+      // await sendPasswordResetEmail(email, resetLink);
+    }
+  } catch (error) {
+    console.error('Forgot password error', error);
+  }
+
+  res.json({ message: 'Si el email existe en nuestra base de datos, recibirás un correo con instrucciones para restablecer tu contraseña.' });
+});
+
+router.post('/reset-password', async (req, res) => {
+  const { token, password } = req.body || {};
+  if (!token || !password) {
+    return res.status(400).json({ message: 'Token y nueva contraseña son requeridos' });
+  }
+
+  const pwErr = validatePassword(password);
+  if (pwErr) {
+    return res.status(400).json({ message: pwErr });
+  }
+
+  try {
+    const result = await query(
+      `SELECT prt.user_id FROM password_reset_tokens prt
+       WHERE prt.token = $1 AND prt.expires_at > NOW()
+       LIMIT 1`,
+      [token]
+    );
+
+    if (!result.rows[0]) {
+      return res.status(400).json({ message: 'El enlace ha caducado o no es válido. Solicita uno nuevo.' });
+    }
+
+    const { user_id: userId } = result.rows[0];
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    await query('UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2', [
+      passwordHash,
+      userId,
+    ]);
+    await query('DELETE FROM password_reset_tokens WHERE user_id = $1', [userId]);
+
+    res.json({ message: 'Contraseña actualizada correctamente. Ya puedes iniciar sesión.' });
+  } catch (error) {
+    console.error('Reset password error', error);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 });
@@ -226,6 +316,83 @@ router.post('/apple', async (req, res) => {
   } catch (error) {
     console.error('Apple auth error', error);
     res.status(401).json({ message: 'Token de Apple inválido' });
+  }
+});
+
+router.get('/me', async (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(401).json({ message: 'Token inválido o expirado' });
+  }
+
+  try {
+    const result = await query(
+      'SELECT id, name, surname, email, avatar, provider, created_at, updated_at FROM users WHERE id = $1 LIMIT 1',
+      [userId]
+    );
+    if (!result.rows[0]) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    res.json({ data: result.rows[0] });
+  } catch (error) {
+    console.error('Me GET error', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+});
+
+router.patch('/me', async (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(401).json({ message: 'Token inválido o expirado' });
+  }
+
+  const { name, surname, email, avatar } = req.body || {};
+  const updates = [];
+  const values = [];
+  let paramNum = 1;
+
+  if (avatar !== undefined) {
+    updates.push(`avatar = $${paramNum++}`);
+    values.push(avatar === '' ? null : avatar);
+  }
+  if (name !== undefined) {
+    updates.push(`name = $${paramNum++}`);
+    values.push(name);
+  }
+  if (surname !== undefined) {
+    updates.push(`surname = $${paramNum++}`);
+    values.push(surname);
+  }
+  if (email !== undefined) {
+    updates.push(`email = $${paramNum++}`);
+    values.push(email);
+  }
+
+  if (updates.length === 0) {
+    return res.status(400).json({ message: 'No hay campos para actualizar' });
+  }
+
+  try {
+    if (email) {
+      const existing = await query('SELECT id FROM users WHERE email = $1 AND id != $2 LIMIT 1', [email, userId]);
+      if (existing.rows.length) {
+        return res.status(409).json({ message: 'El email ya está en uso' });
+      }
+    }
+
+    updates.push('updated_at = NOW()');
+    values.push(userId);
+    const result = await query(
+      `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramNum} RETURNING id, name, surname, email, avatar, provider, created_at, updated_at`,
+      values
+    );
+    if (!result.rows[0]) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    res.json({ data: result.rows[0] });
+  } catch (error) {
+    console.error('Me PATCH error', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 });
 

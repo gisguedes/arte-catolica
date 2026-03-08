@@ -1,6 +1,9 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { FavoritesService } from '../../services/favorites.service';
+import { LocaleService } from '../../services/locale.service';
 import { ArtistService } from '../../services/artist.service';
 import { ProductService } from '../../services/product.service';
 import { ProductCardComponent } from '../../components/product-card/product-card';
@@ -16,8 +19,12 @@ import { Artist, Product } from '../../models/product.model';
 })
 export class ArtistComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private artistService = inject(ArtistService);
   private productService = inject(ProductService);
+  authService = inject(AuthService);
+  private favoritesService = inject(FavoritesService);
+  private localeService = inject(LocaleService);
 
   artist = signal<Artist | null>(null);
   products = signal<Product[]>([]);
@@ -28,6 +35,9 @@ export class ArtistComponent implements OnInit {
       .slice(0, 4),
   );
   ngOnInit(): void {
+    if (this.authService.authenticated()) {
+      this.favoritesService.loadFavorites();
+    }
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/3d6fb066-d5c2-417c-b90d-dfa24731bc3e', {
       method: 'POST',
@@ -68,6 +78,11 @@ export class ArtistComponent implements OnInit {
   loadArtist(id: string): void {
     this.artistService.getArtist(id).subscribe({
       next: (artist) => {
+        const status = (artist as any)?.status || 'approved';
+        if (status === 'cancelled') {
+          this.router.navigate(['/', this.localeService.getCurrentLocale(), 'artists']);
+          return;
+        }
         this.artist.set(artist);
         this.ensureArtistOnProducts();
         this.isLoading.set(false);
@@ -132,6 +147,19 @@ export class ArtistComponent implements OnInit {
       product.vendor || product.artist ? product : { ...product, vendor: artist },
     );
     this.products.set(updated);
+  }
+
+  isFavoriteArtist(): boolean {
+    const a = this.artist();
+    return a
+      ? this.authService.authenticated() && this.favoritesService.isFavoriteArtist(a.id)
+      : false;
+  }
+
+  toggleFavoriteArtist(): void {
+    const a = this.artist();
+    if (!a || !this.authService.authenticated()) return;
+    this.favoritesService.toggleFavoriteArtist(a.id);
   }
 
   artistLocation(): string {

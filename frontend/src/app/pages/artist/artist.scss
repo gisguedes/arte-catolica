@@ -8,6 +8,16 @@
     padding: 0 2rem;
   }
 
+  .inactive-banner {
+    background: #fff3cd;
+    color: #856404;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    border: 1px solid #ffc107;
+  }
+
   .loading {
     text-align: center;
     padding: 4rem;
@@ -18,12 +28,42 @@
     margin-bottom: 4rem;
 
     .artist-header {
+      position: relative;
       display: flex;
       gap: 3rem;
       background: white;
       padding: 2rem;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      .favorite-btn {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 50%;
+        cursor: pointer;
+        color: #666;
+        transition:
+          border-color 0.2s,
+          color 0.2s;
+        flex-shrink: 0;
+
+        &:hover {
+          border-color: var(--primary-color);
+          color: var(--primary-color);
+        }
+        &.active {
+          border-color: var(--primary-color);
+          color: var(--primary-color);
+        }
+      }
 
       .artist-image {
         flex-shrink: 0;

@@ -7,8 +7,9 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { LocaleService } from '../../services/locale.service';
 import { environment } from '../../../environments/environment';
 
 declare global {
@@ -41,15 +42,18 @@ declare global {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private localeService = inject(LocaleService);
 
+  locale = this.localeService.locale;
   showRegister = signal(false);
   errorMessage = '';
   isLoading = false;
@@ -129,7 +133,10 @@ export class LoginComponent implements OnInit {
 
       this.authService.login(this.loginForm.value).subscribe({
         next: () => {
-          this.router.navigate(['/es/profile']);
+          const returnUrl =
+            this.route.snapshot.queryParamMap.get('returnUrl') ||
+            `/${this.localeService.getCurrentLocale()}/profile`;
+          this.router.navigateByUrl(returnUrl.startsWith('/') ? returnUrl : `/${returnUrl}`);
         },
         error: (error) => {
           this.errorMessage = error.error?.message || 'Error al iniciar sesión';
@@ -155,7 +162,10 @@ export class LoginComponent implements OnInit {
             })
             .subscribe({
               next: () => {
-                this.router.navigate(['/es/profile']);
+                const returnUrl =
+                  this.route.snapshot.queryParamMap.get('returnUrl') ||
+                  `/${this.localeService.getCurrentLocale()}/profile`;
+                this.router.navigateByUrl(returnUrl.startsWith('/') ? returnUrl : `/${returnUrl}`);
               },
               error: () => {
                 this.router.navigate(['/es/login']);
@@ -206,7 +216,12 @@ export class LoginComponent implements OnInit {
 
   private handleGoogleCredential(credential: string): void {
     this.authService.loginWithGoogle(credential).subscribe({
-      next: () => this.router.navigate(['/es/profile']),
+      next: () => {
+        const returnUrl =
+          this.route.snapshot.queryParamMap.get('returnUrl') ||
+          `/${this.localeService.getCurrentLocale()}/profile`;
+        this.router.navigateByUrl(returnUrl.startsWith('/') ? returnUrl : `/${returnUrl}`);
+      },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Error al iniciar sesión con Google';
         this.isLoading = false;
@@ -239,7 +254,12 @@ export class LoginComponent implements OnInit {
         const idToken = response?.authorization?.id_token;
         if (!idToken) throw new Error('Sin token de Apple');
         this.authService.loginWithApple(idToken).subscribe({
-          next: () => this.router.navigate(['/es/profile']),
+          next: () => {
+            const returnUrl =
+              this.route.snapshot.queryParamMap.get('returnUrl') ||
+              `/${this.localeService.getCurrentLocale()}/profile`;
+            this.router.navigateByUrl(returnUrl.startsWith('/') ? returnUrl : `/${returnUrl}`);
+          },
           error: (err) => {
             this.errorMessage = err.error?.message || 'Error al iniciar sesión con Apple';
             this.isLoading = false;
