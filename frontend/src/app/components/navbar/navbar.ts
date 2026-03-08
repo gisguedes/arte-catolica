@@ -5,11 +5,12 @@ import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
 import { LocaleService } from '../../services/locale.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { CartAddedModalComponent } from '../cart-added-modal/cart-added-modal';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, TranslatePipe],
+  imports: [CommonModule, RouterLink, RouterLinkActive, TranslatePipe, CartAddedModalComponent],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
 })

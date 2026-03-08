@@ -162,83 +162,44 @@
           </a>
         </div>
       </div>
-      <a
-        [routerLink]="['/', locale(), 'cart']"
-        routerLinkActive="active"
-        class="cart-link nav-link"
-        (click)="closeMenu()"
-      >
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path
-            d="M6 6h14l-2 9H8L6 6Z"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <path d="M6 6l-2-3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-          <circle
-            cx="9"
-            cy="20"
-            r="1.5"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <circle
-            cx="17"
-            cy="20"
-            r="1.5"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-        <span>{{ 'nav.cart' | t }}</span>
-        <span class="cart-badge" *ngIf="cartItemCount() > 0">
-          {{ cartItemCount() }}
-        </span>
-      </a>
-
-      <div class="nav-lang" [class.open]="isLangOpen()">
-        <button
-          type="button"
-          class="nav-lang-trigger"
-          (click)="toggleLang()"
-          [attr.aria-expanded]="isLangOpen()"
-          aria-haspopup="true"
-          [attr.aria-label]="'Language'"
+      <div class="cart-wrapper">
+        <a
+          [routerLink]="['/', locale(), 'cart']"
+          routerLinkActive="active"
+          class="cart-link nav-link"
+          (click)="closeMenu()"
         >
-          <span class="flag">{{ locale() === 'es' ? '🇪🇸' : '🇺🇸' }}</span>
-          <svg
-            class="chevron"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path
+              d="M6 6h14l-2 9H8L6 6Z"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path d="M6 6l-2-3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <circle
+              cx="9"
+              cy="20"
+              r="1.5"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <circle
+              cx="17"
+              cy="20"
+              r="1.5"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
-        </button>
-        <div class="nav-lang-menu">
-          <button
-            type="button"
-            class="nav-lang-item"
-            [class.active]="locale() === 'es'"
-            (click)="selectLocale('es')"
-          >
-            <span class="flag">🇪🇸</span>
-            Español
-          </button>
-          <button
-            type="button"
-            class="nav-lang-item"
-            [class.active]="locale() === 'en'"
-            (click)="selectLocale('en')"
-          >
-            <span class="flag">🇺🇸</span>
-            English
-          </button>
-        </div>
+          <span>{{ 'nav.cart' | t }}</span>
+          <span class="cart-badge" *ngIf="cartItemCount() > 0">
+            {{ cartItemCount() }}
+          </span>
+        </a>
+        <app-cart-added-modal></app-cart-added-modal>
       </div>
 
       <ng-container *ngIf="isAuthenticated(); else loginLink">
@@ -353,6 +314,48 @@
           {{ 'nav.login' | t }}
         </a>
       </ng-template>
+
+      <div class="nav-lang" [class.open]="isLangOpen()">
+        <button
+          type="button"
+          class="nav-lang-trigger"
+          (click)="toggleLang()"
+          [attr.aria-expanded]="isLangOpen()"
+          aria-haspopup="true"
+          [attr.aria-label]="'Language'"
+        >
+          <span class="flag">{{ locale() === 'es' ? '🇪🇸' : '🇺🇸' }}</span>
+          <svg
+            class="chevron"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <div class="nav-lang-menu">
+          <button
+            type="button"
+            class="nav-lang-item"
+            [class.active]="locale() === 'es'"
+            (click)="selectLocale('es')"
+          >
+            <span class="flag">🇪🇸</span>
+            Español
+          </button>
+          <button
+            type="button"
+            class="nav-lang-item"
+            [class.active]="locale() === 'en'"
+            (click)="selectLocale('en')"
+          >
+            <span class="flag">🇺🇸</span>
+            English
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </nav>

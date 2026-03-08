@@ -17,7 +17,6 @@ const ordersRouter = require('./routes/orders');
 const addressesRouter = require('./routes/addresses');
 const vendorAddressesRouter = require('./routes/vendor-addresses');
 const paymentMethodsRouter = require('./routes/payment-methods');
-const cartRouter = require('./routes/cart');
 const favoritesRouter = require('./routes/favorites');
 
 const app = express();
@@ -45,7 +44,6 @@ app.use('/api/orders', ordersRouter);
 app.use('/api/addresses', addressesRouter);
 app.use('/api/vendor-addresses', vendorAddressesRouter);
 app.use('/api/payment-methods', paymentMethodsRouter);
-app.use('/api/cart', cartRouter);
 app.use('/api/favorites', favoritesRouter);
 
 // Manejador global de errores: evita filtrar base64 u otros datos sensibles

@@ -199,7 +199,7 @@ router.get('/', async (req, res) => {
   } = req.query;
 
   const params = [locale];
-  let whereClause = "(COALESCE(p.status, 'approved') = 'approved')";
+  let whereClause = "(COALESCE(p.status, 'approved') IN ('approved', 'archived'))";
 
   if (materialSlug) {
     params.push(Array.isArray(materialSlug) ? materialSlug : [materialSlug]);
@@ -256,13 +256,35 @@ router.get('/', async (req, res) => {
     )`;
   }
 
-  const sql = `${buildProductSelect()} WHERE ${whereClause} ORDER BY p.created_at DESC`;
+  const sql = `${buildProductSelect()} WHERE ${whereClause} ORDER BY (CASE WHEN COALESCE(p.status, 'approved') = 'archived' THEN 1 ELSE 0 END), p.created_at DESC`;
 
   try {
     const result = await query(sql, params);
     res.json({ data: result.rows });
   } catch (error) {
     console.error('Products list error', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+});
+
+router.get('/status', async (req, res) => {
+  const ids = req.query.ids;
+  const idList = Array.isArray(ids) ? ids : ids ? String(ids).split(',') : [];
+  if (idList.length === 0) {
+    return res.json({ data: {} });
+  }
+  try {
+    const result = await query(
+      `SELECT id, COALESCE(status, 'approved') AS status FROM products WHERE id = ANY($1)`,
+      [idList]
+    );
+    const data = {};
+    for (const row of result.rows) {
+      data[row.id] = row.status;
+    }
+    res.json({ data });
+  } catch (error) {
+    console.error('Products status error', error);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 });

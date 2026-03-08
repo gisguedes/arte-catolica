@@ -115,6 +115,12 @@ export class TechniqueDetailComponent implements OnInit {
     if (sort === 'price_low') list.sort((a, b) => a.price - b.price);
     else if (sort === 'price_high') list.sort((a, b) => b.price - a.price);
 
+    // Siempre productos archivados al final
+    list.sort(
+      (a, b) =>
+        ((a.status ?? 'approved') === 'archived' ? 1 : 0) -
+        ((b.status ?? 'approved') === 'archived' ? 1 : 0),
+    );
     return list;
   });
 

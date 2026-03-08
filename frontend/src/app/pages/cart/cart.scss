@@ -60,6 +60,31 @@
         margin-bottom: 1.5rem;
         align-items: center;
 
+        &.unavailable {
+          opacity: 0.8;
+          background: #f0f0f0;
+
+          .item-image img {
+            filter: grayscale(100%);
+          }
+
+          .item-details h3,
+          .artist-name {
+            color: #888;
+          }
+
+          .unavailable-badge {
+            margin: 0 0 0.5rem 0;
+            padding: 0.25rem 0.5rem;
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--error-color);
+            background: rgba(184, 70, 58, 0.1);
+            border-radius: 6px;
+          }
+        }
+
         .item-image {
           width: 150px;
           height: 150px;
@@ -284,4 +309,3 @@
     }
   }
 }
-
