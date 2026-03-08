@@ -129,6 +129,12 @@ export class CategoryDetailComponent implements OnInit {
       list.sort((a, b) => b.price - a.price);
     }
 
+    // Siempre productos archivados al final
+    list.sort(
+      (a, b) =>
+        ((a.status ?? 'approved') === 'archived' ? 1 : 0) -
+        ((b.status ?? 'approved') === 'archived' ? 1 : 0),
+    );
     return list;
   });
 

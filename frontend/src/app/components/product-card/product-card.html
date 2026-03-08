@@ -101,7 +101,13 @@
       </div>
     </a>
   </div>
-  <button class="add-to-cart-btn" *ngIf="product.status !== 'archived'" (click)="addToCart($event)">
+  <button
+    type="button"
+    class="add-to-cart-btn"
+    *ngIf="product.status !== 'archived'"
+    (click)="addToCart($event); $event.stopPropagation(); $event.preventDefault()"
+  >
     Agregar al Carrito
   </button>
+  <span class="unavailable-msg" *ngIf="product.status === 'archived'">No disponible</span>
 </div>

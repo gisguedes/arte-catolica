@@ -1,53 +1,64 @@
-import { Injectable, signal, computed, effect, inject } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { CartItem, Product } from '../models/product.model';
-import { ApiService } from './api';
-import { AuthService } from './auth.service';
+
+const ADDED_NOTIFICATION_DURATION_MS = 4000;
+const CART_STORAGE_KEY = 'arte-catolica-cart';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CartService {
-  private apiService = inject(ApiService);
-  private authService = inject(AuthService);
   private items = signal<CartItem[]>(this.loadCartFromStorage());
+  private addedNotificationTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  // Computed signals
-  totalItems = computed(() => this.items().reduce((sum, item) => sum + item.quantity, 0));
+  /** Producto recién añadido (para mostrar modal de confirmación) */
+  addedProduct = signal<Product | null>(null);
+
+  private static isProductAvailable(product: Product): boolean {
+    const status = product?.status ?? 'approved';
+    return status !== 'archived' && status !== 'cancelled';
+  }
+
+  // Computed signals (solo productos disponibles cuentan para totals)
+  totalItems = computed(() =>
+    this.items().reduce(
+      (sum, item) => sum + (CartService.isProductAvailable(item.product) ? item.quantity : 0),
+      0,
+    ),
+  );
 
   totalPrice = computed(() =>
-    this.items().reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+    this.items().reduce(
+      (sum, item) =>
+        sum +
+        (CartService.isProductAvailable(item.product) ? item.product.price * item.quantity : 0),
+      0,
+    ),
   );
+
+  isProductAvailable = CartService.isProductAvailable;
 
   get cartItems() {
     return this.items.asReadonly();
   }
 
-  constructor() {
-    effect(() => {
-      const user = this.authService.user();
-      if (user?.id) {
-        this.loadRemoteCart(user.id);
-      } else {
-        this.items.set(this.loadCartFromStorage());
-      }
-    });
+  /** Actualiza el status de los productos en el carrito (para detectar archived/cancelled) */
+  refreshProductStatus(statusMap: Record<string, string>): void {
+    if (Object.keys(statusMap).length === 0) return;
+    this.items.update((items) =>
+      items.map((item) => {
+        const newStatus = statusMap[item.product.id];
+        if (!newStatus) return item;
+        return {
+          ...item,
+          product: { ...item.product, status: newStatus as Product['status'] },
+        };
+      }),
+    );
+    this.saveCartToStorage();
   }
 
   addToCart(product: Product, quantity: number = 1): void {
-    const userId = this.getUserId();
-    if (userId) {
-      this.apiService
-        .post<{ data: CartItem[] }>('cart', {
-          user_id: userId,
-          product_id: product.id,
-          quantity,
-        })
-        .subscribe({
-          next: (response) =>
-            this.items.set(this.normalizeCartItems(response.data || (response as any))),
-        });
-      return;
-    }
     const currentItems = this.items();
     const existingItem = currentItems.find((item) => item.product.id === product.id);
 
@@ -61,42 +72,31 @@ export class CartService {
       this.items.set([...currentItems, { product, quantity }]);
     }
     this.saveCartToStorage();
+    this.showAddedNotification(product);
+  }
+
+  /** Muestra el modal temporal de "producto añadido" */
+  showAddedNotification(product: Product): void {
+    if (this.addedNotificationTimeout) clearTimeout(this.addedNotificationTimeout);
+    this.addedProduct.set(product);
+    this.addedNotificationTimeout = setTimeout(() => {
+      this.addedProduct.set(null);
+      this.addedNotificationTimeout = null;
+    }, ADDED_NOTIFICATION_DURATION_MS);
+  }
+
+  dismissAddedNotification(): void {
+    if (this.addedNotificationTimeout) clearTimeout(this.addedNotificationTimeout);
+    this.addedNotificationTimeout = null;
+    this.addedProduct.set(null);
   }
 
   removeFromCart(productId: string): void {
-    const userId = this.getUserId();
-    if (userId) {
-      this.apiService
-        .delete<{ data: CartItem[] }>(`cart?user_id=${userId}&product_id=${productId}`)
-        .subscribe({
-          next: (response) =>
-            this.items.set(this.normalizeCartItems(response.data || (response as any))),
-        });
-      return;
-    }
     this.items.set(this.items().filter((item) => item.product.id !== productId));
     this.saveCartToStorage();
   }
 
   updateQuantity(productId: string, quantity: number): void {
-    const userId = this.getUserId();
-    if (userId) {
-      if (quantity <= 0) {
-        this.removeFromCart(productId);
-        return;
-      }
-      this.apiService
-        .post<{ data: CartItem[] }>('cart', {
-          user_id: userId,
-          product_id: productId,
-          quantity,
-        })
-        .subscribe({
-          next: (response) =>
-            this.items.set(this.normalizeCartItems(response.data || (response as any))),
-        });
-      return;
-    }
     if (quantity <= 0) {
       this.removeFromCart(productId);
       return;
@@ -108,23 +108,27 @@ export class CartService {
   }
 
   clearCart(): void {
-    const userId = this.getUserId();
-    if (userId) {
-      this.apiService.delete(`cart/clear?user_id=${userId}`).subscribe({
-        next: () => this.items.set([]),
-      });
-      return;
-    }
     this.items.set([]);
     this.saveCartToStorage();
   }
 
-  private loadRemoteCart(userId: string): void {
-    this.apiService.get<{ data: CartItem[] }>(`cart?user_id=${userId}`).subscribe({
-      next: (response) =>
-        this.items.set(this.normalizeCartItems(response.data || (response as any))),
-      error: () => this.items.set([]),
-    });
+  private loadCartFromStorage(): CartItem[] {
+    try {
+      const cartStr = localStorage.getItem(CART_STORAGE_KEY);
+      if (!cartStr) return [];
+      const parsed = JSON.parse(cartStr) as CartItem[];
+      return this.normalizeCartItems(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      return [];
+    }
+  }
+
+  private saveCartToStorage(): void {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(this.items()));
+    } catch {
+      // QuotaExceeded o localStorage no disponible
+    }
   }
 
   private normalizeCartItems(items: CartItem[]): CartItem[] {
@@ -135,18 +139,5 @@ export class CartService {
         price: Number(item.product?.price ?? 0),
       },
     }));
-  }
-
-  private getUserId(): string | null {
-    return this.authService.user()?.id ?? null;
-  }
-
-  private loadCartFromStorage(): CartItem[] {
-    const cartStr = localStorage.getItem('cart');
-    return cartStr ? JSON.parse(cartStr) : [];
-  }
-
-  private saveCartToStorage(): void {
-    localStorage.setItem('cart', JSON.stringify(this.items()));
   }
 }

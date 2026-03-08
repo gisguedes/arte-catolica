@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 import { ApiService } from './api';
 import { Product, Category, Technique, Material, ShippingCalendar } from '../models/product.model';
 
@@ -66,6 +66,15 @@ export class ProductService {
     return this.apiService
       .get<{ data: Technique }>(`techniques?slug=${encodeURIComponent(slug)}`)
       .pipe(map((response) => response.data || (response as any)));
+  }
+
+  getProductStatus(ids: string[]): Observable<Record<string, string>> {
+    if (ids.length === 0) return of({});
+    const search = new URLSearchParams();
+    ids.forEach((id) => search.append('ids', id));
+    return this.apiService
+      .get<{ data: Record<string, string> }>(`products/status?${search.toString()}`)
+      .pipe(map((r) => r?.data ?? {}));
   }
 
   getProduct(id: string): Observable<Product> {

@@ -196,6 +196,9 @@
   }
 
   .add-to-cart-btn {
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
     margin: 0 1rem 1rem 1rem;
     padding: 0.75rem;
     background: var(--primary-color);
@@ -213,6 +216,15 @@
     &:active {
       transform: scale(0.98);
     }
+  }
+
+  .unavailable-msg {
+    display: block;
+    margin: 0.5rem 1rem 1rem 1rem;
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--text-medium);
   }
 }
 

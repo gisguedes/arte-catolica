@@ -125,7 +125,7 @@ router.get('/:id', async (req, res) => {
 
 router.get('/:id/products', async (req, res) => {
   const locale = getLocale(req);
-  const sql = `${buildProductSelect()} WHERE p.vendor_id = $2 AND (COALESCE(p.status, 'approved') = 'approved') ORDER BY p.created_at DESC`;
+  const sql = `${buildProductSelect()} WHERE p.vendor_id = $2 AND (COALESCE(p.status, 'approved') IN ('approved', 'archived')) ORDER BY (CASE WHEN COALESCE(p.status, 'approved') = 'archived' THEN 1 ELSE 0 END), p.created_at DESC`;
 
   try {
     const result = await query(sql, [locale, req.params.id]);
