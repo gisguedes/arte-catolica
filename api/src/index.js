@@ -15,6 +15,7 @@ const techniquesRouter = require('./routes/techniques');
 const authRouter = require('./routes/auth');
 const ordersRouter = require('./routes/orders');
 const addressesRouter = require('./routes/addresses');
+const vendorAddressesRouter = require('./routes/vendor-addresses');
 const paymentMethodsRouter = require('./routes/payment-methods');
 const cartRouter = require('./routes/cart');
 
@@ -40,6 +41,7 @@ app.use('/api/artist-types', artistTypesRouter);
 app.use('/api/techniques', techniquesRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/addresses', addressesRouter);
+app.use('/api/vendor-addresses', vendorAddressesRouter);
 app.use('/api/payment-methods', paymentMethodsRouter);
 app.use('/api/cart', cartRouter);
 

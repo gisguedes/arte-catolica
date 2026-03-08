@@ -33,7 +33,33 @@ export class AuthService {
         }
         localStorage.setItem(this.userKey, JSON.stringify(response.user));
         this.currentUser.set(response.user);
-      })
+      }),
+    );
+  }
+
+  loginWithGoogle(idToken: string): Observable<LoginResponse> {
+    return this.apiService
+      .post<LoginResponse>('google', { id_token: idToken, credential: idToken })
+      .pipe(
+        tap((response) => {
+          if (response.token) {
+            localStorage.setItem(this.tokenKey, response.token);
+          }
+          localStorage.setItem(this.userKey, JSON.stringify(response.user));
+          this.currentUser.set(response.user);
+        }),
+      );
+  }
+
+  loginWithApple(idToken: string): Observable<LoginResponse> {
+    return this.apiService.post<LoginResponse>('apple', { id_token: idToken }).pipe(
+      tap((response) => {
+        if (response.token) {
+          localStorage.setItem(this.tokenKey, response.token);
+        }
+        localStorage.setItem(this.userKey, JSON.stringify(response.user));
+        this.currentUser.set(response.user);
+      }),
     );
   }
 
@@ -57,4 +83,3 @@ export class AuthService {
     return localStorage.getItem(this.tokenKey);
   }
 }
-

@@ -8,6 +8,7 @@ const buildAddressSelect = () => `
     a.id,
     a.user_id,
     a.type,
+    a.alias,
     a.first_name,
     a.last_name,
     a.address_line_1,
@@ -60,14 +61,15 @@ router.post('/', async (req, res) => {
   try {
     const result = await query(
       `INSERT INTO addresses (
-        id, user_id, type, first_name, last_name, address_line_1, address_line_2,
+        id, user_id, type, alias, first_name, last_name, address_line_1, address_line_2,
         city, state, postal_code, country, phone, is_default, created_at, updated_at
       )
-      VALUES (uuid_generate_v4(), $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,NOW(),NOW())
+      VALUES (uuid_generate_v4(), $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW(),NOW())
       RETURNING id`,
       [
         payload.user_id,
         payload.type ?? 'shipping',
+        payload.alias ?? null,
         payload.first_name,
         payload.last_name,
         payload.address_line_1,
@@ -102,6 +104,7 @@ router.put('/:id', async (req, res) => {
   };
 
   if (payload.type !== undefined) setField('type', payload.type);
+  if (payload.alias !== undefined) setField('alias', payload.alias);
   if (payload.first_name !== undefined) setField('first_name', payload.first_name);
   if (payload.last_name !== undefined) setField('last_name', payload.last_name);
   if (payload.address_line_1 !== undefined) setField('address_line_1', payload.address_line_1);

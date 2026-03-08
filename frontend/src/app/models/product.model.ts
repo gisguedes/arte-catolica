@@ -52,10 +52,14 @@ export interface Category {
 export interface Artist {
   id: string;
   name: string;
-  bio?: string;
+  /** Descripción breve para la card de artistas/vendors */
+  short_description?: string | null;
+  /** Descripción larga para la página de detalle del artista */
+  description?: string | null;
   image?: string;
-  email?: string;
   website?: string;
+  /** Redes sociales: [{network, url}] */
+  social_links?: { network: string; url: string }[];
   city?: string;
   country?: string;
   postal_code?: string;

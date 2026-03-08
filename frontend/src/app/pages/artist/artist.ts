@@ -4,12 +4,13 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ArtistService } from '../../services/artist.service';
 import { ProductService } from '../../services/product.service';
 import { ProductCardComponent } from '../../components/product-card/product-card';
+import { SocialUrlPipe } from '../../pipes/social-url.pipe';
 import { Artist, Product } from '../../models/product.model';
 
 @Component({
   selector: 'app-artist',
   standalone: true,
-  imports: [CommonModule, RouterLink, ProductCardComponent],
+  imports: [CommonModule, RouterLink, ProductCardComponent, SocialUrlPipe],
   templateUrl: './artist.html',
   styleUrl: './artist.scss',
 })

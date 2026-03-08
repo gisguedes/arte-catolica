@@ -110,6 +110,44 @@
       font-size: 0.9rem;
     }
 
+    .password-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      input {
+        flex: 1;
+        padding-right: 3rem;
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 0.5rem;
+        padding: 0.5rem;
+        background: none;
+        border: none;
+        color: #666;
+        cursor: pointer;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+          color: var(--primary-color);
+          background: rgba(0, 0, 0, 0.05);
+        }
+
+        &:focus {
+          outline: none;
+        }
+
+        svg {
+          display: block;
+        }
+      }
+    }
+
     input {
       width: 100%;
       padding: 0.875rem;
@@ -125,6 +163,52 @@
 
       &.error {
         border-color: #dc3545;
+      }
+    }
+
+    .password-input-wrapper + .error-message {
+      margin-top: 0.25rem;
+    }
+
+    .password-requirements {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0;
+      font-size: 0.85rem;
+      color: #666;
+
+      li {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.35rem;
+        transition: color 0.2s;
+
+        &.met {
+          color: #198754;
+        }
+      }
+
+      .req-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 14px;
+        flex-shrink: 0;
+
+        svg {
+          stroke: #198754;
+        }
+
+        .req-dot {
+          color: #adb5bd;
+          font-size: 1.2rem;
+          line-height: 1;
+        }
+
+        &.met .req-dot {
+          display: none;
+        }
       }
     }
 
