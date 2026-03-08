@@ -34,7 +34,6 @@
           aria-label="Ver imagen a pantalla completa"
         >
           <button
-            *ngIf="authService.authenticated()"
             type="button"
             class="favorite-btn"
             [class.active]="isFavorite()"

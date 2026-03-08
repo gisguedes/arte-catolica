@@ -199,7 +199,13 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
   toggleFavorite(): void {
     const p = this.product();
-    if (!p || !this.authService.authenticated()) return;
+    if (!p) return;
+    if (!this.authService.authenticated()) {
+      const base = `/${this.localeService.locale()}/login`;
+      const returnUrl = encodeURIComponent(this.router.url);
+      this.router.navigateByUrl(`${base}?returnUrl=${returnUrl}`);
+      return;
+    }
     this.favoritesService.toggleFavorite(p.id);
   }
 

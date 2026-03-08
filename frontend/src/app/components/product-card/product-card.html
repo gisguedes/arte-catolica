@@ -30,7 +30,6 @@
     <a [routerLink]="['/es/products', product.id]" class="product-link">
       <div class="product-image">
         <button
-          *ngIf="authService.authenticated()"
           type="button"
           class="favorite-btn"
           [class.active]="isFavorite()"

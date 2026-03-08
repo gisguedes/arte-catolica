@@ -9,12 +9,13 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Product } from '../../models/product.model';
 import { CartService } from '../../services/cart.service';
 import { ProductService } from '../../services/product.service';
 import { FavoritesService } from '../../services/favorites.service';
 import { AuthService } from '../../services/auth.service';
+import { LocaleService } from '../../services/locale.service';
 
 @Component({
   selector: 'app-product-card',
@@ -29,6 +30,8 @@ export class ProductCardComponent implements OnInit, OnChanges {
   private cartService = inject(CartService);
   private productService = inject(ProductService);
   private favoritesService = inject(FavoritesService);
+  private router = inject(Router);
+  private localeService = inject(LocaleService);
   authService = inject(AuthService);
   imageIndex = signal(0);
   firstShipDate = signal<string | null>(null);
@@ -66,7 +69,12 @@ export class ProductCardComponent implements OnInit, OnChanges {
   toggleFavorite(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    if (!this.authService.authenticated()) return;
+    if (!this.authService.authenticated()) {
+      const base = `/${this.localeService.locale()}/login`;
+      const returnUrl = encodeURIComponent(this.router.url);
+      this.router.navigateByUrl(`${base}?returnUrl=${returnUrl}`);
+      return;
+    }
     this.favoritesService.toggleFavorite(this.product.id);
   }
 
