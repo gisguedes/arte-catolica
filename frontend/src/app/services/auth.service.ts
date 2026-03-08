@@ -82,4 +82,12 @@ export class AuthService {
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
+
+  updateUser(userData: User): void {
+    const current = this.currentUser();
+    if (!current) return;
+    const updated = { ...current, ...userData };
+    localStorage.setItem(this.userKey, JSON.stringify(updated));
+    this.currentUser.set(updated);
+  }
 }

@@ -130,6 +130,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     'profile.seller': 'Vendedor',
     'profile.buyerDesc': 'Gestiona tus pedidos, favoritos y direcciones de entrega',
     'profile.sellerDesc': 'Gestiona tus productos, pedidos y datos profesionales',
+    'profile.personalData': 'Mis datos personales',
 
     // Pagination
     'pagination.first': '« Primero',
@@ -282,6 +283,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     'profile.seller': 'Seller',
     'profile.buyerDesc': 'Manage your orders, favorites and delivery addresses',
     'profile.sellerDesc': 'Manage your products, orders and professional data',
+    'profile.personalData': 'My personal data',
 
     // Pagination
     'pagination.first': '« First',

@@ -15,6 +15,16 @@
     font-weight: 500;
   }
 
+  .inactive-banner {
+    background: #fff3cd;
+    color: #856404;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    border: 1px solid #ffc107;
+  }
+
   .loading,
   .error {
     text-align: center;
@@ -43,6 +53,36 @@
       position: relative;
       display: flex;
       justify-content: center;
+
+      .favorite-btn {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        z-index: 3;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        color: #999;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          color 0.2s,
+          background 0.2s;
+
+        &:hover {
+          color: #e74c3c;
+          background: white;
+        }
+
+        &.active {
+          color: #e74c3c;
+        }
+      }
       align-items: center;
       background: rgba(255, 255, 255, 0.92);
       border-radius: 12px;

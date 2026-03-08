@@ -15,6 +15,13 @@
       }}</a>
     </div>
 
+    <div
+      class="inactive-banner"
+      *ngIf="!isLoading() && product() && product()?.status === 'archived'"
+    >
+      Este producto ya no está activo.
+    </div>
+
     <div class="detail-grid" *ngIf="!isLoading() && product()">
       <div class="image-block">
         <div
@@ -26,6 +33,27 @@
           (keydown.space)="openFullscreen(); $event.preventDefault()"
           aria-label="Ver imagen a pantalla completa"
         >
+          <button
+            *ngIf="authService.authenticated()"
+            type="button"
+            class="favorite-btn"
+            [class.active]="isFavorite()"
+            (click)="toggleFavorite(); $event.stopPropagation()"
+            [attr.aria-label]="isFavorite() ? 'Quitar de favoritos' : 'Añadir a favoritos'"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              [attr.fill]="isFavorite() ? 'currentColor' : 'none'"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+              />
+            </svg>
+          </button>
           <img [src]="currentImage()" [alt]="product()?.name" />
           <button
             type="button"

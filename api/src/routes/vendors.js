@@ -21,6 +21,7 @@ const buildVendorSelect = (localeParam = '$1') => `
     v.postal_code,
     v.opening_date,
     v.is_active,
+    COALESCE(v.status, 'approved') AS status,
     v.created_at,
     v.updated_at,
     COALESCE(
@@ -57,6 +58,7 @@ const buildProductSelect = () => `
     p.sku,
     p.is_active,
     p.is_featured,
+    COALESCE(p.status, 'approved') AS status,
     p.created_at,
     p.updated_at,
     COALESCE(pt.name, '') AS name,
@@ -81,7 +83,7 @@ router.get('/', async (req, res) => {
   let joinClause = '';
 
   if (includeInactive !== 'true') {
-    conditions.push('v.is_active = true');
+    conditions.push("(COALESCE(v.status, 'approved') = 'approved')");
   }
 
   if (userId) {
@@ -123,7 +125,7 @@ router.get('/:id', async (req, res) => {
 
 router.get('/:id/products', async (req, res) => {
   const locale = getLocale(req);
-  const sql = `${buildProductSelect()} WHERE p.vendor_id = $2 AND p.is_active = true ORDER BY p.created_at DESC`;
+  const sql = `${buildProductSelect()} WHERE p.vendor_id = $2 AND (COALESCE(p.status, 'approved') = 'approved') ORDER BY p.created_at DESC`;
 
   try {
     const result = await query(sql, [locale, req.params.id]);

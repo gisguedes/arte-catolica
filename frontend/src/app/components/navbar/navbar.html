@@ -242,38 +242,95 @@
       </div>
 
       <ng-container *ngIf="isAuthenticated(); else loginLink">
-        <a
-          [routerLink]="['/', locale(), 'profile']"
-          routerLinkActive="active"
-          class="nav-link"
-          (click)="closeMenu()"
-        >
-          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <circle
-              cx="12"
-              cy="8"
-              r="4"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M4 21a8 8 0 0 1 16 0"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          {{ 'nav.myArea' | t }}
-        </a>
-        <a [routerLink]="['/', locale(), 'home']" (click)="logout()" class="logout-link">
-          {{ 'nav.logout' | t }}
-        </a>
-        <span class="user-name">{{ user()?.name }}</span>
+        <div class="nav-area" [class.open]="isAreaOpen()">
+          <button
+            type="button"
+            class="nav-link nav-area-trigger"
+            (click)="toggleArea()"
+            [attr.aria-expanded]="isAreaOpen()"
+            aria-haspopup="true"
+          >
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle
+                cx="12"
+                cy="8"
+                r="4"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M4 21a8 8 0 0 1 16 0"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            {{ 'nav.myArea' | t }}
+            <svg
+              class="chevron"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <div class="nav-area-menu">
+            <a
+              [routerLink]="['/', locale(), 'profile']"
+              class="nav-area-item"
+              (click)="closeMenu(); closeArea()"
+            >
+              <svg
+                class="nav-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                />
+              </svg>
+              Mi área
+            </a>
+            <a
+              [routerLink]="['/', locale(), 'profile', 'buyer']"
+              [queryParams]="{ tab: 'personal' }"
+              class="nav-area-item"
+              (click)="closeMenu(); closeArea()"
+            >
+              {{ 'profile.personalData' | t }}
+            </a>
+            <a
+              [routerLink]="['/', locale(), 'profile', 'buyer']"
+              [queryParams]="{ tab: 'orders' }"
+              class="nav-area-item"
+              (click)="closeMenu(); closeArea()"
+            >
+              Últimas compras
+            </a>
+            <a
+              [routerLink]="['/', locale(), 'profile', 'buyer']"
+              [queryParams]="{ tab: 'favorites' }"
+              class="nav-area-item"
+              (click)="closeMenu(); closeArea()"
+            >
+              Mis favoritos
+            </a>
+            <button type="button" class="nav-area-item nav-area-logout" (click)="logout()">
+              {{ 'nav.logout' | t }}
+            </button>
+          </div>
+        </div>
       </ng-container>
       <ng-template #loginLink>
         <a
           [routerLink]="['/', locale(), 'login']"
+          [queryParams]="{ returnUrl: router.url }"
           routerLinkActive="active"
           class="nav-link"
           (click)="closeMenu()"

@@ -1,112 +1,269 @@
 <div class="buyer-profile">
-  <div class="container">
-    <div class="header">
-      <h1>Perfil de Comprador</h1>
-      <a routerLink="/es/profile" class="back-link">← Volver al área personal</a>
-    </div>
+  <div class="buyer-layout">
+    <aside class="buyer-sidebar">
+      <div class="sidebar-header">
+        <a [routerLink]="['/', locale(), 'profile']" class="back-link">← Área personal</a>
+      </div>
+      <nav class="sidebar-nav">
+        <a
+          class="nav-item"
+          [class.active]="activeTab() === 'personal'"
+          (click)="setTab('personal')"
+        >
+          <svg
+            class="nav-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21a8 8 0 0 1 16 0" />
+          </svg>
+          Mis datos personales
+        </a>
+        <a class="nav-item" [class.active]="activeTab() === 'orders'" (click)="setTab('orders')">
+          <svg
+            class="nav-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+          Últimas compras
+        </a>
+        <a
+          class="nav-item"
+          [class.active]="activeTab() === 'favorites'"
+          (click)="setTab('favorites')"
+        >
+          <svg
+            class="nav-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+            />
+          </svg>
+          Mis favoritos
+        </a>
+      </nav>
+    </aside>
 
-    <div class="tabs">
-      <button 
-        class="tab-btn" 
-        [class.active]="activeTab() === 'orders'"
-        (click)="setTab('orders')"
-      >
-        Mis Pedidos
-      </button>
-      <button 
-        class="tab-btn" 
-        [class.active]="activeTab() === 'favorites'"
-        (click)="setTab('favorites')"
-      >
-        Favoritos
-      </button>
-      <button 
-        class="tab-btn" 
-        [class.active]="activeTab() === 'addresses'"
-        (click)="setTab('addresses')"
-      >
-        Direcciones
-      </button>
-      <button 
-        class="tab-btn" 
-        [class.active]="activeTab() === 'settings'"
-        (click)="setTab('settings')"
-      >
-        Configuración
-      </button>
-    </div>
+    <main class="buyer-content">
+      <!-- Mis datos personales -->
+      <section class="tab-panel" *ngIf="activeTab() === 'personal'">
+        <h1>Mis datos personales</h1>
+        <p class="section-desc">Edita tu información personal</p>
+        <form [formGroup]="personalForm" (ngSubmit)="onSavePersonal()" class="personal-form">
+          <div class="avatar-upload form-group">
+            <div class="avatar-preview">
+              <img
+                *ngIf="avatarPreview()"
+                [src]="avatarPreview()"
+                alt="Avatar"
+                class="avatar-img"
+              />
+              <span *ngIf="!avatarPreview()" class="avatar-initials">
+                {{ user()?.name?.charAt(0) || '?' }}{{ user()?.surname?.charAt(0) || '' }}
+              </span>
+            </div>
+            <div class="avatar-actions">
+              <input
+                type="file"
+                #avatarInput
+                accept="image/jpeg,image/png,image/webp"
+                (change)="onAvatarSelected($event)"
+                class="avatar-input-hidden"
+              />
+              <button type="button" class="btn-secondary btn-avatar" (click)="avatarInput.click()">
+                Subir foto
+              </button>
+              <button
+                *ngIf="avatarPreview()"
+                type="button"
+                class="btn-remove-avatar"
+                (click)="removeAvatar()"
+              >
+                Quitar foto
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="name">Nombre</label>
+            <input id="name" formControlName="name" type="text" placeholder="Tu nombre" />
+          </div>
+          <div class="form-group">
+            <label for="surname">Apellidos</label>
+            <input id="surname" formControlName="surname" type="text" placeholder="Tus apellidos" />
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" formControlName="email" type="email" placeholder="tu@email.com" />
+          </div>
+          <div class="form-actions">
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="personalForm.invalid || isSaving()"
+            >
+              {{ isSaving() ? 'Guardando...' : 'Guardar cambios' }}
+            </button>
+          </div>
+          <p class="error-msg" *ngIf="personalError()">{{ personalError() }}</p>
+          <p class="success-msg" *ngIf="personalSuccess()">Cambios guardados correctamente.</p>
+        </form>
+      </section>
 
-    <!-- Tab: Pedidos -->
-    <div class="tab-content" *ngIf="activeTab() === 'orders'">
-      <div class="orders-section">
-        <h2>Pedidos en Curso</h2>
-        <div class="empty-state" *ngIf="orders().length === 0">
-          <p>No tienes pedidos en curso</p>
-        </div>
-        <div class="orders-list" *ngIf="orders().length > 0">
-          <!-- Orders will be displayed here -->
-        </div>
-
-        <h2 class="section-title">Historial de Pedidos</h2>
+      <!-- Últimas compras -->
+      <section class="tab-panel" *ngIf="activeTab() === 'orders'">
+        <h1>Últimas compras</h1>
+        <p class="section-desc">Historial de tus pedidos</p>
         <div class="empty-state" *ngIf="orders().length === 0">
           <p>No has realizado ningún pedido aún</p>
-          <a routerLink="/es/products" class="btn-primary">Explorar Productos</a>
+          <a [routerLink]="['/', locale(), 'products']" class="btn-primary">Explorar productos</a>
         </div>
-      </div>
-    </div>
+        <div class="orders-list" *ngIf="orders().length > 0">
+          <a
+            *ngFor="let order of orders()"
+            [routerLink]="['/', locale(), 'profile', 'buyer', 'orders', order.id]"
+            class="order-card"
+          >
+            <div class="order-preview">
+              <img
+                *ngIf="getFirstProductImage(order)"
+                [src]="getFirstProductImage(order)"
+                [alt]="getFirstProductName(order)"
+                class="order-avatar"
+              />
+              <div *ngIf="!getFirstProductImage(order)" class="order-avatar placeholder">—</div>
+              <div class="order-info">
+                <h3>
+                  {{ getFirstProductName(order)
+                  }}{{
+                    (order.items ?? []).length > 1
+                      ? ' (+' + ((order.items ?? []).length - 1) + ')'
+                      : ''
+                  }}
+                </h3>
+                <p class="order-meta">{{ order.order_number }} · {{ formatPrice(order.total) }}</p>
+                <span class="order-status" [attr.data-status]="order.status">{{
+                  statusLabel(order.status)
+                }}</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
 
-    <!-- Tab: Favoritos -->
-    <div class="tab-content" *ngIf="activeTab() === 'favorites'">
-      <div class="favorites-section">
-        <h2>Mis Favoritos</h2>
-        <div class="empty-state" *ngIf="favorites().length === 0">
-          <p>No tienes productos favoritos</p>
-          <a routerLink="/es/products" class="btn-primary">Explorar Productos</a>
-        </div>
-        <div class="favorites-grid" *ngIf="favorites().length > 0">
-          <!-- Favorites will be displayed here -->
-        </div>
-      </div>
-    </div>
+      <!-- Mis favoritos -->
+      <section class="tab-panel" *ngIf="activeTab() === 'favorites'">
+        <h1>Mis favoritos</h1>
+        <p class="section-desc">Productos y artistas que te gustan</p>
 
-    <!-- Tab: Direcciones -->
-    <div class="tab-content" *ngIf="activeTab() === 'addresses'">
-      <div class="addresses-section">
-        <div class="section-header">
-          <h2>Mis Direcciones</h2>
-          <button class="btn-primary">Agregar Dirección</button>
+        <div class="empty-state" *ngIf="favorites().length === 0 && favoriteArtists().length === 0">
+          <p>No tienes favoritos aún</p>
+          <a [routerLink]="['/', locale(), 'products']" class="btn-primary">Explorar productos</a>
         </div>
-        <div class="empty-state" *ngIf="addresses().length === 0">
-          <p>No has agregado direcciones aún</p>
-          <button class="btn-primary">Agregar Primera Dirección</button>
-        </div>
-        <div class="addresses-list" *ngIf="addresses().length > 0">
-          <!-- Addresses will be displayed here -->
-        </div>
-      </div>
-    </div>
 
-    <!-- Tab: Configuración -->
-    <div class="tab-content" *ngIf="activeTab() === 'settings'">
-      <div class="settings-section">
-        <h2>Configuración</h2>
-        <div class="settings-form">
-          <div class="form-group">
-            <label>Nombre</label>
-            <input type="text" [value]="user()?.name" readonly>
+        <div class="favorites-section" *ngIf="favorites().length > 0">
+          <h2 class="favorites-subtitle">Productos</h2>
+          <div class="favorites-list">
+            <div
+              *ngFor="let fav of favorites()"
+              class="favorite-card"
+              [class.archived]="fav.status === 'archived'"
+            >
+              <a
+                [routerLink]="['/', locale(), 'products', fav.product_id]"
+                class="favorite-card-link"
+              >
+                <img
+                  [src]="fav.image || '/assets/placeholder-image.jpg'"
+                  [alt]="fav.name"
+                  class="favorite-image"
+                />
+                <div class="favorite-info">
+                  <h3>{{ fav.name }}</h3>
+                  <p class="favorite-price">{{ formatPrice(fav.price) }}</p>
+                </div>
+              </a>
+              <button
+                type="button"
+                class="remove-fav-btn"
+                (click)="removeFavoriteProduct(fav.product_id); $event.stopPropagation()"
+                [attr.aria-label]="'Quitar ' + fav.name + ' de favoritos'"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                  />
+                </svg>
+                Quitar
+              </button>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Apellidos</label>
-            <input type="text" [value]="user()?.surname" readonly>
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" [value]="user()?.email" readonly>
-          </div>
-          <button class="btn-secondary">Editar Perfil</button>
         </div>
-      </div>
-    </div>
+
+        <div class="favorites-section" *ngIf="favoriteArtists().length > 0">
+          <h2 class="favorites-subtitle">Artistas</h2>
+          <div class="favorites-list">
+            <div
+              *ngFor="let fav of favoriteArtists()"
+              class="favorite-card favorite-artist-card"
+              [class.archived]="fav.status === 'archived'"
+            >
+              <a [routerLink]="['/', locale(), 'artist', fav.vendor_id]" class="favorite-card-link">
+                <img
+                  [src]="fav.image || '/assets/placeholder-image.jpg'"
+                  [alt]="fav.name"
+                  class="favorite-image"
+                />
+                <div class="favorite-info">
+                  <h3>{{ fav.name }}</h3>
+                  <p class="favorite-desc" *ngIf="fav.short_description">
+                    {{ fav.short_description }}
+                  </p>
+                </div>
+              </a>
+              <button
+                type="button"
+                class="remove-fav-btn"
+                (click)="removeFavoriteArtist(fav.vendor_id); $event.stopPropagation()"
+                [attr.aria-label]="'Quitar ' + fav.name + ' de favoritos'"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                  />
+                </svg>
+                Quitar
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 </div>
-

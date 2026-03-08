@@ -26,8 +26,22 @@ const buildOrderSelect = () => `
             'product_id', oi.product_id,
             'quantity', oi.quantity,
             'unit_price', oi.unit_price,
-            'total_price', oi.total_price
+            'total_price', oi.total_price,
+            'product_name', (
+              SELECT COALESCE(pt.name, '') FROM product_translations pt
+              WHERE pt.product_id = oi.product_id AND pt.locale = 'es' LIMIT 1
+            ),
+            'product_image', (
+              SELECT image_path FROM product_images pi
+              WHERE pi.product_id = oi.product_id
+              ORDER BY pi.is_primary DESC, pi."order" ASC NULLS LAST LIMIT 1
+            ),
+            'product_status', (
+              SELECT COALESCE(p.status, 'approved') FROM products p
+              WHERE p.id = oi.product_id LIMIT 1
+            )
           )
+          ORDER BY oi.id
         )
         FROM order_items oi
         WHERE oi.order_id = o.id

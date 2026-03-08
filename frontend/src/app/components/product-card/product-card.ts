@@ -13,6 +13,8 @@ import { RouterLink } from '@angular/router';
 import { Product } from '../../models/product.model';
 import { CartService } from '../../services/cart.service';
 import { ProductService } from '../../services/product.service';
+import { FavoritesService } from '../../services/favorites.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-product-card',
@@ -26,6 +28,8 @@ export class ProductCardComponent implements OnInit, OnChanges {
 
   private cartService = inject(CartService);
   private productService = inject(ProductService);
+  private favoritesService = inject(FavoritesService);
+  authService = inject(AuthService);
   imageIndex = signal(0);
   firstShipDate = signal<string | null>(null);
 
@@ -51,6 +55,19 @@ export class ProductCardComponent implements OnInit, OnChanges {
     event.preventDefault();
     event.stopPropagation();
     this.cartService.addToCart(this.product);
+  }
+
+  isFavorite = computed(
+    () =>
+      this.authService.authenticated() &&
+      this.favoritesService.favorites().some((f) => f.product_id === this.product.id),
+  );
+
+  toggleFavorite(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!this.authService.authenticated()) return;
+    this.favoritesService.toggleFavorite(this.product.id);
   }
 
   ngOnInit(): void {
