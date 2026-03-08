@@ -116,7 +116,24 @@ npm run dev
 
 ## ⚡️ 3) Comandos y atajos útiles
 
-*(...mantienes el bloque que ya tienes completo aquí...)*
+### Liberar puertos (frontend / backend)
+
+Si cerraste el front o el back pero `localhost:4200` (o `8000`) sigue respondiendo, el proceso sigue corriendo. Libera el puerto con:
+
+```bash
+# Liberar puerto del frontend (4200)
+lsof -ti :4200 | xargs kill -9
+
+# Liberar puerto del backend (8000)
+lsof -ti :8000 | xargs kill -9
+```
+
+Para ver qué proceso usa un puerto antes de matarlo:
+
+```bash
+lsof -i :4200
+lsof -i :8000
+```
 
 ---
 

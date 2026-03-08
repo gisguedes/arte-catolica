@@ -103,6 +103,13 @@ export class LoginComponent implements OnInit {
     return req.check(this.registerForm.get('password')?.value ?? '');
   }
 
+  /** Devuelve true cuando ambas contraseñas tienen valor y coinciden */
+  passwordsMatch(): boolean {
+    const pass = this.registerForm.get('password')?.value;
+    const confirm = this.registerForm.get('confirmPassword')?.value;
+    return !!pass && !!confirm && pass === confirm;
+  }
+
   private passwordMatchValidator(group: AbstractControl) {
     const pass = group.get('password')?.value;
     const confirm = group.get('confirmPassword')?.value;
