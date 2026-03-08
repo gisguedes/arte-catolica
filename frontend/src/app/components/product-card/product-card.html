@@ -77,8 +77,10 @@
       </div>
       <div class="product-info">
         <h3 class="product-name">{{ product.name }}</h3>
-        <p class="product-price">{{ formatPrice(product.price) }}</p>
-        <p class="product-delivery" *ngIf="firstShipDate()">
+        <p class="product-price" *ngIf="product.status !== 'archived'">
+          {{ formatPrice(product.price) }}
+        </p>
+        <p class="product-delivery" *ngIf="firstShipDate() && product.status !== 'archived'">
           <svg
             class="delivery-calendar-icon"
             viewBox="0 0 24 24"
@@ -99,5 +101,7 @@
       </div>
     </a>
   </div>
-  <button class="add-to-cart-btn" (click)="addToCart($event)">Agregar al Carrito</button>
+  <button class="add-to-cart-btn" *ngIf="product.status !== 'archived'" (click)="addToCart($event)">
+    Agregar al Carrito
+  </button>
 </div>
