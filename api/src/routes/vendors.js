@@ -9,12 +9,13 @@ const buildVendorSelect = (localeParam = '$1') => `
     v.id,
     v.name,
     v.surname,
-    v.email,
     v.phone,
     v.nif,
-    v.bio,
+    COALESCE(vt.short_description, '') AS short_description,
+    COALESCE(vt.description, '') AS description,
     v.image,
     v.website,
+    COALESCE(v.social_links, '[]'::jsonb) AS social_links,
     v.city,
     v.country,
     v.postal_code,
@@ -40,6 +41,7 @@ const buildVendorSelect = (localeParam = '$1') => `
       '[]'::jsonb
     ) AS artist_types
   FROM vendors v
+  LEFT JOIN vendor_translations vt ON vt.vendor_id = v.id AND vt.locale = ${localeParam}
 `;
 
 const buildProductSelect = () => `
@@ -75,6 +77,8 @@ router.get('/', async (req, res) => {
   const { include_inactive: includeInactive, user_id: userId } = req.query;
   const conditions = [];
   const params = [];
+  let fromClause = 'FROM vendors v';
+  let joinClause = '';
 
   if (includeInactive !== 'true') {
     conditions.push('v.is_active = true');
@@ -82,12 +86,15 @@ router.get('/', async (req, res) => {
 
   if (userId) {
     params.push(userId);
-    conditions.push(`v.user_id = $${params.length + 1}`);
+    const paramNum = params.length + 1;
+    joinClause = ` INNER JOIN vendor_users vu ON vu.vendor_id = v.id AND vu.user_id = $${paramNum}`;
+    conditions.push(`vu.user_id = $${paramNum}`);
   }
 
   const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const locale = getLocale(req);
-  const sql = `${buildVendorSelect('$1')} ${whereClause} ORDER BY v.created_at DESC`;
+  const selectPart = buildVendorSelect('$1').replace('FROM vendors v', `FROM vendors v${joinClause}`);
+  const sql = `${selectPart} ${whereClause} ORDER BY v.created_at DESC`;
 
   try {
     const result = await query(sql, [locale, ...params]);

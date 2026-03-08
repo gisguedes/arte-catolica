@@ -40,12 +40,13 @@ const buildCartSelect = () => `
           'id', v.id,
           'name', v.name,
           'surname', v.surname,
-          'email', v.email,
           'phone', v.phone,
           'nif', v.nif,
-          'bio', v.bio,
+          'short_description', COALESCE(vt.short_description, ''),
+          'description', COALESCE(vt.description, ''),
           'image', v.image,
           'website', v.website,
+          'social_links', COALESCE(v.social_links, '[]'::jsonb),
           'city', v.city,
           'country', v.country,
           'postal_code', v.postal_code,
@@ -62,6 +63,7 @@ const buildCartSelect = () => `
   LEFT JOIN product_translations pt
     ON pt.product_id = p.id AND pt.locale = $2
   LEFT JOIN vendors v ON v.id = p.vendor_id
+  LEFT JOIN vendor_translations vt ON vt.vendor_id = v.id AND vt.locale = $2
 `;
 
 router.get('/', async (req, res) => {

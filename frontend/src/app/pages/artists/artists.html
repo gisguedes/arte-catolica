@@ -145,7 +145,7 @@
         </div>
         <div class="info">
           <h3>{{ artist.name }}</h3>
-          <p>{{ artist.bio || 'Artista destacado en arte sacro.' }}</p>
+          <p *ngIf="artist.short_description">{{ artist.short_description }}</p>
         </div>
       </a>
     </div>

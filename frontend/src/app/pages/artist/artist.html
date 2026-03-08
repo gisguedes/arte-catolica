@@ -11,7 +11,14 @@
         </div>
         <div class="artist-details">
           <h1>{{ artist()!.name }}</h1>
-          <p class="artist-bio" *ngIf="artist()!.bio">{{ artist()!.bio }}</p>
+          <p class="artist-short-description" *ngIf="artist()!.short_description">
+            {{ artist()!.short_description }}
+          </p>
+          <div
+            class="artist-description"
+            *ngIf="artist()!.description"
+            [innerHTML]="artist()!.description"
+          ></div>
           <div class="artist-meta">
             <div *ngIf="artistLocation()">
               <span class="meta-label">Localización</span>
@@ -30,12 +37,27 @@
               <span class="meta-value">{{ artist()!.opening_date | date: 'longDate' }}</span>
             </div>
           </div>
-          <div class="artist-contact" *ngIf="artist()!.email || artist()!.website">
-            <a *ngIf="artist()!.email" [href]="'mailto:' + artist()!.email" class="contact-link">
-              {{ artist()!.email }}
-            </a>
-            <a *ngIf="artist()!.website" [href]="artist()!.website" target="_blank" class="contact-link">
+          <div
+            class="artist-contact"
+            *ngIf="artist()!.website || (artist()!.social_links?.length ?? 0) > 0"
+          >
+            <a
+              *ngIf="artist()!.website"
+              [href]="artist()!.website"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="contact-link"
+            >
               Sitio Web
+            </a>
+            <a
+              *ngFor="let link of artist()!.social_links ?? []"
+              [href]="link.url | socialUrl: link.network"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="contact-link"
+            >
+              {{ link.network | titlecase }}
             </a>
           </div>
         </div>
@@ -55,10 +77,7 @@
     <div class="artist-products" *ngIf="artist() && !isLoading()">
       <h2>Obras de {{ artist()!.name }}</h2>
       <div class="products-grid" *ngIf="products().length > 0">
-        <app-product-card
-          *ngFor="let product of products()"
-          [product]="product"
-        ></app-product-card>
+        <app-product-card *ngFor="let product of products()" [product]="product"></app-product-card>
       </div>
       <div class="no-products" *ngIf="products().length === 0">
         <p>Este artista aún no tiene productos disponibles.</p>
@@ -66,4 +85,3 @@
     </div>
   </div>
 </div>
-

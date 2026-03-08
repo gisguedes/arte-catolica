@@ -49,11 +49,26 @@
           font-size: 2.5rem;
         }
 
-        .artist-bio {
+        .artist-short-description {
           color: #666;
           font-size: 1.1rem;
           line-height: 1.6;
           margin-bottom: 1.5rem;
+        }
+
+        .artist-description {
+          color: #444;
+          font-size: 1rem;
+          line-height: 1.7;
+          margin-top: 0.5rem;
+          margin-bottom: 1.5rem;
+
+          :deep(p) {
+            margin-bottom: 0.75rem;
+          }
+          :deep(p:last-child) {
+            margin-bottom: 0;
+          }
         }
 
         .artist-meta {

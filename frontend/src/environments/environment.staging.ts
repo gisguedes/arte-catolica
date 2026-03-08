@@ -1,4 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://arte-backend-staging.onrender.com/api'
+  apiUrl: 'https://arte-backend-staging.onrender.com/api',
+  googleClientId: '',
+  appleClientId: '',
 };

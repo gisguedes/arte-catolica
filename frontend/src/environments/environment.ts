@@ -10,6 +10,8 @@
 export const environment = {
   production: false,
   apiUrl: '/api',
+  googleClientId: '', // OAuth Client ID (tipo "Web application") de Google Cloud Console
+  appleClientId: '', // Services ID de Sign in with Apple
 };
 
 // Nota:
