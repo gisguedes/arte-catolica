@@ -27,6 +27,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 })
 export class ProductDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private productService = inject(ProductService);
   private cartService = inject(CartService);
   private localeService = inject(LocaleService);

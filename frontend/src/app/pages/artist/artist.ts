@@ -34,6 +34,7 @@ export class ArtistComponent implements OnInit {
       .filter((product) => product.is_featured === true)
       .slice(0, 4),
   );
+  artistStatus = computed(() => (this.artist() as { status?: string })?.status ?? null);
   ngOnInit(): void {
     if (this.authService.authenticated()) {
       this.favoritesService.loadFavorites();
