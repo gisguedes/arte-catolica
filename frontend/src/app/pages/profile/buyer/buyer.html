@@ -148,7 +148,7 @@
                 <h3>
                   {{ getFirstProductName(order)
                   }}                  {{
-                    order.items.length > 1 ? ' (+' + (order.items.length - 1) + ')' : ''
+                    getOrderItems(order).length > 1 ? ' (+' + (getOrderItems(order).length - 1) + ')' : ''
                   }}
                 </h3>
                 <p class="order-meta">{{ order.order_number }} · {{ formatPrice(order.total) }}</p>

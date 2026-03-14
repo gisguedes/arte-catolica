@@ -97,8 +97,12 @@ export class BuyerProfileComponent implements OnInit {
     this.favoritesService.removeFavoriteArtist(vendorId);
   }
 
+  getOrderItems(order: Order): OrderItem[] {
+    return order?.items ?? [];
+  }
+
   getFirstProductImage(order: Order): string | null {
-    const items = order?.items ?? [];
+    const items = this.getOrderItems(order);
     return items[0]?.product_image || null;
   }
 
@@ -131,7 +135,7 @@ export class BuyerProfileComponent implements OnInit {
   }
 
   getFirstProductName(order: Order): string {
-    const items = order?.items ?? [];
+    const items = this.getOrderItems(order);
     return items[0]?.product_name ?? 'Producto';
   }
 
