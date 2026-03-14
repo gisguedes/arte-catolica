@@ -120,6 +120,14 @@
           <p class="error-msg" *ngIf="personalError()">{{ personalError() }}</p>
           <p class="success-msg" *ngIf="personalSuccess()">Cambios guardados correctamente.</p>
         </form>
+
+        <div class="danger-zone">
+          <h3>Zona de riesgo</h3>
+          <p>Si te das de baja, tu cuenta quedará desactivada y tendrás que iniciar sesión de nuevo para reactivarla.</p>
+          <button type="button" class="btn-danger" (click)="openDeactivateModal()">
+            Darme de baja
+          </button>
+        </div>
       </section>
 
       <!-- Últimas compras -->
@@ -265,5 +273,27 @@
         </div>
       </section>
     </main>
+  </div>
+</div>
+
+<!-- Modal confirmar darse de baja -->
+<div class="confirm-modal" *ngIf="showDeactivateModal()">
+  <div class="confirm-backdrop" (click)="closeDeactivateModal()"></div>
+  <div class="confirm-panel">
+    <h3>¿Estás seguro de darte de baja?</h3>
+    <p>Tu cuenta quedará desactivada, se cerrará tu sesión y no podrás acceder hasta que la reactives al iniciar sesión de nuevo.</p>
+    <div class="confirm-actions">
+      <button type="button" class="btn-secondary" (click)="closeDeactivateModal()">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="btn-danger"
+        (click)="confirmDeactivate()"
+        [disabled]="isDeactivating()"
+      >
+        {{ isDeactivating() ? 'Procesando...' : 'Sí, darme de baja' }}
+      </button>
+    </div>
   </div>
 </div>

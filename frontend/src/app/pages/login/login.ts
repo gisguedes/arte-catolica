@@ -57,6 +57,9 @@ export class LoginComponent implements OnInit {
   showRegister = signal(false);
   errorMessage = '';
   isLoading = false;
+  showReactivateModal = signal(false);
+  deactivatedAt = signal<string | null>(null);
+  isReactivating = false;
   showPasswordLogin = signal(false);
   showPasswordRegister = signal(false);
   showConfirmPassword = signal(false);
@@ -130,6 +133,7 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.errorMessage = '';
+      this.showReactivateModal.set(false);
 
       this.authService.login(this.loginForm.value).subscribe({
         next: () => {
@@ -139,11 +143,57 @@ export class LoginComponent implements OnInit {
           this.router.navigateByUrl(returnUrl.startsWith('/') ? returnUrl : `/${returnUrl}`);
         },
         error: (error) => {
-          this.errorMessage = error.error?.message || 'Error al iniciar sesión';
+          if (error.status === 403 && error.error?.deactivated) {
+            this.deactivatedAt.set(error.error.deactivated_at || null);
+            this.showReactivateModal.set(true);
+            this.errorMessage = '';
+          } else {
+            this.errorMessage = error.error?.message || 'Error al iniciar sesión';
+          }
           this.isLoading = false;
         },
       });
     }
+  }
+
+  closeReactivateModal(): void {
+    this.showReactivateModal.set(false);
+    this.deactivatedAt.set(null);
+  }
+
+  formatDeactivatedDate(isoDate: string | null): string {
+    if (!isoDate) return '';
+    try {
+      const d = new Date(isoDate);
+      return d.toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+    } catch {
+      return isoDate;
+    }
+  }
+
+  confirmReactivate(): void {
+    if (!this.loginForm.valid) return;
+    this.isReactivating = true;
+    this.authService.reactivate(this.loginForm.value).subscribe({
+      next: () => {
+        const returnUrl =
+          this.route.snapshot.queryParamMap.get('returnUrl') ||
+          `/${this.localeService.getCurrentLocale()}/profile`;
+        this.router.navigateByUrl(returnUrl.startsWith('/') ? returnUrl : `/${returnUrl}`);
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Error al reactivar la cuenta';
+        this.showReactivateModal.set(false);
+        this.isReactivating = false;
+      },
+      complete: () => {
+        this.isReactivating = false;
+      },
+    });
   }
 
   onRegister(): void {

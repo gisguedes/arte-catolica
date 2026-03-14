@@ -54,6 +54,8 @@ export class BuyerProfileComponent implements OnInit {
   personalError = signal('');
   personalSuccess = signal(false);
   avatarData = signal<string | null>(null);
+  showDeactivateModal = signal(false);
+  isDeactivating = signal(false);
 
   personalForm: FormGroup = this.fb.group({
     name: ['', [Validators.required]],
@@ -95,6 +97,28 @@ export class BuyerProfileComponent implements OnInit {
 
   removeFavoriteArtist(vendorId: string): void {
     this.favoritesService.removeFavoriteArtist(vendorId);
+  }
+
+  openDeactivateModal(): void {
+    this.showDeactivateModal.set(true);
+  }
+
+  closeDeactivateModal(): void {
+    this.showDeactivateModal.set(false);
+  }
+
+  confirmDeactivate(): void {
+    this.isDeactivating.set(true);
+    this.authService.deactivate().subscribe({
+      next: () => {
+        this.authService.logout();
+      },
+      error: (err) => {
+        this.personalError.set(err.error?.message ?? 'Error al desactivar la cuenta');
+        this.isDeactivating.set(false);
+        this.showDeactivateModal.set(false);
+      },
+    });
   }
 
   getOrderItems(order: Order): OrderItem[] {
