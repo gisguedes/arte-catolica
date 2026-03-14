@@ -354,6 +354,15 @@
         &:hover {
           color: var(--secondary-color);
         }
+
+        &.nav-area-trigger--seller {
+          color: var(--primary-color);
+          font-weight: 600;
+
+          &:hover {
+            color: var(--primary-dark);
+          }
+        }
       }
 
       &.open .nav-area-trigger .chevron {

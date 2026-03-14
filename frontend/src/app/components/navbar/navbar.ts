@@ -1,8 +1,10 @@
-import { Component, ElementRef, HostListener, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, ElementRef, HostListener, inject, OnInit, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { filter } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
+import { VendorService } from '../../services/vendor.service';
 import { LocaleService } from '../../services/locale.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { CartAddedModalComponent } from '../cart-added-modal/cart-added-modal';
@@ -14,14 +16,17 @@ import { CartAddedModalComponent } from '../cart-added-modal/cart-added-modal';
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
   private authService = inject(AuthService);
   private cartService = inject(CartService);
+  private vendorService = inject(VendorService);
   router = inject(Router);
   private localeService = inject(LocaleService);
   private el = inject(ElementRef);
 
   locale = this.localeService.locale;
+  hasSellerProfile = signal(false);
+  isOnSellerPage = signal(false);
   user = this.authService.user;
   isAuthenticated = this.authService.authenticated;
   cartItemCount = this.cartService.totalItems;
@@ -90,5 +95,23 @@ export class NavbarComponent {
     this.closeCatalog();
     this.closeLang();
     this.closeArea();
+  }
+
+  ngOnInit(): void {
+    this.updateIsOnSellerPage();
+    this.router.events
+      .pipe(filter((e) => e instanceof NavigationEnd))
+      .subscribe(() => this.updateIsOnSellerPage());
+    const user = this.authService.user();
+    if (user?.id) {
+      this.vendorService.getVendorByUserId(user.id).subscribe({
+        next: (vendor) => this.hasSellerProfile.set(!!vendor),
+        error: () => this.hasSellerProfile.set(false),
+      });
+    }
+  }
+
+  private updateIsOnSellerPage(): void {
+    this.isOnSellerPage.set(this.router.url?.includes('/profile/seller') ?? false);
   }
 }

@@ -50,7 +50,15 @@ app.use('/api/favorites', favoritesRouter);
 app.use((err, req, res, next) => {
   if (res.headersSent) return next(err);
   const status = err.status ?? err.statusCode ?? 500;
-  res.status(status).json({ message: 'Error interno del servidor' });
+  console.error('Error global no capturado:', err?.message || err);
+  if (process.env.NODE_ENV !== 'production') {
+    console.error(err?.stack);
+  }
+  const msg =
+    process.env.NODE_ENV !== 'production' && err?.message
+      ? `Error: ${err.message}`
+      : 'Error interno del servidor';
+  res.status(status).json({ message: msg });
 });
 
 app.listen(port, () => {

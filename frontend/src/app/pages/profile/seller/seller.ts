@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { VendorService } from '../../../services/vendor.service';
 import { ProductService } from '../../../services/product.service';
+import { LocaleService } from '../../../services/locale.service';
 import { Artist, Product } from '../../../models/product.model';
 
 @Component({
@@ -17,7 +18,9 @@ export class SellerProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private vendorService = inject(VendorService);
   private productService = inject(ProductService);
+  private localeService = inject(LocaleService);
 
+  locale = this.localeService.locale;
   user = this.authService.user;
   activeTab = signal<'products' | 'orders' | 'bank' | 'settings'>('products');
 

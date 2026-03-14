@@ -1,8 +1,22 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const { query } = require('../db');
-const { getLocale } = require('../utils');
+const { getLocale, formatApiError } = require('../utils');
 
 const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || 'insecure-secret';
+
+function getUserIdFromToken(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  try {
+    const token = authHeader.slice(7);
+    const decoded = jwt.verify(token, JWT_SECRET);
+    return decoded.sub;
+  } catch {
+    return null;
+  }
+}
 
 const buildVendorSelect = (localeParam = '$1') => `
   SELECT
@@ -103,7 +117,128 @@ router.get('/', async (req, res) => {
     res.json({ data: result.rows });
   } catch (error) {
     console.error('Vendors list error', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    res.status(500).json({ message: formatApiError('listar vendors', error) });
+  }
+});
+
+router.post('/', async (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(401).json({ message: 'Token inválido o expirado' });
+  }
+
+  const payload = req.body || {};
+  const { name, surname, phone, nif, artist_type_ids, short_description } = payload;
+  if (!name || !surname) {
+    return res.status(400).json({ message: 'name y surname son requeridos' });
+  }
+
+  const artistTypeIds = Array.isArray(artist_type_ids) ? artist_type_ids : artist_type_ids ? [artist_type_ids] : [];
+
+  const steps = {
+    checkExisting: 'comprobar vendor existente',
+    insertVendor: 'insertar vendor',
+    insertTranslations: 'insertar vendor_translations',
+    insertVendorUser: 'insertar vendor_users',
+    insertArtistTypes: 'insertar artist_type_vendor',
+    selectVendor: 'recuperar vendor creado',
+  };
+
+  try {
+    const existingVendor = await query(
+      'SELECT vu.vendor_id FROM vendor_users vu WHERE vu.user_id = $1 LIMIT 1',
+      [userId]
+    );
+    if (existingVendor.rows.length > 0) {
+      return res.status(409).json({ message: 'Ya tienes un perfil de vendedor' });
+    }
+  } catch (error) {
+    console.error('Vendor create error [' + steps.checkExisting + ']', error);
+    return res.status(500).json({ message: formatApiError(steps.checkExisting, error) });
+  }
+
+  let userEmail;
+  try {
+    const userRow = await query('SELECT email FROM users WHERE id = $1 LIMIT 1', [userId]);
+    userEmail = userRow.rows[0]?.email;
+    if (!userEmail) {
+      return res.status(400).json({ message: 'Usuario sin email válido' });
+    }
+  } catch (error) {
+    console.error('Vendor create error [obtener email usuario]', error);
+    return res.status(500).json({ message: formatApiError('obtener email usuario', error) });
+  }
+
+  let vendorId;
+  try {
+    const vendorResult = await query(
+      `INSERT INTO vendors (
+        id, name, surname, email, phone, nif, opening_date, is_active, created_at, updated_at
+      )
+      VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5, NOW(), true, NOW(), NOW())
+      RETURNING id, name, surname, phone, nif, opening_date, is_active, created_at, updated_at`,
+      [
+        String(name).trim(),
+        String(surname || '').trim(),
+        userEmail,
+        phone ? String(phone).trim() : null,
+        nif ? String(nif).trim() : null,
+      ]
+    );
+    const vendor = vendorResult.rows[0];
+    vendorId = vendor.id;
+  } catch (error) {
+    console.error('Vendor create error [' + steps.insertVendor + ']', error);
+    return res.status(500).json({ message: formatApiError(steps.insertVendor, error) });
+  }
+
+  try {
+    await query(
+      `INSERT INTO vendor_translations (id, vendor_id, locale, short_description, description)
+       VALUES (uuid_generate_v4(), $1, 'es', $2, '')
+       ON CONFLICT (vendor_id, locale) DO UPDATE SET short_description = EXCLUDED.short_description`,
+      [vendorId, short_description ? String(short_description).trim() : '']
+    );
+  } catch (error) {
+    console.error('Vendor create error [' + steps.insertTranslations + ']', error);
+    return res.status(500).json({ message: formatApiError(steps.insertTranslations, error) });
+  }
+
+  try {
+    await query(
+      `INSERT INTO vendor_users (id, vendor_id, user_id, role, created_at, updated_at)
+       VALUES (uuid_generate_v4(), $1, $2, 'owner', NOW(), NOW())`,
+      [vendorId, userId]
+    );
+  } catch (error) {
+    console.error('Vendor create error [' + steps.insertVendorUser + ']', error);
+    return res.status(500).json({ message: formatApiError(steps.insertVendorUser, error) });
+  }
+
+  const uniqueArtistTypeIds = [...new Set(artistTypeIds.filter(Boolean))];
+  for (const artistTypeId of uniqueArtistTypeIds) {
+    try {
+      await query(
+        `INSERT INTO artist_type_vendor (vendor_id, artist_type_id) VALUES ($1, $2)`,
+        [vendorId, artistTypeId]
+      );
+    } catch (error) {
+      if (error.code === '23503') {
+        return res.status(400).json({ message: 'artist_type_id no válido' });
+      }
+      console.error('Vendor create error [' + steps.insertArtistTypes + ']', error);
+      return res.status(500).json({ message: formatApiError(steps.insertArtistTypes, error) });
+    }
+  }
+
+  try {
+    const locale = getLocale(req);
+    const selectSql = `${buildVendorSelect('$1')} WHERE v.id = $2 LIMIT 1`;
+    const result = await query(selectSql, [locale, vendorId]);
+    res.status(201).json({ data: result.rows[0] });
+  } catch (error) {
+    console.error('Vendor create error [' + steps.selectVendor + ']', error);
+    return res.status(500).json({ message: formatApiError(steps.selectVendor, error) });
   }
 });
 
@@ -119,7 +254,7 @@ router.get('/:id', async (req, res) => {
     res.json({ data: result.rows[0] });
   } catch (error) {
     console.error('Vendor show error', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    res.status(500).json({ message: formatApiError('obtener vendor', error) });
   }
 });
 
@@ -132,7 +267,7 @@ router.get('/:id/products', async (req, res) => {
     res.json({ data: result.rows });
   } catch (error) {
     console.error('Vendor products error', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    res.status(500).json({ message: formatApiError('listar productos vendor', error) });
   }
 });
 

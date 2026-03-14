@@ -3,6 +3,15 @@ import { Observable, map } from 'rxjs';
 import { ApiService } from './api';
 import { Artist } from '../models/product.model';
 
+export interface CreateVendorPayload {
+  name: string;
+  surname: string;
+  phone?: string;
+  nif?: string;
+  artist_type_ids?: string[];
+  short_description?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -16,5 +25,9 @@ export class VendorService {
         return Array.isArray(vendors) ? (vendors[0] ?? null) : null;
       }),
     );
+  }
+
+  createVendor(payload: CreateVendorPayload): Observable<{ data: Artist }> {
+    return this.apiService.post<{ data: Artist }>('vendors', payload);
   }
 }

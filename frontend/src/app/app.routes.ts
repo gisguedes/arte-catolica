@@ -16,6 +16,7 @@ import { TechniquesHubComponent } from './pages/techniques-hub/techniques-hub';
 import { ArtistsComponent } from './pages/artists/artists';
 import { AboutComponent } from './pages/about/about';
 import { HealthComponent } from './features/health/health.component';
+import { BecomeSellerComponent } from './pages/become-seller/become-seller';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'es/home', pathMatch: 'full' },
@@ -41,6 +42,7 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   { path: 'profile/seller', redirectTo: 'es/profile/seller', pathMatch: 'full' },
+  { path: 'ser-vendedor', redirectTo: 'es/ser-vendedor', pathMatch: 'full' },
   { path: 'artist/:id', redirectTo: 'es/artist/:id', pathMatch: 'full' },
   { path: 'health', redirectTo: 'es/health', pathMatch: 'full' },
   {
@@ -65,6 +67,7 @@ export const routes: Routes = [
       { path: 'profile/buyer', component: BuyerProfileComponent },
       { path: 'profile/buyer/orders/:id', component: OrderDetailComponent },
       { path: 'profile/seller', component: SellerProfileComponent },
+      { path: 'ser-vendedor', component: BecomeSellerComponent },
       { path: 'health', component: HealthComponent },
     ],
   },
@@ -90,6 +93,7 @@ export const routes: Routes = [
       { path: 'profile/buyer', component: BuyerProfileComponent },
       { path: 'profile/buyer/orders/:id', component: OrderDetailComponent },
       { path: 'profile/seller', component: SellerProfileComponent },
+      { path: 'ser-vendedor', component: BecomeSellerComponent },
       { path: 'health', component: HealthComponent },
     ],
   },

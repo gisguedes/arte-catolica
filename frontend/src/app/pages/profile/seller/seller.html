@@ -2,33 +2,27 @@
   <div class="container">
     <div class="header">
       <h1>Perfil Profesional</h1>
-      <a routerLink="/es/profile" class="back-link">← Volver al área personal</a>
+      <a [routerLink]="['/', locale(), 'profile']" class="back-link"
+        >← Cambiar a perfil comprador</a
+      >
     </div>
 
     <div class="tabs">
-      <button 
-        class="tab-btn" 
+      <button
+        class="tab-btn"
         [class.active]="activeTab() === 'products'"
         (click)="setTab('products')"
       >
         Mis Productos
       </button>
-      <button 
-        class="tab-btn" 
-        [class.active]="activeTab() === 'orders'"
-        (click)="setTab('orders')"
-      >
+      <button class="tab-btn" [class.active]="activeTab() === 'orders'" (click)="setTab('orders')">
         Pedidos
       </button>
-      <button 
-        class="tab-btn" 
-        [class.active]="activeTab() === 'bank'"
-        (click)="setTab('bank')"
-      >
+      <button class="tab-btn" [class.active]="activeTab() === 'bank'" (click)="setTab('bank')">
         Datos Bancarios
       </button>
-      <button 
-        class="tab-btn" 
+      <button
+        class="tab-btn"
         [class.active]="activeTab() === 'settings'"
         (click)="setTab('settings')"
       >
@@ -85,34 +79,34 @@
     <div class="tab-content" *ngIf="activeTab() === 'settings'">
       <div class="settings-section">
         <h2>Configuración del Perfil Profesional</h2>
-        
+
         <div class="settings-form">
           <h3>Datos Personales/Empresa</h3>
           <div class="form-group">
             <label>Nombre</label>
-            <input type="text" [value]="user()?.name" placeholder="Nombre o Razón Social">
+            <input type="text" [value]="user()?.name" placeholder="Nombre o Razón Social" />
           </div>
           <div class="form-group">
             <label>Apellidos</label>
-            <input type="text" [value]="user()?.surname" placeholder="Apellidos">
+            <input type="text" [value]="user()?.surname" placeholder="Apellidos" />
           </div>
           <div class="form-group">
             <label>Email</label>
-            <input type="email" [value]="user()?.email">
+            <input type="email" [value]="user()?.email" />
           </div>
           <div class="form-group">
             <label>Teléfono</label>
-            <input type="tel" placeholder="+34 600 000 000">
+            <input type="tel" placeholder="+34 600 000 000" />
           </div>
           <div class="form-group">
             <label>NIF/CIF</label>
-            <input type="text" placeholder="12345678A">
+            <input type="text" placeholder="12345678A" />
           </div>
 
           <h3>Configuración de Envíos</h3>
           <div class="form-group">
             <label>Plazo de Entrega (días)</label>
-            <input type="number" [value]="deliveryTime()" min="1" max="30">
+            <input type="number" [value]="deliveryTime()" min="1" max="30" />
           </div>
 
           <h3>Biografía</h3>
@@ -127,4 +121,3 @@
     </div>
   </div>
 </div>
-
