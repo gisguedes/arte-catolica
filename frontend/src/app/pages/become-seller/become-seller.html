@@ -1,0 +1,77 @@
+<div class="become-seller-page">
+  <div class="container">
+    <div *ngIf="isLoading" class="loading">
+      <p>Cargando...</p>
+    </div>
+
+    <div *ngIf="!isLoading" class="wizard">
+      <h1>Ser Vendedor</h1>
+      <p class="intro">Completa estos datos para darte de alta como vendedor en Arte Católica.</p>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="wizard-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Nombre o razón social *</label>
+            <input id="name" type="text" formControlName="name" placeholder="Nombre" />
+            <span class="error" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+              El nombre es obligatorio
+            </span>
+          </div>
+          <div class="form-group">
+            <label for="surname">Apellidos *</label>
+            <input id="surname" type="text" formControlName="surname" placeholder="Apellidos" />
+            <span
+              class="error"
+              *ngIf="form.get('surname')?.invalid && form.get('surname')?.touched"
+            >
+              Los apellidos son obligatorios
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Teléfono</label>
+          <input id="phone" type="tel" formControlName="phone" placeholder="+34 600 000 000" />
+        </div>
+
+        <div class="form-group">
+          <label for="nif">NIF / CIF</label>
+          <input id="nif" type="text" formControlName="nif" placeholder="12345678A" />
+        </div>
+
+        <div class="form-group">
+          <label>Tipo(s) de artista</label>
+          <p class="hint">Selecciona uno o varios tipos que definan tu trabajo</p>
+          <div class="artist-types">
+            <label *ngFor="let at of artistTypes()" class="checkbox-label">
+              <input
+                type="checkbox"
+                [checked]="isArtistTypeSelected(at.id)"
+                (change)="toggleArtistType(at.id)"
+              />
+              <span>{{ at.name }}</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="short_description">Descripción breve</label>
+          <textarea
+            id="short_description"
+            formControlName="short_description"
+            rows="3"
+            placeholder="Una breve descripción de ti y tu arte..."
+          ></textarea>
+        </div>
+
+        <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary" [disabled]="form.invalid || isSubmitting">
+            {{ isSubmitting ? 'Creando...' : 'Crear perfil de vendedor' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

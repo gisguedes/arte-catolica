@@ -207,6 +207,7 @@
           <button
             type="button"
             class="nav-link nav-area-trigger"
+            [class.nav-area-trigger--seller]="isOnSellerPage()"
             (click)="toggleArea()"
             [attr.aria-expanded]="isAreaOpen()"
             aria-haspopup="true"
@@ -281,6 +282,15 @@
               (click)="closeMenu(); closeArea()"
             >
               Mis favoritos
+            </a>
+            <a
+              *ngIf="hasSellerProfile()"
+              [routerLink]="['/', locale(), 'profile', 'seller']"
+              routerLinkActive="active"
+              class="nav-area-item nav-area-item--seller"
+              (click)="closeMenu(); closeArea()"
+            >
+              Perfil vendedor
             </a>
             <button type="button" class="nav-area-item nav-area-logout" (click)="logout()">
               {{ 'nav.logout' | t }}

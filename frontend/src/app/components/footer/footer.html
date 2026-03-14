@@ -53,7 +53,9 @@
             }}</a>
           </li>
           <li>
-            <a href="#seller" (click)="scrollToTop($event)">{{ 'footer.seller' | t }}</a>
+            <a [routerLink]="['/', locale(), 'ser-vendedor']" (click)="scrollToTop()">{{
+              'footer.seller' | t
+            }}</a>
           </li>
           <li>
             <a href="#faq" (click)="scrollToTop($event)">{{ 'footer.faq' | t }}</a>

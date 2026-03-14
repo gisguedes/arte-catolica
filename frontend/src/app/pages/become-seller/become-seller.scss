@@ -1,0 +1,140 @@
+.become-seller-page {
+  min-height: 60vh;
+  padding: 2rem 0;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+}
+
+.wizard {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.wizard h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  color: #333;
+}
+
+.intro {
+  margin: 0 0 1.5rem 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.wizard-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 500px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+  }
+
+  .hint {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: normal;
+  }
+
+  input,
+  textarea {
+    padding: 0.6rem 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color, #2c5282);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 4rem;
+  }
+
+  .error {
+    font-size: 0.85rem;
+    color: #c53030;
+  }
+}
+
+.artist-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: normal;
+
+  input {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--primary-color, #2c5282);
+  }
+}
+
+.error-msg {
+  margin: 0;
+  padding: 0.5rem;
+  background: #fff5f5;
+  color: #c53030;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.actions {
+  margin-top: 0.5rem;
+}
+
+.btn-primary {
+  padding: 0.75rem 1.5rem;
+  background: var(--primary-color, #2c5282);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) {
+    background: var(--primary-dark, #1a365d);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
