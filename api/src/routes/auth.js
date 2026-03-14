@@ -161,7 +161,7 @@ router.post('/login', async (req, res) => {
 
   try {
     const result = await query(
-      `SELECT id, name, surname, email, password, avatar, provider, created_at, updated_at
+      `SELECT id, name, surname, email, password, avatar, provider, created_at, updated_at, active, deactivated_at
        FROM users WHERE email = $1 LIMIT 1`,
       [email]
     );
@@ -174,6 +174,14 @@ router.post('/login', async (req, res) => {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
       return res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+
+    if (user.active === false) {
+      return res.status(403).json({
+        message: 'Tu cuenta fue dada de baja.',
+        deactivated: true,
+        deactivated_at: user.deactivated_at,
+      });
     }
 
     const token = jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
@@ -209,10 +217,62 @@ function buildUserResponse(user) {
   };
 }
 
+router.post('/reactivate', async (req, res) => {
+  const { email, password } = req.body || {};
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email y contraseña son requeridos' });
+  }
+
+  try {
+    const result = await query(
+      `SELECT id, name, surname, email, password, avatar, provider, created_at, updated_at, active
+       FROM users WHERE email = $1 LIMIT 1`,
+      [email]
+    );
+
+    const user = result.rows[0];
+    if (!user || !user.password) {
+      return res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+
+    if (user.active !== false) {
+      return res.status(400).json({ message: 'La cuenta ya está activa' });
+    }
+
+    await query(
+      'UPDATE users SET active = true, deactivated_at = NULL, updated_at = NOW() WHERE id = $1',
+      [user.id]
+    );
+
+    const token = jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        surname: user.surname,
+        email: user.email,
+        avatar: user.avatar,
+        provider: user.provider,
+        created_at: user.created_at,
+        updated_at: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error('Reactivate error', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+});
+
 async function findOrCreateOAuthUser({ email, name, surname, provider, providerId, avatar }) {
   const existingByProvider = providerId
     ? await query(
-        'SELECT id, name, surname, email, avatar, provider FROM users WHERE provider = $1 AND provider_id = $2 LIMIT 1',
+        'SELECT id, name, surname, email, avatar, provider, active, deactivated_at FROM users WHERE provider = $1 AND provider_id = $2 LIMIT 1',
         [provider, providerId]
       )
     : { rows: [] };
@@ -221,9 +281,10 @@ async function findOrCreateOAuthUser({ email, name, surname, provider, providerI
     return existingByProvider.rows[0];
   }
 
-  const existingByEmail = await query('SELECT id, name, surname, email, avatar, provider FROM users WHERE email = $1 LIMIT 1', [
-    email,
-  ]);
+  const existingByEmail = await query(
+    'SELECT id, name, surname, email, avatar, provider, active, deactivated_at FROM users WHERE email = $1 LIMIT 1',
+    [email]
+  );
   if (existingByEmail.rows.length) {
     const u = existingByEmail.rows[0];
     await query(
@@ -274,6 +335,14 @@ router.post('/google', async (req, res) => {
       avatar,
     });
 
+    if (user.active === false) {
+      return res.status(403).json({
+        message: 'Tu cuenta fue dada de baja.',
+        deactivated: true,
+        deactivated_at: user.deactivated_at,
+      });
+    }
+
     const jwtToken = jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token: jwtToken, user: buildUserResponse(user) });
   } catch (error) {
@@ -311,11 +380,37 @@ router.post('/apple', async (req, res) => {
       avatar: null,
     });
 
+    if (user.active === false) {
+      return res.status(403).json({
+        message: 'Tu cuenta fue dada de baja.',
+        deactivated: true,
+        deactivated_at: user.deactivated_at,
+      });
+    }
+
     const jwtToken = jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token: jwtToken, user: buildUserResponse(user) });
   } catch (error) {
     console.error('Apple auth error', error);
     res.status(401).json({ message: 'Token de Apple inválido' });
+  }
+});
+
+router.post('/me/deactivate', async (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(401).json({ message: 'Token inválido o expirado' });
+  }
+
+  try {
+    await query(
+      'UPDATE users SET active = false, deactivated_at = COALESCE(deactivated_at, NOW()), updated_at = NOW() WHERE id = $1',
+      [userId]
+    );
+    res.json({ message: 'Cuenta desactivada correctamente' });
+  } catch (error) {
+    console.error('Deactivate error', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 });
 

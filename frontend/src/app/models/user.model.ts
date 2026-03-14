@@ -7,6 +7,8 @@ export interface User {
   provider?: string;
   created_at?: string;
   updated_at?: string;
+  active?: boolean;
+  deactivated_at?: string;
 }
 
 export interface LoginRequest {

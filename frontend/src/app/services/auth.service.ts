@@ -70,6 +70,22 @@ export class AuthService {
     this.router.navigate(['/es/login']);
   }
 
+  deactivate(): Observable<{ message: string }> {
+    return this.apiService.post<{ message: string }>('me/deactivate', {});
+  }
+
+  reactivate(credentials: LoginRequest): Observable<LoginResponse> {
+    return this.apiService.post<LoginResponse>('reactivate', credentials).pipe(
+      tap((response) => {
+        if (response.token) {
+          localStorage.setItem(this.tokenKey, response.token);
+        }
+        localStorage.setItem(this.userKey, JSON.stringify(response.user));
+        this.currentUser.set(response.user);
+      }),
+    );
+  }
+
   register(userData: any): Observable<any> {
     return this.apiService.post('register', userData);
   }

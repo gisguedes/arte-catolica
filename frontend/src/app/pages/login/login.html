@@ -333,3 +333,29 @@
     </form>
   </div>
 </div>
+
+<!-- Modal cuenta desactivada -->
+<div class="confirm-modal" *ngIf="showReactivateModal()">
+  <div class="confirm-backdrop" (click)="closeReactivateModal()"></div>
+  <div class="confirm-panel">
+    <h3>Cuenta desactivada</h3>
+    <p *ngIf="deactivatedAt()">
+      El {{ formatDeactivatedDate(deactivatedAt()) }} diste de baja tu cuenta.
+    </p>
+    <p *ngIf="!deactivatedAt()">Tu cuenta fue dada de baja anteriormente.</p>
+    <p><strong>¿Quieres reactivarla?</strong></p>
+    <div class="confirm-actions">
+      <button type="button" class="btn-secondary" (click)="closeReactivateModal()">
+        No
+      </button>
+      <button
+        type="button"
+        class="btn-primary-reactivate"
+        (click)="confirmReactivate()"
+        [disabled]="isReactivating"
+      >
+        {{ isReactivating ? 'Reactivando...' : 'Sí, reactivar' }}
+      </button>
+    </div>
+  </div>
+</div>
