@@ -93,7 +93,7 @@ const buildProductSelect = () => `
           LEFT JOIN artist_type_translations att ON att.artist_type_id = at.id AND att.locale = $1
           WHERE atv.vendor_id = v.id
         ),
-        'is_active', v.is_active,
+        'status', COALESCE(v.status, 'approved'),
         'created_at', v.created_at,
         'updated_at', v.updated_at
       )

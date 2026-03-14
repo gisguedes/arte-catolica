@@ -83,13 +83,13 @@
                 (change)="onAvatarSelected($event)"
                 class="avatar-input-hidden"
               />
-              <button type="button" class="btn-secondary btn-avatar" (click)="avatarInput.click()">
-                Subir foto
+              <button type="button" class="btn-photo btn-photo-upload" (click)="avatarInput.click()">
+                {{ avatarPreview() ? 'Cambiar foto' : 'Subir foto' }}
               </button>
               <button
                 *ngIf="avatarPreview()"
                 type="button"
-                class="btn-remove-avatar"
+                class="btn-photo btn-photo-remove"
                 (click)="removeAvatar()"
               >
                 Quitar foto

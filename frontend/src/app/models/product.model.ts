@@ -1,3 +1,5 @@
+import type { VendorUserRole } from '../constants/vendor-roles';
+
 export type ProductStatus = 'in_review' | 'approved' | 'archived' | 'cancelled';
 
 export interface Product {
@@ -52,12 +54,17 @@ export interface Category {
   updated_at?: string;
 }
 
-export type ArtistStatus = 'in_review' | 'approved' | 'archived' | 'cancelled';
+export type ArtistStatus = 'in_progress' | 'in_review' | 'approved' | 'archived' | 'cancelled';
 
 export interface Artist {
   id: string;
   name: string;
+  surname?: string | null;
   status?: ArtistStatus;
+  /** Teléfono (privado, solo perfil vendedor) */
+  phone?: string | null;
+  /** NIF/CIF (privado, solo perfil vendedor) */
+  nif?: string | null;
   /** Descripción breve para la card de artistas/vendors */
   short_description?: string | null;
   /** Descripción larga para la página de detalle del artista */
@@ -73,6 +80,10 @@ export interface Artist {
   artist_types?: ArtistType[];
   created_at?: string;
   updated_at?: string;
+  /** Días de preparación (plazo de entrega), solo para perfil vendedor */
+  preparation_days?: number;
+  /** Rol del usuario actual en este vendor. Solo presente cuando se consulta con auth */
+  my_role?: VendorUserRole | null;
 }
 
 export interface CartItem {
