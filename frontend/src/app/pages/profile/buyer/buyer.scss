@@ -131,21 +131,34 @@
       display: none;
     }
 
-    .btn-avatar {
+    .btn-photo {
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
       white-space: nowrap;
     }
 
-    .btn-remove-avatar {
-      background: none;
+    .btn-photo-upload {
+      background: var(--primary-color);
+      color: white;
       border: none;
-      color: #dc3545;
-      font-size: 0.9rem;
-      cursor: pointer;
-      padding: 0;
-      text-decoration: underline;
 
       &:hover {
-        color: #c82333;
+        background: var(--primary-dark);
+      }
+    }
+
+    .btn-photo-remove {
+      background: transparent;
+      border: 1px solid #e0e0e0;
+      color: #6c757d;
+
+      &:hover {
+        border-color: #dc3545;
+        color: #dc3545;
       }
     }
   }

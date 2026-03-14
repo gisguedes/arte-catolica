@@ -5,6 +5,20 @@
       <a [routerLink]="['/', locale(), 'profile']" class="back-link"
         >← Cambiar a perfil comprador</a
       >
+      <div class="vendor-status" *ngIf="vendor()">
+        <span class="status-badge" [class]="'status-' + (vendor()!.status ?? 'approved')">
+          {{ statusLabel(vendor()!.status) }}
+        </span>
+        <button
+          *ngIf="canRequestApproval(vendor()!.status)"
+          type="button"
+          class="btn-approve"
+          (click)="requestApproval()"
+          [disabled]="isUpdatingStatus()"
+        >
+          {{ isUpdatingStatus() ? 'Actualizando...' : 'Publicar perfil' }}
+        </button>
+      </div>
     </div>
 
     <div class="tabs">
@@ -17,6 +31,17 @@
       </button>
       <button class="tab-btn" [class.active]="activeTab() === 'orders'" (click)="setTab('orders')">
         Pedidos
+      </button>
+      <button class="tab-btn" [class.active]="activeTab() === 'profile'" (click)="setTab('profile')">
+        Perfil público
+      </button>
+      <button
+        *ngIf="vendor()?.my_role === VENDOR_USER_ROLES.OWNER"
+        class="tab-btn"
+        [class.active]="activeTab() === 'users'"
+        (click)="setTab('users')"
+      >
+        Usuarios
       </button>
       <button class="tab-btn" [class.active]="activeTab() === 'bank'" (click)="setTab('bank')">
         Datos Bancarios
@@ -60,6 +85,160 @@
       </div>
     </div>
 
+    <!-- Tab: Perfil público -->
+    <div class="tab-content" *ngIf="activeTab() === 'profile'">
+      <div class="profile-section">
+        <h2>Perfil público</h2>
+        <p class="section-description">Estos datos son visibles para los visitantes en tu página de artista.</p>
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
+          <h3>Foto de perfil</h3>
+          <div class="image-upload form-group">
+            <div class="image-preview">
+              <img
+                *ngIf="imagePreview()"
+                [src]="imagePreview()"
+                alt="Foto del artista"
+                class="profile-image"
+              />
+              <span *ngIf="!imagePreview()" class="image-placeholder">
+                {{ (vendor()?.name?.charAt(0) || '?') + (vendor()?.surname?.charAt(0) || '') }}
+              </span>
+            </div>
+            <div class="image-actions">
+              <input
+                type="file"
+                #imageInput
+                accept="image/jpeg,image/png,image/webp"
+                (change)="onImageSelected($event)"
+                class="image-input-hidden"
+              />
+              <button type="button" class="btn-photo btn-photo-upload" (click)="imageInput.click()">
+                {{ imagePreview() ? 'Cambiar foto' : 'Subir foto' }}
+              </button>
+              <button
+                *ngIf="imagePreview()"
+                type="button"
+                class="btn-photo btn-photo-remove"
+                (click)="removeImage()"
+              >
+                Quitar foto
+              </button>
+            </div>
+          </div>
+          <h3>Datos básicos</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre</label>
+              <input type="text" formControlName="name" placeholder="Nombre o Razón Social" />
+            </div>
+            <div class="form-group">
+              <label>Apellidos</label>
+              <input type="text" formControlName="surname" placeholder="Apellidos" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Sitio web</label>
+            <input type="url" formControlName="website" placeholder="https://..." />
+          </div>
+          <div class="form-group">
+            <label>Ciudad</label>
+            <input type="text" formControlName="city" placeholder="Ciudad" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Código postal</label>
+              <input type="text" formControlName="postal_code" placeholder="28001" />
+            </div>
+            <div class="form-group">
+              <label>País</label>
+              <input type="text" formControlName="country" placeholder="España" />
+            </div>
+          </div>
+          <h3>Biografía</h3>
+          <div class="form-group">
+            <label>Descripción breve</label>
+            <input type="text" formControlName="short_description" placeholder="Frase corta para la tarjeta de artista..." maxlength="200" />
+          </div>
+          <div class="form-group">
+            <label>Descripción completa</label>
+            <textarea formControlName="description" rows="6" placeholder="Cuéntanos sobre ti y tu arte..."></textarea>
+          </div>
+          <p class="form-error" *ngIf="profileError()">{{ profileError() }}</p>
+          <p class="form-success" *ngIf="profileSuccess()">Cambios guardados correctamente.</p>
+          <button type="submit" class="btn-primary" [disabled]="profileForm.invalid || isSavingProfile()">
+            {{ isSavingProfile() ? 'Guardando...' : 'Guardar perfil público' }}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tab: Usuarios (solo owner) -->
+    <div class="tab-content" *ngIf="activeTab() === 'users'">
+      <div class="users-section">
+        <h2>Usuarios del equipo</h2>
+        <p class="section-description">
+          Añade usuarios por email para que tengan acceso al perfil de vendedor cuando inicien sesión.
+        </p>
+        <p class="form-hint form-hint-notice">
+          Solo puedes añadir usuarios que ya estén registrados en la plataforma.
+        </p>
+        <form [formGroup]="addUserForm" (ngSubmit)="addUser()" class="add-user-form">
+          <div class="add-user-card">
+            <div class="add-user-fields">
+              <div class="form-group add-user-email">
+                <label for="add-user-email">Email</label>
+                <input
+                  id="add-user-email"
+                  type="email"
+                  formControlName="email"
+                  placeholder="usuario&#64;ejemplo.com"
+                  class="input-modern"
+                />
+              </div>
+              <div class="form-group add-user-role">
+                <label for="add-user-role">Rol</label>
+                <select id="add-user-role" formControlName="role" class="select-modern">
+                  @for (r of VENDOR_ASSIGNABLE_ROLES; track r) {
+                    <option [value]="r">{{ roleLabel(r) }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-group add-user-submit">
+                <button
+                  type="submit"
+                  class="btn-primary btn-add-user"
+                  [disabled]="addUserForm.invalid || isAddingUser()"
+                >
+                  {{ isAddingUser() ? 'Añadiendo...' : 'Añadir usuario' }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <p class="form-error" *ngIf="usersError()">{{ usersError() }}</p>
+          <p class="form-success" *ngIf="usersSuccess()">{{ usersSuccess() }}</p>
+        </form>
+        <div class="users-list">
+          <div class="user-card" *ngFor="let u of vendorUsers()">
+            <div class="user-info">
+              <span class="user-name">{{ u.name }} {{ u.surname }}</span>
+              <span class="user-email">{{ u.email }}</span>
+              <span class="user-role role-badge" [class]="'role-' + u.role">{{ roleLabel(u.role) }}</span>
+            </div>
+            <button
+              *ngIf="u.role !== VENDOR_USER_ROLES.OWNER && u.user_id !== user()?.id"
+              type="button"
+              class="btn-remove-user"
+              (click)="removeUser(u)"
+              [disabled]="isRemovingUser()"
+              title="Eliminar del equipo"
+            >
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Tab: Datos Bancarios -->
     <div class="tab-content" *ngIf="activeTab() === 'bank'">
       <div class="bank-section">
@@ -78,45 +257,37 @@
     <!-- Tab: Configuración -->
     <div class="tab-content" *ngIf="activeTab() === 'settings'">
       <div class="settings-section">
-        <h2>Configuración del Perfil Profesional</h2>
-
-        <div class="settings-form">
-          <h3>Datos Personales/Empresa</h3>
-          <div class="form-group">
-            <label>Nombre</label>
-            <input type="text" [value]="user()?.name" placeholder="Nombre o Razón Social" />
-          </div>
-          <div class="form-group">
-            <label>Apellidos</label>
-            <input type="text" [value]="user()?.surname" placeholder="Apellidos" />
-          </div>
+        <h2>Configuración</h2>
+        <p class="section-description">Datos de contacto y logística. No se muestran públicamente.</p>
+        <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" class="settings-form">
+          <h3>Datos de contacto (privados)</h3>
           <div class="form-group">
             <label>Email</label>
-            <input type="email" [value]="user()?.email" />
+            <input type="email" [value]="user()?.email" disabled readonly />
+            <span class="form-hint">El email se toma de tu cuenta de usuario.</span>
           </div>
           <div class="form-group">
             <label>Teléfono</label>
-            <input type="tel" placeholder="+34 600 000 000" />
+            <input type="tel" formControlName="phone" placeholder="+34 600 000 000" />
           </div>
           <div class="form-group">
             <label>NIF/CIF</label>
-            <input type="text" placeholder="12345678A" />
+            <input type="text" formControlName="nif" placeholder="12345678A" />
           </div>
 
-          <h3>Configuración de Envíos</h3>
+          <h3>Envíos</h3>
           <div class="form-group">
-            <label>Plazo de Entrega (días)</label>
-            <input type="number" [value]="deliveryTime()" min="1" max="30" />
+            <label>Plazo de preparación (días)</label>
+            <input type="number" formControlName="preparation_days" min="0" max="30" />
+            <span class="form-hint">Días que tardas en preparar un pedido antes del envío.</span>
           </div>
 
-          <h3>Biografía</h3>
-          <div class="form-group">
-            <label>Descripción</label>
-            <textarea rows="4" placeholder="Cuéntanos sobre ti y tu arte..."></textarea>
-          </div>
-
-          <button class="btn-primary">Guardar Cambios</button>
-        </div>
+          <p class="form-error" *ngIf="settingsError()">{{ settingsError() }}</p>
+          <p class="form-success" *ngIf="settingsSuccess()">Cambios guardados correctamente.</p>
+          <button type="submit" class="btn-primary" [disabled]="settingsForm.invalid || isSavingSettings()">
+            {{ isSavingSettings() ? 'Guardando...' : 'Guardar configuración' }}
+          </button>
+        </form>
       </div>
     </div>
   </div>

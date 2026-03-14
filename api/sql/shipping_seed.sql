@@ -97,7 +97,7 @@ SELECT v.id,
        COALESCE(v.country, 'ES'),
        (SELECT id FROM carrier WHERE name = 'SEUR' LIMIT 1)
 FROM vendors v
-WHERE v.is_active = true
+WHERE COALESCE(v.status, 'approved') = 'approved'
   AND NOT EXISTS (SELECT 1 FROM vendor_shipping_policy p WHERE p.vendor_id = v.id)
 LIMIT 5;
 

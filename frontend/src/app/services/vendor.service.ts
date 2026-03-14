@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ApiService } from './api';
 import { Artist } from '../models/product.model';
+import type { VendorUserRole } from '../constants/vendor-roles';
 
 export interface CreateVendorPayload {
   name: string;
@@ -30,4 +31,34 @@ export class VendorService {
   createVendor(payload: CreateVendorPayload): Observable<{ data: Artist }> {
     return this.apiService.post<{ data: Artist }>('vendors', payload);
   }
+
+  updateVendorStatus(vendorId: string, status: string): Observable<{ data: Artist }> {
+    return this.apiService.patch<{ data: Artist }>(`vendors/${vendorId}/status`, { status });
+  }
+
+  updateVendor(vendorId: string, payload: Partial<Artist & { short_description?: string; description?: string; preparation_days?: number }>): Observable<{ data: Artist }> {
+    return this.apiService.patch<{ data: Artist }>(`vendors/${vendorId}`, payload);
+  }
+
+  getVendorUsers(vendorId: string): Observable<{ data: VendorUser[] }> {
+    return this.apiService.get<{ data: VendorUser[] }>(`vendors/${vendorId}/users`);
+  }
+
+  addVendorUser(vendorId: string, email: string, role: VendorUserRole): Observable<{ data: VendorUser }> {
+    return this.apiService.post<{ data: VendorUser }>(`vendors/${vendorId}/users`, { email: email.trim(), role });
+  }
+
+  removeVendorUser(vendorId: string, userId: string): Observable<void> {
+    return this.apiService.delete<void>(`vendors/${vendorId}/users/${userId}`);
+  }
+}
+
+export interface VendorUser {
+  id: string;
+  user_id: string;
+  role: VendorUserRole;
+  created_at?: string;
+  name?: string;
+  surname?: string;
+  email?: string;
 }
