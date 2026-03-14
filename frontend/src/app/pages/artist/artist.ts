@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FavoritesService } from '../../services/favorites.service';
 import { LocaleService } from '../../services/locale.service';
@@ -13,7 +13,7 @@ import { Artist, Product } from '../../models/product.model';
 @Component({
   selector: 'app-artist',
   standalone: true,
-  imports: [CommonModule, RouterLink, ProductCardComponent, SocialUrlPipe],
+  imports: [CommonModule, ProductCardComponent, SocialUrlPipe],
   templateUrl: './artist.html',
   styleUrl: './artist.scss',
 })
