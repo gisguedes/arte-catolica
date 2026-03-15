@@ -480,10 +480,11 @@ export class SellerProfileComponent implements OnInit {
     links.forEach((item) => {
       this.addSocialLink(item.network ?? '', item.url ?? '');
     });
+    const vAny = v as unknown as { phone?: string; nif?: string };
     this.settingsForm.patchValue(
       {
-        phone: (v as Record<string, unknown>).phone ?? '',
-        nif: (v as Record<string, unknown>).nif ?? '',
+        phone: vAny.phone ?? '',
+        nif: vAny.nif ?? '',
         preparation_days: v.preparation_days ?? 7,
       },
       { emitEvent: false },
