@@ -32,7 +32,11 @@
       <button class="tab-btn" [class.active]="activeTab() === 'orders'" (click)="setTab('orders')">
         Pedidos
       </button>
-      <button class="tab-btn" [class.active]="activeTab() === 'profile'" (click)="setTab('profile')">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab() === 'profile'"
+        (click)="setTab('profile')"
+      >
         Perfil público
       </button>
       <button
@@ -45,6 +49,13 @@
       </button>
       <button class="tab-btn" [class.active]="activeTab() === 'bank'" (click)="setTab('bank')">
         Datos Bancarios
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab() === 'billing'"
+        (click)="setTab('billing')"
+      >
+        Datos para factura
       </button>
       <button
         class="tab-btn"
@@ -89,7 +100,9 @@
     <div class="tab-content" *ngIf="activeTab() === 'profile'">
       <div class="profile-section">
         <h2>Perfil público</h2>
-        <p class="section-description">Estos datos son visibles para los visitantes en tu página de artista.</p>
+        <p class="section-description">
+          Estos datos son visibles para los visitantes en tu página de artista.
+        </p>
         <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
           <h3>Foto de perfil</h3>
           <div class="image-upload form-group">
@@ -140,6 +153,38 @@
             <label>Sitio web</label>
             <input type="url" formControlName="website" placeholder="https://..." />
           </div>
+          <h3>Redes sociales</h3>
+          <p class="form-hint">
+            Estas redes se mostrarán en tu página de artista cuando tengan URL.
+          </p>
+          <div formArrayName="social_links" class="social-links-list">
+            @for (item of socialLinksArray.controls; track item; let i = $index) {
+              <div [formGroupName]="i" class="social-link-row">
+                <select formControlName="network" class="social-network-select" title="Red social">
+                  @for (net of SOCIAL_NETWORKS; track net.value) {
+                    <option [value]="net.value">{{ net.label }}</option>
+                  }
+                </select>
+                <input
+                  type="url"
+                  formControlName="url"
+                  placeholder="https://... o @usuario"
+                  class="social-url-input"
+                />
+                <button
+                  type="button"
+                  class="btn-remove-link"
+                  (click)="removeSocialLink(i)"
+                  title="Quitar red"
+                >
+                  Eliminar
+                </button>
+              </div>
+            }
+          </div>
+          <button type="button" class="btn-secondary btn-add-social" (click)="addSocialLink()">
+            + Añadir red social
+          </button>
           <div class="form-group">
             <label>Ciudad</label>
             <input type="text" formControlName="city" placeholder="Ciudad" />
@@ -157,15 +202,28 @@
           <h3>Biografía</h3>
           <div class="form-group">
             <label>Descripción breve</label>
-            <input type="text" formControlName="short_description" placeholder="Frase corta para la tarjeta de artista..." maxlength="200" />
+            <input
+              type="text"
+              formControlName="short_description"
+              placeholder="Frase corta para la tarjeta de artista..."
+              maxlength="200"
+            />
           </div>
           <div class="form-group">
             <label>Descripción completa</label>
-            <textarea formControlName="description" rows="6" placeholder="Cuéntanos sobre ti y tu arte..."></textarea>
+            <textarea
+              formControlName="description"
+              rows="6"
+              placeholder="Cuéntanos sobre ti y tu arte..."
+            ></textarea>
           </div>
           <p class="form-error" *ngIf="profileError()">{{ profileError() }}</p>
           <p class="form-success" *ngIf="profileSuccess()">Cambios guardados correctamente.</p>
-          <button type="submit" class="btn-primary" [disabled]="profileForm.invalid || isSavingProfile()">
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="profileForm.invalid || isSavingProfile()"
+          >
             {{ isSavingProfile() ? 'Guardando...' : 'Guardar perfil público' }}
           </button>
         </form>
@@ -177,7 +235,8 @@
       <div class="users-section">
         <h2>Usuarios del equipo</h2>
         <p class="section-description">
-          Añade usuarios por email para que tengan acceso al perfil de vendedor cuando inicien sesión.
+          Añade usuarios por email para que tengan acceso al perfil de vendedor cuando inicien
+          sesión.
         </p>
         <p class="form-hint form-hint-notice">
           Solo puedes añadir usuarios que ya estén registrados en la plataforma.
@@ -222,7 +281,9 @@
             <div class="user-info">
               <span class="user-name">{{ u.name }} {{ u.surname }}</span>
               <span class="user-email">{{ u.email }}</span>
-              <span class="user-role role-badge" [class]="'role-' + u.role">{{ roleLabel(u.role) }}</span>
+              <span class="user-role role-badge" [class]="'role-' + u.role">{{
+                roleLabel(u.role)
+              }}</span>
             </div>
             <button
               *ngIf="u.role !== VENDOR_USER_ROLES.OWNER && u.user_id !== user()?.id"
@@ -254,25 +315,82 @@
       </div>
     </div>
 
+    <!-- Tab: Datos para factura -->
+    <div class="tab-content" *ngIf="activeTab() === 'billing'">
+      <div class="billing-section">
+        <h2>Datos para factura</h2>
+        <p class="section-description">
+          Razón social, NIF y dirección fiscal. Solo para facturación y uso administrativo; no se
+          muestran en tu página de artista.
+        </p>
+        <form
+          [formGroup]="billingForm"
+          (ngSubmit)="saveBilling()"
+          class="billing-form profile-form"
+        >
+          <h3>Empresa / Razón social</h3>
+          <div class="form-group">
+            <label>Razón social / Nombre fiscal</label>
+            <input type="text" formControlName="legal_name" placeholder="Ej. Arte Sacro S.L." />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>NIF/CIF</label>
+              <input type="text" formControlName="nif" placeholder="12345678A" />
+            </div>
+            <div class="form-group">
+              <label>Teléfono de la empresa</label>
+              <input type="tel" formControlName="phone" placeholder="+34 900 000 000" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Email (facturación)</label>
+            <input type="email" formControlName="email" placeholder="facturacion&#64;ejemplo.com" />
+          </div>
+          <h3>Dirección fiscal</h3>
+          <div class="form-group">
+            <label>Dirección</label>
+            <input type="text" formControlName="street" placeholder="Calle, número, piso..." />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Código postal</label>
+              <input type="text" formControlName="postal_code" placeholder="28001" />
+            </div>
+            <div class="form-group">
+              <label>Ciudad</label>
+              <input type="text" formControlName="city" placeholder="Madrid" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>País</label>
+            <input type="text" formControlName="country" placeholder="España" />
+          </div>
+          <p class="form-error" *ngIf="billingError()">{{ billingError() }}</p>
+          <p class="form-success" *ngIf="billingSuccess()">Datos guardados correctamente.</p>
+          <button type="submit" class="btn-primary" [disabled]="isSavingBilling()">
+            {{ isSavingBilling() ? 'Guardando...' : 'Guardar datos de facturación' }}
+          </button>
+        </form>
+      </div>
+    </div>
+
     <!-- Tab: Configuración -->
     <div class="tab-content" *ngIf="activeTab() === 'settings'">
       <div class="settings-section">
         <h2>Configuración</h2>
-        <p class="section-description">Datos de contacto y logística. No se muestran públicamente.</p>
+        <p class="section-description">
+          Datos de contacto y logística. No se muestran públicamente.
+        </p>
         <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" class="settings-form">
-          <h3>Datos de contacto (privados)</h3>
+          <h3>Datos de contacto</h3>
           <div class="form-group">
             <label>Email</label>
             <input type="email" [value]="user()?.email" disabled readonly />
-            <span class="form-hint">El email se toma de tu cuenta de usuario.</span>
-          </div>
-          <div class="form-group">
-            <label>Teléfono</label>
-            <input type="tel" formControlName="phone" placeholder="+34 600 000 000" />
-          </div>
-          <div class="form-group">
-            <label>NIF/CIF</label>
-            <input type="text" formControlName="nif" placeholder="12345678A" />
+            <span class="form-hint"
+              >El email se toma de tu cuenta de usuario. Para facturación, usa la pestaña «Datos
+              para factura».</span
+            >
           </div>
 
           <h3>Envíos</h3>
@@ -284,7 +402,11 @@
 
           <p class="form-error" *ngIf="settingsError()">{{ settingsError() }}</p>
           <p class="form-success" *ngIf="settingsSuccess()">Cambios guardados correctamente.</p>
-          <button type="submit" class="btn-primary" [disabled]="settingsForm.invalid || isSavingSettings()">
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="settingsForm.invalid || isSavingSettings()"
+          >
             {{ isSavingSettings() ? 'Guardando...' : 'Guardar configuración' }}
           </button>
         </form>

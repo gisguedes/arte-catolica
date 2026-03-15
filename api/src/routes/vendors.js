@@ -28,8 +28,6 @@ const buildVendorSelect = (localeParam = '$1') => `
     v.id,
     v.name,
     v.surname,
-    v.phone,
-    v.nif,
     COALESCE(vt.short_description, '') AS short_description,
     COALESCE(vt.description, '') AS description,
     v.image,
@@ -149,7 +147,7 @@ router.post('/', async (req, res) => {
   }
 
   const payload = req.body || {};
-  const { name, surname, phone, nif, artist_type_ids, short_description } = payload;
+  const { name, surname, artist_type_ids, short_description } = payload;
   if (!name || !surname) {
     return res.status(400).json({ message: 'name y surname son requeridos' });
   }
@@ -178,33 +176,15 @@ router.post('/', async (req, res) => {
     return res.status(500).json({ message: formatApiError(steps.checkExisting, error) });
   }
 
-  let userEmail;
-  try {
-    const userRow = await query('SELECT email FROM users WHERE id = $1 LIMIT 1', [userId]);
-    userEmail = userRow.rows[0]?.email;
-    if (!userEmail) {
-      return res.status(400).json({ message: 'Usuario sin email válido' });
-    }
-  } catch (error) {
-    console.error('Vendor create error [obtener email usuario]', error);
-    return res.status(500).json({ message: formatApiError('obtener email usuario', error) });
-  }
-
   let vendorId;
   try {
     const vendorResult = await query(
       `INSERT INTO vendors (
-        id, name, surname, email, phone, nif, opening_date, status, created_at, updated_at
+        id, name, surname, opening_date, status, created_at, updated_at
       )
-      VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5, NOW(), 'in_progress', NOW(), NOW())
-      RETURNING id, name, surname, phone, nif, opening_date, status, created_at, updated_at`,
-      [
-        String(name).trim(),
-        String(surname || '').trim(),
-        userEmail,
-        phone ? String(phone).trim() : null,
-        nif ? String(nif).trim() : null,
-      ]
+      VALUES (uuid_generate_v4(), $1, $2, NOW(), 'in_progress', NOW(), NOW())
+      RETURNING id, name, surname, opening_date, status, created_at, updated_at`,
+      [String(name).trim(), String(surname || '').trim()]
     );
     const vendor = vendorResult.rows[0];
     vendorId = vendor.id;
@@ -323,8 +303,6 @@ router.patch('/:id', async (req, res) => {
   const vendorFields = {
     name: 'name',
     surname: 'surname',
-    phone: 'phone',
-    nif: 'nif',
     image: 'image',
     website: 'website',
     social_links: 'social_links',
@@ -507,6 +485,87 @@ router.delete('/:id/users/:userId', async (req, res) => {
   } catch (error) {
     console.error('Vendor remove user error', error);
     res.status(500).json({ message: formatApiError('eliminar usuario', error) });
+  }
+});
+
+// --- Datos de facturación (company) ---
+router.get('/:id/company', async (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(401).json({ message: 'Token inválido o expirado' });
+  }
+  const vendorId = req.params.id;
+  try {
+    const memberCheck = await query(
+      'SELECT 1 FROM vendor_users WHERE vendor_id = $1 AND user_id = $2 LIMIT 1',
+      [vendorId, userId]
+    );
+    if (memberCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Vendor no encontrado o sin permiso' });
+    }
+    const result = await query(
+      `SELECT id, vendor_id, legal_name, nif, phone, email, street, postal_code, city, country, created_at, updated_at
+       FROM companies WHERE vendor_id = $1 LIMIT 1`,
+      [vendorId]
+    );
+    const company = result.rows[0] || null;
+    res.json({ data: company });
+  } catch (error) {
+    console.error('Vendor company get error', error);
+    res.status(500).json({ message: formatApiError('obtener datos de facturación', error) });
+  }
+});
+
+router.put('/:id/company', async (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(401).json({ message: 'Token inválido o expirado' });
+  }
+  const vendorId = req.params.id;
+  const body = req.body || {};
+  try {
+    const memberCheck = await query(
+      'SELECT 1 FROM vendor_users WHERE vendor_id = $1 AND user_id = $2 LIMIT 1',
+      [vendorId, userId]
+    );
+    if (memberCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Vendor no encontrado o sin permiso' });
+    }
+    const legal_name = body.legal_name != null ? String(body.legal_name).trim() : null;
+    const nif = body.nif != null ? String(body.nif).trim() : null;
+    const phone = body.phone != null ? String(body.phone).trim() : null;
+    const email = body.email != null ? String(body.email).trim() : null;
+    const street = body.street != null ? String(body.street).trim() : null;
+    const postal_code = body.postal_code != null ? String(body.postal_code).trim() : null;
+    const city = body.city != null ? String(body.city).trim() : null;
+    const country = body.country != null ? String(body.country).trim() : null;
+
+    const existing = await query('SELECT id FROM companies WHERE vendor_id = $1 LIMIT 1', [vendorId]);
+    if (existing.rows.length > 0) {
+      await query(
+        `UPDATE companies SET
+          legal_name = $1, nif = $2, phone = $3, email = $4,
+          street = $5, postal_code = $6, city = $7, country = $8,
+          updated_at = NOW()
+         WHERE vendor_id = $9`,
+        [legal_name, nif, phone, email, street, postal_code, city, country, vendorId]
+      );
+    } else {
+      await query(
+        `INSERT INTO companies (id, vendor_id, legal_name, nif, phone, email, street, postal_code, city, country, created_at, updated_at)
+         VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())`,
+        [vendorId, legal_name, nif, phone, email, street, postal_code, city, country]
+      );
+    }
+    const result = await query(
+      `SELECT id, vendor_id, legal_name, nif, phone, email, street, postal_code, city, country, created_at, updated_at
+       FROM companies WHERE vendor_id = $1 LIMIT 1`,
+      [vendorId]
+    );
+    res.json({ data: result.rows[0] });
+  } catch (error) {
+    console.error('Vendor company put error', error);
+    res.status(500).json({ message: formatApiError('guardar datos de facturación', error) });
   }
 });
 

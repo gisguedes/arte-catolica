@@ -48,8 +48,10 @@
               <span class="meta-label">Localización</span>
               <span class="meta-value">{{ artistLocation() }}</span>
             </div>
-            <div *ngIf="artist()!.artist_types?.length">
-              <span class="meta-label">Tipo de artista</span>
+            <div class="meta-types" *ngIf="artist()!.artist_types?.length">
+              <span class="meta-label">{{
+                artist()!.artist_types!.length > 1 ? 'Tipos' : 'Tipo de artista'
+              }}</span>
               <div class="meta-tags">
                 <span class="meta-tag" *ngFor="let type of artist()!.artist_types">
                   {{ type.name }}
@@ -65,6 +67,7 @@
             class="artist-contact"
             *ngIf="artist()!.website || (artist()!.social_links?.length ?? 0) > 0"
           >
+            <span class="contact-label">Web y redes sociales</span>
             <a
               *ngIf="artist()!.website"
               [href]="artist()!.website"

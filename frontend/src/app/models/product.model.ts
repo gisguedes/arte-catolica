@@ -61,10 +61,6 @@ export interface Artist {
   name: string;
   surname?: string | null;
   status?: ArtistStatus;
-  /** Teléfono (privado, solo perfil vendedor) */
-  phone?: string | null;
-  /** NIF/CIF (privado, solo perfil vendedor) */
-  nif?: string | null;
   /** Descripción breve para la card de artistas/vendors */
   short_description?: string | null;
   /** Descripción larga para la página de detalle del artista */

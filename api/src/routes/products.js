@@ -70,8 +70,6 @@ const buildProductSelect = () => `
         'id', v.id,
         'name', v.name,
         'surname', v.surname,
-        'phone', v.phone,
-        'nif', v.nif,
         'short_description', COALESCE(vt.short_description, ''),
         'description', COALESCE(vt.description, ''),
         'image', v.image,

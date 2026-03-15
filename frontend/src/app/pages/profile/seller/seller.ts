@@ -1,9 +1,9 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
-import { VendorService, VendorUser } from '../../../services/vendor.service';
+import { VendorService, VendorUser, Company } from '../../../services/vendor.service';
 import { ProductService } from '../../../services/product.service';
 import { LocaleService } from '../../../services/locale.service';
 import { Artist, Product } from '../../../models/product.model';
@@ -32,9 +32,12 @@ export class SellerProfileComponent implements OnInit {
 
   locale = this.localeService.locale;
   user = this.authService.user;
-  activeTab = signal<'products' | 'orders' | 'bank' | 'profile' | 'users' | 'settings'>('products');
+  activeTab = signal<'products' | 'orders' | 'bank' | 'profile' | 'users' | 'billing' | 'settings'>(
+    'products',
+  );
 
   vendor = signal<Artist | null>(null);
+  company = signal<Company | null>(null);
   vendorUsers = signal<VendorUser[]>([]);
   products = signal<Product[]>([]);
   orders = signal<any[]>([]);
@@ -42,21 +45,36 @@ export class SellerProfileComponent implements OnInit {
   isUpdatingStatus = signal(false);
   isSavingProfile = signal(false);
   isSavingSettings = signal(false);
+  isSavingBilling = signal(false);
   isAddingUser = signal(false);
   isRemovingUser = signal(false);
   profileError = signal('');
   profileSuccess = signal(false);
   settingsError = signal('');
   settingsSuccess = signal(false);
+  billingError = signal('');
+  billingSuccess = signal(false);
   usersError = signal('');
   usersSuccess = signal('');
   /** Base64 de nueva imagen, '' = usuario quiere quitar, null = sin cambio */
   imageData = signal<string | null | ''>(null);
 
+  /** Redes sociales soportadas para el selector en el perfil */
+  readonly SOCIAL_NETWORKS = [
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'tiktok', label: 'TikTok' },
+    { value: 'twitter', label: 'X (Twitter)' },
+    { value: 'youtube', label: 'YouTube' },
+    { value: 'linkedin', label: 'LinkedIn' },
+    { value: 'pinterest', label: 'Pinterest' },
+  ] as const;
+
   profileForm: FormGroup = this.fb.group({
     name: ['', [Validators.required]],
     surname: [''],
     website: [''],
+    social_links: this.fb.array<FormGroup>([]),
     city: [''],
     postal_code: [''],
     country: [''],
@@ -73,26 +91,57 @@ export class SellerProfileComponent implements OnInit {
   });
 
   settingsForm: FormGroup = this.fb.group({
-    phone: [''],
-    nif: [''],
     preparation_days: [7, [Validators.min(0), Validators.max(30)]],
   });
+
+  billingForm: FormGroup = this.fb.group({
+    legal_name: [''],
+    nif: [''],
+    phone: [''],
+    email: [''],
+    street: [''],
+    postal_code: [''],
+    city: [''],
+    country: [''],
+  });
+
+  get socialLinksArray(): FormArray {
+    return this.profileForm.get('social_links') as FormArray;
+  }
+
+  addSocialLink(network = 'instagram', url = ''): void {
+    this.socialLinksArray.push(
+      this.fb.group({
+        network: [network],
+        url: [url],
+      }),
+    );
+  }
+
+  removeSocialLink(index: number): void {
+    this.socialLinksArray.removeAt(index);
+  }
 
   addUserForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     role: [VENDOR_USER_ROLES.ADMIN, [Validators.required]],
   });
 
-  setTab(tab: 'products' | 'orders' | 'bank' | 'profile' | 'users' | 'settings'): void {
+  setTab(tab: 'products' | 'orders' | 'bank' | 'profile' | 'users' | 'billing' | 'settings'): void {
     this.profileSuccess.set(false);
     this.settingsSuccess.set(false);
+    this.billingSuccess.set(false);
     this.usersSuccess.set('');
     this.profileError.set('');
     this.settingsError.set('');
+    this.billingError.set('');
     this.usersError.set('');
     this.activeTab.set(tab);
     if (tab === 'users') {
       this.loadVendorUsers();
+    }
+    if (tab === 'billing') {
+      this.loadCompany();
     }
   }
 
@@ -174,21 +223,30 @@ export class SellerProfileComponent implements OnInit {
   private patchFormsWithVendor(v: Artist | null): void {
     if (!v) return;
     this.imageData.set(null);
-    this.profileForm.patchValue({
-      name: v.name ?? '',
-      surname: v.surname ?? '',
-      website: v.website ?? '',
-      city: v.city ?? '',
-      postal_code: v.postal_code ?? '',
-      country: v.country ?? '',
-      short_description: v.short_description ?? '',
-      description: v.description ?? '',
-    }, { emitEvent: false });
-    this.settingsForm.patchValue({
-      phone: v.phone ?? '',
-      nif: v.nif ?? '',
-      preparation_days: v.preparation_days ?? 7,
-    }, { emitEvent: false });
+    this.profileForm.patchValue(
+      {
+        name: v.name ?? '',
+        surname: v.surname ?? '',
+        website: v.website ?? '',
+        city: v.city ?? '',
+        postal_code: v.postal_code ?? '',
+        country: v.country ?? '',
+        short_description: v.short_description ?? '',
+        description: v.description ?? '',
+      },
+      { emitEvent: false },
+    );
+    const links = v.social_links ?? [];
+    this.socialLinksArray.clear();
+    links.forEach((item) => {
+      this.addSocialLink(item.network ?? '', item.url ?? '');
+    });
+    this.settingsForm.patchValue(
+      {
+        preparation_days: v.preparation_days ?? 7,
+      },
+      { emitEvent: false },
+    );
   }
 
   saveProfile(): void {
@@ -197,7 +255,15 @@ export class SellerProfileComponent implements OnInit {
     this.isSavingProfile.set(true);
     this.profileError.set('');
     this.profileSuccess.set(false);
-    const payload = { ...this.profileForm.value };
+    const raw = this.profileForm.value;
+    const social_links =
+      (raw.social_links as { network: string; url: string }[])
+        ?.filter((item) => item?.url?.trim())
+        ?.map((item) => ({
+          network: (item.network || 'instagram').toLowerCase(),
+          url: item.url.trim(),
+        })) ?? [];
+    const payload = { ...raw, social_links };
     const img = this.imageData();
     if (img === '') {
       payload.image = null;
@@ -242,6 +308,49 @@ export class SellerProfileComponent implements OnInit {
     });
   }
 
+  private loadCompany(): void {
+    const v = this.vendor();
+    if (!v?.id) return;
+    this.vendorService.getCompany(v.id).subscribe({
+      next: (c) => {
+        this.company.set(c);
+        this.billingForm.patchValue(
+          {
+            legal_name: c?.legal_name ?? '',
+            nif: c?.nif ?? '',
+            phone: c?.phone ?? '',
+            email: c?.email ?? '',
+            street: c?.street ?? '',
+            postal_code: c?.postal_code ?? '',
+            city: c?.city ?? '',
+            country: c?.country ?? '',
+          },
+          { emitEvent: false },
+        );
+      },
+      error: () => this.company.set(null),
+    });
+  }
+
+  saveBilling(): void {
+    const v = this.vendor();
+    if (!v?.id) return;
+    this.isSavingBilling.set(true);
+    this.billingError.set('');
+    this.billingSuccess.set(false);
+    this.vendorService.updateCompany(v.id, this.billingForm.value).subscribe({
+      next: (res) => {
+        this.company.set(res.data);
+        this.billingSuccess.set(true);
+        this.isSavingBilling.set(false);
+      },
+      error: (err) => {
+        this.billingError.set(err.error?.message ?? 'Error al guardar');
+        this.isSavingBilling.set(false);
+      },
+    });
+  }
+
   addUser(): void {
     const v = this.vendor();
     if (!v?.id || this.addUserForm.invalid) return;
@@ -254,7 +363,14 @@ export class SellerProfileComponent implements OnInit {
         const d = res.data;
         this.vendorUsers.update((list) => [
           ...list,
-          { id: d.user_id, user_id: d.user_id, role: d.role, name: d.name, surname: d.surname, email: d.email },
+          {
+            id: d.user_id,
+            user_id: d.user_id,
+            role: d.role,
+            name: d.name,
+            surname: d.surname,
+            email: d.email,
+          },
         ]);
         this.addUserForm.patchValue({ email: '', role: VENDOR_USER_ROLES.ADMIN });
         this.usersSuccess.set('Usuario añadido correctamente.');
