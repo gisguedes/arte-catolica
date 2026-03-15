@@ -64,6 +64,26 @@ export class VendorService {
     return this.apiService.delete<void>(`vendors/${vendorId}/users/${userId}`);
   }
 
+  getBankAccounts(vendorId: string): Observable<VendorBankAccount[]> {
+    return this.apiService
+      .get<{ data: VendorBankAccount[] }>(`vendors/${vendorId}/bank-accounts`)
+      .pipe(map((res) => res.data ?? []));
+  }
+
+  addBankAccount(
+    vendorId: string,
+    payload: Partial<VendorBankAccount>,
+  ): Observable<{ data: VendorBankAccount }> {
+    return this.apiService.post<{ data: VendorBankAccount }>(
+      `vendors/${vendorId}/bank-accounts`,
+      payload,
+    );
+  }
+
+  removeBankAccount(vendorId: string, accountId: string): Observable<void> {
+    return this.apiService.delete<void>(`vendors/${vendorId}/bank-accounts/${accountId}`);
+  }
+
   getCompany(vendorId: string): Observable<Company | null> {
     return this.apiService
       .get<{ data: Company | null }>(`vendors/${vendorId}/company`)
@@ -73,6 +93,18 @@ export class VendorService {
   updateCompany(vendorId: string, payload: Partial<Company>): Observable<{ data: Company }> {
     return this.apiService.put<{ data: Company }>(`vendors/${vendorId}/company`, payload);
   }
+}
+
+export interface VendorBankAccount {
+  id: string;
+  vendor_id?: string;
+  account_holder_name: string;
+  iban: string;
+  swift_bic?: string | null;
+  bank_name?: string | null;
+  is_default: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Company {
