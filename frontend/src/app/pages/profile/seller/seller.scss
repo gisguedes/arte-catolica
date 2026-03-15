@@ -712,6 +712,81 @@
     margin-top: 0.25rem;
   }
 
+  .social-links-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .social-link-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .social-network-select {
+    min-width: 140px;
+    padding: 0.65rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #fff;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+  }
+
+  .social-url-input {
+    flex: 1;
+    min-width: 180px;
+    padding: 0.65rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+  }
+
+  .btn-remove-link {
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: 1px solid #e0e0e0;
+    color: #6c757d;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+
+    &:hover {
+      border-color: #dc3545;
+      color: #dc3545;
+    }
+  }
+
+  .btn-add-social,
+  .btn-secondary {
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    color: #333;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+
+    &:hover {
+      background: #e8e8e8;
+      border-color: #ccc;
+    }
+  }
+
   .profile-form,
   .settings-form {
     max-width: 700px;

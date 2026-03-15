@@ -435,6 +435,70 @@
           </div>
         </div>
 
+        <!-- Tab: Datos para factura -->
+        <div class="tab-content" *ngIf="activeTab() === 'billing'">
+          <div class="billing-section">
+            <h2>Datos para factura</h2>
+            <p class="section-description">
+              Razón social, NIF y dirección fiscal. Solo para facturación y uso administrativo; no
+              se muestran en tu página de artista.
+            </p>
+            <form
+              [formGroup]="billingForm"
+              (ngSubmit)="saveBilling()"
+              class="billing-form profile-form"
+            >
+              <h3>Empresa / Razón social</h3>
+              <div class="form-group">
+                <label>Razón social / Nombre fiscal</label>
+                <input type="text" formControlName="legal_name" placeholder="Ej. Arte Sacro S.L." />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>NIF/CIF</label>
+                  <input type="text" formControlName="nif" placeholder="12345678A" />
+                </div>
+                <div class="form-group">
+                  <label>Teléfono de la empresa</label>
+                  <input type="tel" formControlName="phone" placeholder="+34 900 000 000" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Email (facturación)</label>
+                <input
+                  type="email"
+                  formControlName="email"
+                  placeholder="facturacion&#64;ejemplo.com"
+                />
+              </div>
+              <h3>Dirección fiscal</h3>
+              <div class="form-group">
+                <label>Dirección</label>
+                <input type="text" formControlName="street" placeholder="Calle, número, piso..." />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Código postal</label>
+                  <input type="text" formControlName="postal_code" placeholder="28001" />
+                </div>
+                <div class="form-group">
+                  <label>Ciudad</label>
+                  <input type="text" formControlName="city" placeholder="Madrid" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>País</label>
+                <input type="text" formControlName="country" placeholder="España" />
+              </div>
+              <p class="form-error" *ngIf="billingError()">{{ billingError() }}</p>
+              <p class="form-success" *ngIf="billingSuccess()">Datos guardados correctamente.</p>
+              <button type="submit" class="btn-primary" [disabled]="isSavingBilling()">
+                {{ isSavingBilling() ? 'Guardando...' : 'Guardar datos de facturación' }}
+              </button>
+            </form>
+          </div>
+        </div>
+
         <!-- Tab: Configuración -->
         <div class="tab-content" *ngIf="activeTab() === 'settings'">
           <div class="settings-section">
@@ -457,7 +521,6 @@
                 <label>NIF/CIF</label>
                 <input type="text" formControlName="nif" placeholder="12345678A" />
               </div>
-
               <h3>Envíos</h3>
               <div class="form-group">
                 <label>Plazo de preparación (días)</label>

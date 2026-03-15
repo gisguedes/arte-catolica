@@ -83,6 +83,16 @@ export class VendorService {
   removeBankAccount(vendorId: string, accountId: string): Observable<void> {
     return this.apiService.delete<void>(`vendors/${vendorId}/bank-accounts/${accountId}`);
   }
+
+  getCompany(vendorId: string): Observable<Company | null> {
+    return this.apiService
+      .get<{ data: Company | null }>(`vendors/${vendorId}/company`)
+      .pipe(map((res) => res.data ?? null));
+  }
+
+  updateCompany(vendorId: string, payload: Partial<Company>): Observable<{ data: Company }> {
+    return this.apiService.put<{ data: Company }>(`vendors/${vendorId}/company`, payload);
+  }
 }
 
 export interface VendorBankAccount {
@@ -93,6 +103,21 @@ export interface VendorBankAccount {
   swift_bic?: string | null;
   bank_name?: string | null;
   is_default: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Company {
+  id?: string;
+  vendor_id?: string;
+  legal_name?: string | null;
+  nif?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  street?: string | null;
+  postal_code?: string | null;
+  city?: string | null;
+  country?: string | null;
   created_at?: string;
   updated_at?: string;
 }
