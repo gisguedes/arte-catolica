@@ -28,8 +28,6 @@ const buildVendorSelect = (localeParam = '$1') => `
     v.id,
     v.name,
     v.surname,
-    v.phone,
-    v.nif,
     COALESCE(vt.short_description, '') AS short_description,
     COALESCE(vt.description, '') AS description,
     v.image,
@@ -149,7 +147,7 @@ router.post('/', async (req, res) => {
   }
 
   const payload = req.body || {};
-  const { name, surname, phone, nif, artist_type_ids, short_description } = payload;
+  const { name, surname, artist_type_ids, short_description } = payload;
   if (!name || !surname) {
     return res.status(400).json({ message: 'name y surname son requeridos' });
   }
@@ -178,33 +176,15 @@ router.post('/', async (req, res) => {
     return res.status(500).json({ message: formatApiError(steps.checkExisting, error) });
   }
 
-  let userEmail;
-  try {
-    const userRow = await query('SELECT email FROM users WHERE id = $1 LIMIT 1', [userId]);
-    userEmail = userRow.rows[0]?.email;
-    if (!userEmail) {
-      return res.status(400).json({ message: 'Usuario sin email válido' });
-    }
-  } catch (error) {
-    console.error('Vendor create error [obtener email usuario]', error);
-    return res.status(500).json({ message: formatApiError('obtener email usuario', error) });
-  }
-
   let vendorId;
   try {
     const vendorResult = await query(
       `INSERT INTO vendors (
-        id, name, surname, email, phone, nif, opening_date, status, created_at, updated_at
+        id, name, surname, opening_date, status, created_at, updated_at
       )
-      VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5, NOW(), 'in_progress', NOW(), NOW())
-      RETURNING id, name, surname, phone, nif, opening_date, status, created_at, updated_at`,
-      [
-        String(name).trim(),
-        String(surname || '').trim(),
-        userEmail,
-        phone ? String(phone).trim() : null,
-        nif ? String(nif).trim() : null,
-      ]
+      VALUES (uuid_generate_v4(), $1, $2, NOW(), 'in_progress', NOW(), NOW())
+      RETURNING id, name, surname, opening_date, status, created_at, updated_at`,
+      [String(name).trim(), String(surname || '').trim()]
     );
     const vendor = vendorResult.rows[0];
     vendorId = vendor.id;
@@ -323,8 +303,6 @@ router.patch('/:id', async (req, res) => {
   const vendorFields = {
     name: 'name',
     surname: 'surname',
-    phone: 'phone',
-    nif: 'nif',
     image: 'image',
     website: 'website',
     social_links: 'social_links',
@@ -375,6 +353,25 @@ router.patch('/:id', async (req, res) => {
        ON CONFLICT (vendor_id) DO UPDATE SET preparation_days = $2, updated_at = NOW()`,
       [vendorId, days]
     );
+  }
+
+  if ('artist_type_ids' in body) {
+    const ids = Array.isArray(body.artist_type_ids) ? body.artist_type_ids : [];
+    const uniqueIds = [...new Set(ids.filter((id) => id && String(id).trim()))];
+    await query('DELETE FROM artist_type_vendor WHERE vendor_id = $1', [vendorId]);
+    for (const artistTypeId of uniqueIds) {
+      try {
+        await query(
+          'INSERT INTO artist_type_vendor (vendor_id, artist_type_id) VALUES ($1, $2)',
+          [vendorId, artistTypeId]
+        );
+      } catch (err) {
+        if (err.code === '23503') {
+          return res.status(400).json({ message: 'Uno de los tipos de artista no es válido' });
+        }
+        throw err;
+      }
+    }
   }
 
   const selectSql = `${buildVendorSelect('$1')} WHERE v.id = $2 LIMIT 1`;
@@ -507,6 +504,107 @@ router.delete('/:id/users/:userId', async (req, res) => {
   } catch (error) {
     console.error('Vendor remove user error', error);
     res.status(500).json({ message: formatApiError('eliminar usuario', error) });
+  }
+});
+
+// --- Cuentas bancarias del vendor ---
+router.get('/:id/bank-accounts', async (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(401).json({ message: 'Token inválido o expirado' });
+  }
+  const vendorId = req.params.id;
+  try {
+    const memberCheck = await query(
+      'SELECT 1 FROM vendor_users WHERE vendor_id = $1 AND user_id = $2 LIMIT 1',
+      [vendorId, userId]
+    );
+    if (memberCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Vendor no encontrado o sin permiso' });
+    }
+    const result = await query(
+      `SELECT id, vendor_id, account_holder_name, iban, swift_bic, bank_name, is_default, created_at, updated_at
+       FROM vendor_bank_accounts
+       WHERE vendor_id = $1 AND COALESCE(is_active, true) = true
+       ORDER BY is_default DESC, created_at ASC`,
+      [vendorId]
+    );
+    res.json({ data: result.rows });
+  } catch (error) {
+    console.error('Vendor bank accounts list error', error);
+    res.status(500).json({ message: formatApiError('listar cuentas bancarias', error) });
+  }
+});
+
+router.post('/:id/bank-accounts', async (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(401).json({ message: 'Token inválido o expirado' });
+  }
+  const vendorId = req.params.id;
+  const body = req.body || {};
+  const account_holder_name = body.account_holder_name != null ? String(body.account_holder_name).trim() : '';
+  const iban = body.iban != null ? String(body.iban).trim().replace(/\s/g, '') : '';
+  if (!account_holder_name || !iban) {
+    return res.status(400).json({ message: 'Titular de la cuenta e IBAN son obligatorios' });
+  }
+  try {
+    const memberCheck = await query(
+      'SELECT 1 FROM vendor_users WHERE vendor_id = $1 AND user_id = $2 LIMIT 1',
+      [vendorId, userId]
+    );
+    if (memberCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Vendor no encontrado o sin permiso' });
+    }
+    const swift_bic = body.swift_bic != null ? String(body.swift_bic).trim() || null : null;
+    const bank_name = body.bank_name != null ? String(body.bank_name).trim() || null : null;
+    const is_default = Boolean(body.is_default);
+    if (is_default) {
+      await query(
+        'UPDATE vendor_bank_accounts SET is_default = false WHERE vendor_id = $1 AND COALESCE(is_active, true) = true',
+        [vendorId]
+      );
+    }
+    const result = await query(
+      `INSERT INTO vendor_bank_accounts (id, vendor_id, account_holder_name, iban, swift_bic, bank_name, is_default, created_at, updated_at)
+       VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5, $6, NOW(), NOW())
+       RETURNING id, vendor_id, account_holder_name, iban, swift_bic, bank_name, is_default, created_at, updated_at`,
+      [vendorId, account_holder_name, iban, swift_bic, bank_name, is_default]
+    );
+    res.status(201).json({ data: result.rows[0] });
+  } catch (error) {
+    console.error('Vendor bank account create error', error);
+    res.status(500).json({ message: formatApiError('crear cuenta bancaria', error) });
+  }
+});
+
+router.delete('/:id/bank-accounts/:accountId', async (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!userId) {
+    return res.status(401).json({ message: 'Token inválido o expirado' });
+  }
+  const { id: vendorId, accountId } = req.params;
+  try {
+    const memberCheck = await query(
+      'SELECT 1 FROM vendor_users WHERE vendor_id = $1 AND user_id = $2 LIMIT 1',
+      [vendorId, userId]
+    );
+    if (memberCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Vendor no encontrado o sin permiso' });
+    }
+    const result = await query(
+      `UPDATE vendor_bank_accounts SET is_active = false, updated_at = NOW()
+       WHERE id = $1 AND vendor_id = $2 AND COALESCE(is_active, true) = true
+       RETURNING id`,
+      [accountId, vendorId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Cuenta bancaria no encontrada' });
+    }
+    res.status(204).send();
+  } catch (error) {
+    console.error('Vendor bank account delete error', error);
+    res.status(500).json({ message: formatApiError('eliminar cuenta bancaria', error) });
   }
 });
 

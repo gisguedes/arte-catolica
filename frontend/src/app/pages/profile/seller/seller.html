@@ -21,273 +21,464 @@
       </div>
     </div>
 
-    <div class="tabs">
-      <button
-        class="tab-btn"
-        [class.active]="activeTab() === 'products'"
-        (click)="setTab('products')"
-      >
-        Mis Productos
-      </button>
-      <button class="tab-btn" [class.active]="activeTab() === 'orders'" (click)="setTab('orders')">
-        Pedidos
-      </button>
-      <button class="tab-btn" [class.active]="activeTab() === 'profile'" (click)="setTab('profile')">
-        Perfil público
-      </button>
-      <button
-        *ngIf="vendor()?.my_role === VENDOR_USER_ROLES.OWNER"
-        class="tab-btn"
-        [class.active]="activeTab() === 'users'"
-        (click)="setTab('users')"
-      >
-        Usuarios
-      </button>
-      <button class="tab-btn" [class.active]="activeTab() === 'bank'" (click)="setTab('bank')">
-        Datos Bancarios
-      </button>
-      <button
-        class="tab-btn"
-        [class.active]="activeTab() === 'settings'"
-        (click)="setTab('settings')"
-      >
-        Configuración
-      </button>
-    </div>
-
-    <!-- Tab: Productos -->
-    <div class="tab-content" *ngIf="activeTab() === 'products'">
-      <div class="products-section">
-        <div class="section-header">
-          <h2>Mis Productos</h2>
-          <button class="btn-primary">Nuevo Producto</button>
-        </div>
-        <div class="empty-state" *ngIf="products().length === 0">
-          <p>No has creado productos aún</p>
-          <button class="btn-primary">Crear Primer Producto</button>
-        </div>
-        <div class="products-list" *ngIf="products().length > 0">
-          <!-- Products will be displayed here -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab: Pedidos -->
-    <div class="tab-content" *ngIf="activeTab() === 'orders'">
-      <div class="orders-section">
-        <h2>Pedidos Recibidos</h2>
-        <div class="empty-state" *ngIf="orders().length === 0">
-          <p>No tienes pedidos aún</p>
-        </div>
-        <div class="orders-list" *ngIf="orders().length > 0">
-          <!-- Orders will be displayed here -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab: Perfil público -->
-    <div class="tab-content" *ngIf="activeTab() === 'profile'">
-      <div class="profile-section">
-        <h2>Perfil público</h2>
-        <p class="section-description">Estos datos son visibles para los visitantes en tu página de artista.</p>
-        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
-          <h3>Foto de perfil</h3>
-          <div class="image-upload form-group">
-            <div class="image-preview">
-              <img
-                *ngIf="imagePreview()"
-                [src]="imagePreview()"
-                alt="Foto del artista"
-                class="profile-image"
-              />
-              <span *ngIf="!imagePreview()" class="image-placeholder">
-                {{ (vendor()?.name?.charAt(0) || '?') + (vendor()?.surname?.charAt(0) || '') }}
-              </span>
-            </div>
-            <div class="image-actions">
-              <input
-                type="file"
-                #imageInput
-                accept="image/jpeg,image/png,image/webp"
-                (change)="onImageSelected($event)"
-                class="image-input-hidden"
-              />
-              <button type="button" class="btn-photo btn-photo-upload" (click)="imageInput.click()">
-                {{ imagePreview() ? 'Cambiar foto' : 'Subir foto' }}
-              </button>
-              <button
-                *ngIf="imagePreview()"
-                type="button"
-                class="btn-photo btn-photo-remove"
-                (click)="removeImage()"
-              >
-                Quitar foto
-              </button>
-            </div>
-          </div>
-          <h3>Datos básicos</h3>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Nombre</label>
-              <input type="text" formControlName="name" placeholder="Nombre o Razón Social" />
-            </div>
-            <div class="form-group">
-              <label>Apellidos</label>
-              <input type="text" formControlName="surname" placeholder="Apellidos" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Sitio web</label>
-            <input type="url" formControlName="website" placeholder="https://..." />
-          </div>
-          <div class="form-group">
-            <label>Ciudad</label>
-            <input type="text" formControlName="city" placeholder="Ciudad" />
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Código postal</label>
-              <input type="text" formControlName="postal_code" placeholder="28001" />
-            </div>
-            <div class="form-group">
-              <label>País</label>
-              <input type="text" formControlName="country" placeholder="España" />
-            </div>
-          </div>
-          <h3>Biografía</h3>
-          <div class="form-group">
-            <label>Descripción breve</label>
-            <input type="text" formControlName="short_description" placeholder="Frase corta para la tarjeta de artista..." maxlength="200" />
-          </div>
-          <div class="form-group">
-            <label>Descripción completa</label>
-            <textarea formControlName="description" rows="6" placeholder="Cuéntanos sobre ti y tu arte..."></textarea>
-          </div>
-          <p class="form-error" *ngIf="profileError()">{{ profileError() }}</p>
-          <p class="form-success" *ngIf="profileSuccess()">Cambios guardados correctamente.</p>
-          <button type="submit" class="btn-primary" [disabled]="profileForm.invalid || isSavingProfile()">
-            {{ isSavingProfile() ? 'Guardando...' : 'Guardar perfil público' }}
+    <div class="seller-layout">
+      <nav class="sidebar" aria-label="Grupos del perfil">
+        <button
+          *ngFor="let section of SECTIONS"
+          type="button"
+          class="sidebar-item"
+          [class.active]="currentSectionId() === section.id"
+          (click)="selectSection(section.id)"
+        >
+          {{ section.label }}
+        </button>
+      </nav>
+      <div class="main-area">
+        <div class="tabs">
+          <button
+            *ngFor="let tab of currentSectionTabs()"
+            type="button"
+            class="tab-btn"
+            [class.active]="activeTab() === tab.id"
+            (click)="setTab(tab.id)"
+          >
+            {{ tab.label }}
           </button>
-        </form>
-      </div>
-    </div>
+        </div>
 
-    <!-- Tab: Usuarios (solo owner) -->
-    <div class="tab-content" *ngIf="activeTab() === 'users'">
-      <div class="users-section">
-        <h2>Usuarios del equipo</h2>
-        <p class="section-description">
-          Añade usuarios por email para que tengan acceso al perfil de vendedor cuando inicien sesión.
-        </p>
-        <p class="form-hint form-hint-notice">
-          Solo puedes añadir usuarios que ya estén registrados en la plataforma.
-        </p>
-        <form [formGroup]="addUserForm" (ngSubmit)="addUser()" class="add-user-form">
-          <div class="add-user-card">
-            <div class="add-user-fields">
-              <div class="form-group add-user-email">
-                <label for="add-user-email">Email</label>
+        <!-- Tab: Productos -->
+        <div class="tab-content" *ngIf="activeTab() === 'products'">
+          <div class="products-section">
+            <div class="section-header">
+              <h2>Mis Productos</h2>
+              <button class="btn-primary">Nuevo Producto</button>
+            </div>
+            <div class="empty-state" *ngIf="products().length === 0">
+              <p>No has creado productos aún</p>
+              <button class="btn-primary">Crear Primer Producto</button>
+            </div>
+            <div class="products-list" *ngIf="products().length > 0">
+              <!-- Products will be displayed here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Pedidos -->
+        <div class="tab-content" *ngIf="activeTab() === 'orders'">
+          <div class="orders-section">
+            <h2>Pedidos Recibidos</h2>
+            <div class="empty-state" *ngIf="orders().length === 0">
+              <p>No tienes pedidos aún</p>
+            </div>
+            <div class="orders-list" *ngIf="orders().length > 0">
+              <!-- Orders will be displayed here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Perfil público -->
+        <div class="tab-content" *ngIf="activeTab() === 'profile'">
+          <div class="profile-section">
+            <h2>Perfil público</h2>
+            <p class="section-description">
+              Estos datos son visibles para los visitantes en tu página de artista.
+            </p>
+            <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
+              <h3>Foto de perfil</h3>
+              <div class="image-upload form-group">
+                <div class="image-preview">
+                  <img
+                    *ngIf="imagePreview()"
+                    [src]="imagePreview()"
+                    alt="Foto del artista"
+                    class="profile-image"
+                  />
+                  <span *ngIf="!imagePreview()" class="image-placeholder">
+                    {{ (vendor()?.name?.charAt(0) || '?') + (vendor()?.surname?.charAt(0) || '') }}
+                  </span>
+                </div>
+                <div class="image-actions">
+                  <input
+                    type="file"
+                    #imageInput
+                    accept="image/jpeg,image/png,image/webp"
+                    (change)="onImageSelected($event)"
+                    class="image-input-hidden"
+                  />
+                  <button
+                    type="button"
+                    class="btn-photo btn-photo-upload"
+                    (click)="imageInput.click()"
+                  >
+                    {{ imagePreview() ? 'Cambiar foto' : 'Subir foto' }}
+                  </button>
+                  <button
+                    *ngIf="imagePreview()"
+                    type="button"
+                    class="btn-photo btn-photo-remove"
+                    (click)="removeImage()"
+                  >
+                    Quitar foto
+                  </button>
+                </div>
+              </div>
+              <h3>Datos básicos</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Nombre</label>
+                  <input type="text" formControlName="name" placeholder="Nombre o Razón Social" />
+                </div>
+                <div class="form-group">
+                  <label>Apellidos</label>
+                  <input type="text" formControlName="surname" placeholder="Apellidos" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Sitio web</label>
+                <input type="url" formControlName="website" placeholder="https://..." />
+              </div>
+              <div class="form-group">
+                <label>Ciudad</label>
+                <input type="text" formControlName="city" placeholder="Ciudad" />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Código postal</label>
+                  <input type="text" formControlName="postal_code" placeholder="28001" />
+                </div>
+                <div class="form-group">
+                  <label>País</label>
+                  <input type="text" formControlName="country" placeholder="España" />
+                </div>
+              </div>
+              <h3>Tipos de artista</h3>
+              <p class="form-hint">
+                Selecciona uno o varios tipos que definan tu trabajo. Se mostrarán en tu página de
+                artista.
+              </p>
+              <div class="artist-types-checkboxes">
+                <label *ngFor="let type of artistTypes()" class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="isArtistTypeSelected(type.id)"
+                    (change)="toggleArtistType(type.id)"
+                  />
+                  <span>{{ type.name }}</span>
+                </label>
+              </div>
+              <h3>Biografía</h3>
+              <div class="form-group">
+                <label>Descripción breve</label>
                 <input
-                  id="add-user-email"
-                  type="email"
-                  formControlName="email"
-                  placeholder="usuario&#64;ejemplo.com"
-                  class="input-modern"
+                  type="text"
+                  formControlName="short_description"
+                  placeholder="Frase corta para la tarjeta de artista..."
+                  maxlength="200"
                 />
               </div>
-              <div class="form-group add-user-role">
-                <label for="add-user-role">Rol</label>
-                <select id="add-user-role" formControlName="role" class="select-modern">
-                  @for (r of VENDOR_ASSIGNABLE_ROLES; track r) {
-                    <option [value]="r">{{ roleLabel(r) }}</option>
-                  }
-                </select>
+              <div class="form-group">
+                <label>Descripción completa</label>
+                <textarea
+                  formControlName="description"
+                  rows="6"
+                  placeholder="Cuéntanos sobre ti y tu arte..."
+                ></textarea>
               </div>
-              <div class="form-group add-user-submit">
+              <p class="form-error" *ngIf="profileError()">{{ profileError() }}</p>
+              <p class="form-success" *ngIf="profileSuccess()">Cambios guardados correctamente.</p>
+              <button
+                type="submit"
+                class="btn-primary"
+                [disabled]="profileForm.invalid || isSavingProfile()"
+              >
+                {{ isSavingProfile() ? 'Guardando...' : 'Guardar perfil público' }}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Tab: Usuarios (solo owner) -->
+        <div class="tab-content" *ngIf="activeTab() === 'users'">
+          <div class="users-section">
+            <h2>Usuarios del equipo</h2>
+            <p class="section-description">
+              Añade usuarios por email para que tengan acceso al perfil de vendedor cuando inicien
+              sesión.
+            </p>
+            <p class="form-hint form-hint-notice">
+              Solo puedes añadir usuarios que ya estén registrados en la plataforma.
+            </p>
+            <form [formGroup]="addUserForm" (ngSubmit)="addUser()" class="add-user-form">
+              <div class="add-user-card">
+                <div class="add-user-fields">
+                  <div class="form-group add-user-email">
+                    <label for="add-user-email">Email</label>
+                    <input
+                      id="add-user-email"
+                      type="email"
+                      formControlName="email"
+                      placeholder="usuario&#64;ejemplo.com"
+                      class="input-modern"
+                    />
+                  </div>
+                  <div class="form-group add-user-role">
+                    <label for="add-user-role">Rol</label>
+                    <select id="add-user-role" formControlName="role" class="select-modern">
+                      @for (r of VENDOR_ASSIGNABLE_ROLES; track r) {
+                        <option [value]="r">{{ roleLabel(r) }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="form-group add-user-submit">
+                    <button
+                      type="submit"
+                      class="btn-primary btn-add-user"
+                      [disabled]="addUserForm.invalid || isAddingUser()"
+                    >
+                      {{ isAddingUser() ? 'Añadiendo...' : 'Añadir usuario' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p class="form-error" *ngIf="usersError()">{{ usersError() }}</p>
+              <p class="form-success" *ngIf="usersSuccess()">{{ usersSuccess() }}</p>
+            </form>
+            <div class="users-list">
+              <div class="user-card" *ngFor="let u of vendorUsers()">
+                <div class="user-info">
+                  <span class="user-name">{{ u.name }} {{ u.surname }}</span>
+                  <span class="user-email">{{ u.email }}</span>
+                  <span class="user-role role-badge" [class]="'role-' + u.role">{{
+                    roleLabel(u.role)
+                  }}</span>
+                </div>
                 <button
-                  type="submit"
-                  class="btn-primary btn-add-user"
-                  [disabled]="addUserForm.invalid || isAddingUser()"
+                  *ngIf="u.role !== VENDOR_USER_ROLES.OWNER && u.user_id !== user()?.id"
+                  type="button"
+                  class="btn-remove-user"
+                  (click)="removeUser(u)"
+                  [disabled]="isRemovingUser()"
+                  title="Eliminar del equipo"
                 >
-                  {{ isAddingUser() ? 'Añadiendo...' : 'Añadir usuario' }}
+                  Eliminar
                 </button>
               </div>
             </div>
           </div>
-          <p class="form-error" *ngIf="usersError()">{{ usersError() }}</p>
-          <p class="form-success" *ngIf="usersSuccess()">{{ usersSuccess() }}</p>
-        </form>
-        <div class="users-list">
-          <div class="user-card" *ngFor="let u of vendorUsers()">
-            <div class="user-info">
-              <span class="user-name">{{ u.name }} {{ u.surname }}</span>
-              <span class="user-email">{{ u.email }}</span>
-              <span class="user-role role-badge" [class]="'role-' + u.role">{{ roleLabel(u.role) }}</span>
+        </div>
+
+        <!-- Tab: Datos Bancarios -->
+        <div class="tab-content" *ngIf="activeTab() === 'bank'">
+          <div class="bank-section">
+            <h2>Datos Bancarios</h2>
+            <p class="section-description">
+              Configura tus cuentas bancarias para recibir pagos. Solo tú y los usuarios del equipo
+              con acceso pueden ver estos datos.
+            </p>
+
+            <p class="form-success bank-success-msg" *ngIf="bankSuccess()">{{ bankSuccess() }}</p>
+
+            <!-- Lista de cuentas al inicio -->
+            <div class="bank-accounts-list" *ngIf="bankAccounts().length > 0">
+              <div class="bank-account-card" *ngFor="let account of bankAccounts()">
+                <div class="bank-account-body">
+                  <div class="bank-account-main">
+                    <span class="bank-account-holder">{{ account.account_holder_name }}</span>
+                    <span class="bank-account-default" *ngIf="account.is_default">Por defecto</span>
+                  </div>
+                  <!-- Vista resumida: IBAN oculto (solo últimos 4) -->
+                  <div class="bank-account-summary" *ngIf="bankAccountExpandedId() !== account.id">
+                    <span class="bank-account-iban-masked">{{ maskIban(account.iban) }}</span>
+                    <span class="bank-account-bank" *ngIf="account.bank_name">{{
+                      account.bank_name
+                    }}</span>
+                  </div>
+                  <!-- Vista completa: solo lectura -->
+                  <dl class="bank-account-details" *ngIf="bankAccountExpandedId() === account.id">
+                    <dt>IBAN</dt>
+                    <dd class="bank-account-iban">{{ formatIbanDisplay(account.iban) }}</dd>
+                    <ng-container *ngIf="account.swift_bic">
+                      <dt>SWIFT/BIC</dt>
+                      <dd>{{ account.swift_bic }}</dd>
+                    </ng-container>
+                    <ng-container *ngIf="account.bank_name">
+                      <dt>Banco</dt>
+                      <dd>{{ account.bank_name }}</dd>
+                    </ng-container>
+                  </dl>
+                </div>
+                <div class="bank-account-actions">
+                  <button
+                    type="button"
+                    class="btn-bank-secondary"
+                    (click)="toggleBankAccountView(account.id!)"
+                  >
+                    {{ bankAccountExpandedId() === account.id ? 'Ocultar' : 'Ver datos' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-bank-danger"
+                    (click)="confirmRemoveBankAccount(account)"
+                    [disabled]="isRemovingBank()"
+                    title="Eliminar cuenta"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="empty-state bank-empty" *ngIf="bankAccounts().length === 0">
+              <p>No tienes ninguna cuenta bancaria configurada.</p>
             </div>
             <button
-              *ngIf="u.role !== VENDOR_USER_ROLES.OWNER && u.user_id !== user()?.id"
               type="button"
-              class="btn-remove-user"
-              (click)="removeUser(u)"
-              [disabled]="isRemovingUser()"
-              title="Eliminar del equipo"
+              class="btn-primary btn-new-account"
+              (click)="openNewBankAccountModal()"
             >
-              Eliminar
+              Nueva cuenta
             </button>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Tab: Datos Bancarios -->
-    <div class="tab-content" *ngIf="activeTab() === 'bank'">
-      <div class="bank-section">
-        <h2>Datos Bancarios</h2>
-        <p class="section-description">Configura tus datos bancarios para recibir pagos</p>
-        <div class="empty-state" *ngIf="bankAccounts().length === 0">
-          <p>No has configurado datos bancarios</p>
-          <button class="btn-primary">Agregar Cuenta Bancaria</button>
+        <!-- Modal nueva cuenta bancaria -->
+        <div
+          class="modal-overlay"
+          *ngIf="bankAccountModalOpen()"
+          (click)="closeNewBankAccountModal()"
+        >
+          <div class="modal-content bank-form-modal" (click)="$event.stopPropagation()">
+            <h3>Nueva cuenta bancaria</h3>
+            <form
+              [formGroup]="bankAccountForm"
+              (ngSubmit)="addBankAccount()"
+              class="bank-form profile-form"
+            >
+              <div class="form-group">
+                <label>Titular de la cuenta</label>
+                <input
+                  type="text"
+                  formControlName="account_holder_name"
+                  placeholder="Nombre o razón social"
+                />
+              </div>
+              <div class="form-group">
+                <label>IBAN</label>
+                <input
+                  type="text"
+                  formControlName="iban"
+                  placeholder="ES00 0000 0000 0000 0000 0000"
+                  maxlength="34"
+                />
+                <span class="form-hint">Se guardará sin espacios.</span>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>SWIFT/BIC (opcional)</label>
+                  <input type="text" formControlName="swift_bic" placeholder="CAIXESBB" />
+                </div>
+                <div class="form-group">
+                  <label>Nombre del banco (opcional)</label>
+                  <input type="text" formControlName="bank_name" placeholder="Nombre del banco" />
+                </div>
+              </div>
+              <div class="form-group bank-default">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="is_default" />
+                  Usar como cuenta por defecto para pagos
+                </label>
+              </div>
+              <p class="form-error" *ngIf="bankError()">{{ bankError() }}</p>
+              <div class="modal-actions">
+                <button type="button" class="btn-secondary" (click)="closeNewBankAccountModal()">
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  class="btn-primary"
+                  [disabled]="bankAccountForm.invalid || isAddingBank()"
+                >
+                  {{ isAddingBank() ? 'Añadiendo...' : 'Añadir cuenta' }}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div class="bank-accounts-list" *ngIf="bankAccounts().length > 0">
-          <!-- Bank accounts will be displayed here -->
+
+        <!-- Modal confirmar eliminar cuenta bancaria -->
+        <div
+          class="modal-overlay"
+          *ngIf="bankAccountToRemove()"
+          (click)="cancelRemoveBankAccount()"
+        >
+          <div class="modal-content bank-modal" (click)="$event.stopPropagation()">
+            <h3>¿Eliminar esta cuenta?</h3>
+            <p>
+              La cuenta <strong>{{ bankAccountToRemove()?.account_holder_name }}</strong> ({{
+                maskIban(bankAccountToRemove()?.iban ?? '')
+              }}) se desactivará y dejará de mostrarse en tu perfil, pero se mantendrá en nuestros
+              registros por historial.
+            </p>
+            <div class="modal-actions">
+              <button type="button" class="btn-secondary" (click)="cancelRemoveBankAccount()">
+                Cancelar
+              </button>
+              <button
+                type="button"
+                class="btn-primary btn-danger"
+                (click)="removeBankAccount()"
+                [disabled]="isRemovingBank()"
+              >
+                {{ isRemovingBank() ? 'Eliminando...' : 'Sí, eliminar' }}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Tab: Configuración -->
-    <div class="tab-content" *ngIf="activeTab() === 'settings'">
-      <div class="settings-section">
-        <h2>Configuración</h2>
-        <p class="section-description">Datos de contacto y logística. No se muestran públicamente.</p>
-        <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" class="settings-form">
-          <h3>Datos de contacto (privados)</h3>
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" [value]="user()?.email" disabled readonly />
-            <span class="form-hint">El email se toma de tu cuenta de usuario.</span>
-          </div>
-          <div class="form-group">
-            <label>Teléfono</label>
-            <input type="tel" formControlName="phone" placeholder="+34 600 000 000" />
-          </div>
-          <div class="form-group">
-            <label>NIF/CIF</label>
-            <input type="text" formControlName="nif" placeholder="12345678A" />
-          </div>
+        <!-- Tab: Configuración -->
+        <div class="tab-content" *ngIf="activeTab() === 'settings'">
+          <div class="settings-section">
+            <h2>Configuración</h2>
+            <p class="section-description">
+              Datos de contacto y logística. No se muestran públicamente.
+            </p>
+            <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" class="settings-form">
+              <h3>Datos de contacto (privados)</h3>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" [value]="user()?.email" disabled readonly />
+                <span class="form-hint">El email se toma de tu cuenta de usuario.</span>
+              </div>
+              <div class="form-group">
+                <label>Teléfono</label>
+                <input type="tel" formControlName="phone" placeholder="+34 600 000 000" />
+              </div>
+              <div class="form-group">
+                <label>NIF/CIF</label>
+                <input type="text" formControlName="nif" placeholder="12345678A" />
+              </div>
 
-          <h3>Envíos</h3>
-          <div class="form-group">
-            <label>Plazo de preparación (días)</label>
-            <input type="number" formControlName="preparation_days" min="0" max="30" />
-            <span class="form-hint">Días que tardas en preparar un pedido antes del envío.</span>
-          </div>
+              <h3>Envíos</h3>
+              <div class="form-group">
+                <label>Plazo de preparación (días)</label>
+                <input type="number" formControlName="preparation_days" min="0" max="30" />
+                <span class="form-hint"
+                  >Días que tardas en preparar un pedido antes del envío.</span
+                >
+              </div>
 
-          <p class="form-error" *ngIf="settingsError()">{{ settingsError() }}</p>
-          <p class="form-success" *ngIf="settingsSuccess()">Cambios guardados correctamente.</p>
-          <button type="submit" class="btn-primary" [disabled]="settingsForm.invalid || isSavingSettings()">
-            {{ isSavingSettings() ? 'Guardando...' : 'Guardar configuración' }}
-          </button>
-        </form>
+              <p class="form-error" *ngIf="settingsError()">{{ settingsError() }}</p>
+              <p class="form-success" *ngIf="settingsSuccess()">Cambios guardados correctamente.</p>
+              <button
+                type="submit"
+                class="btn-primary"
+                [disabled]="settingsForm.invalid || isSavingSettings()"
+              >
+                {{ isSavingSettings() ? 'Guardando...' : 'Guardar configuración' }}
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </div>

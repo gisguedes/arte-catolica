@@ -36,7 +36,12 @@ export class VendorService {
     return this.apiService.patch<{ data: Artist }>(`vendors/${vendorId}/status`, { status });
   }
 
-  updateVendor(vendorId: string, payload: Partial<Artist & { short_description?: string; description?: string; preparation_days?: number }>): Observable<{ data: Artist }> {
+  updateVendor(
+    vendorId: string,
+    payload: Partial<
+      Artist & { short_description?: string; description?: string; preparation_days?: number }
+    >,
+  ): Observable<{ data: Artist }> {
     return this.apiService.patch<{ data: Artist }>(`vendors/${vendorId}`, payload);
   }
 
@@ -44,13 +49,52 @@ export class VendorService {
     return this.apiService.get<{ data: VendorUser[] }>(`vendors/${vendorId}/users`);
   }
 
-  addVendorUser(vendorId: string, email: string, role: VendorUserRole): Observable<{ data: VendorUser }> {
-    return this.apiService.post<{ data: VendorUser }>(`vendors/${vendorId}/users`, { email: email.trim(), role });
+  addVendorUser(
+    vendorId: string,
+    email: string,
+    role: VendorUserRole,
+  ): Observable<{ data: VendorUser }> {
+    return this.apiService.post<{ data: VendorUser }>(`vendors/${vendorId}/users`, {
+      email: email.trim(),
+      role,
+    });
   }
 
   removeVendorUser(vendorId: string, userId: string): Observable<void> {
     return this.apiService.delete<void>(`vendors/${vendorId}/users/${userId}`);
   }
+
+  getBankAccounts(vendorId: string): Observable<VendorBankAccount[]> {
+    return this.apiService
+      .get<{ data: VendorBankAccount[] }>(`vendors/${vendorId}/bank-accounts`)
+      .pipe(map((res) => res.data ?? []));
+  }
+
+  addBankAccount(
+    vendorId: string,
+    payload: Partial<VendorBankAccount>,
+  ): Observable<{ data: VendorBankAccount }> {
+    return this.apiService.post<{ data: VendorBankAccount }>(
+      `vendors/${vendorId}/bank-accounts`,
+      payload,
+    );
+  }
+
+  removeBankAccount(vendorId: string, accountId: string): Observable<void> {
+    return this.apiService.delete<void>(`vendors/${vendorId}/bank-accounts/${accountId}`);
+  }
+}
+
+export interface VendorBankAccount {
+  id: string;
+  vendor_id?: string;
+  account_holder_name: string;
+  iban: string;
+  swift_bic?: string | null;
+  bank_name?: string | null;
+  is_default: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface VendorUser {

@@ -3,15 +3,18 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
-import { VendorService, VendorUser } from '../../../services/vendor.service';
+import { VendorService, VendorUser, VendorBankAccount } from '../../../services/vendor.service';
 import { ProductService } from '../../../services/product.service';
+import { ArtistService } from '../../../services/artist.service';
 import { LocaleService } from '../../../services/locale.service';
-import { Artist, Product } from '../../../models/product.model';
+import { Artist, ArtistType, Product } from '../../../models/product.model';
 import {
   VENDOR_USER_ROLES,
   VENDOR_ASSIGNABLE_ROLES,
   type VendorUserRole,
 } from '../../../constants/vendor-roles';
+
+type TabId = 'products' | 'orders' | 'bank' | 'profile' | 'users' | 'settings';
 
 @Component({
   selector: 'app-seller-profile',
@@ -24,6 +27,7 @@ export class SellerProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private vendorService = inject(VendorService);
   private productService = inject(ProductService);
+  private artistService = inject(ArtistService);
   private localeService = inject(LocaleService);
   private fb = inject(FormBuilder);
 
@@ -32,22 +36,82 @@ export class SellerProfileComponent implements OnInit {
 
   locale = this.localeService.locale;
   user = this.authService.user;
-  activeTab = signal<'products' | 'orders' | 'bank' | 'profile' | 'users' | 'settings'>('products');
+  activeTab = signal<TabId>('products');
+
+  /** Grupos del menú vertical; cada uno tiene sub-tabs horizontales */
+  readonly SECTIONS: {
+    id: string;
+    label: string;
+    tabs: { id: TabId; label: string; ownerOnly?: boolean }[];
+  }[] = [
+    {
+      id: 'principal',
+      label: 'Principal',
+      tabs: [
+        { id: 'products', label: 'Mis Productos' },
+        { id: 'orders', label: 'Pedidos' },
+      ],
+    },
+    { id: 'public', label: 'Datos públicos', tabs: [{ id: 'profile', label: 'Perfil público' }] },
+    { id: 'finance', label: 'Finanzas', tabs: [{ id: 'bank', label: 'Datos bancarios' }] },
+    {
+      id: 'team',
+      label: 'Equipo y configuración',
+      tabs: [
+        { id: 'users', label: 'Usuarios', ownerOnly: true },
+        { id: 'settings', label: 'Configuración' },
+      ],
+    },
+  ];
+
+  /** Sección activa (derivada del tab actual) */
+  currentSectionId = computed(() => {
+    const tab = this.activeTab();
+    const section = this.SECTIONS.find((s) => s.tabs.some((t) => t.id === tab));
+    return section?.id ?? 'principal';
+  });
+
+  /** Sub-tabs horizontales de la sección actual (respetando ownerOnly) */
+  currentSectionTabs = computed(() => {
+    const section = this.SECTIONS.find((s) => s.id === this.currentSectionId());
+    if (!section) return [];
+    const isOwner = this.vendor()?.my_role === this.VENDOR_USER_ROLES.OWNER;
+    return section.tabs.filter((t) => !t.ownerOnly || isOwner);
+  });
+
+  selectSection(sectionId: string): void {
+    const section = this.SECTIONS.find((s) => s.id === sectionId);
+    if (!section) return;
+    const isOwner = this.vendor()?.my_role === this.VENDOR_USER_ROLES.OWNER;
+    const first = section.tabs.find((t) => !t.ownerOnly || isOwner);
+    if (first) this.setTab(first.id);
+  }
 
   vendor = signal<Artist | null>(null);
   vendorUsers = signal<VendorUser[]>([]);
+  artistTypes = signal<ArtistType[]>([]);
   products = signal<Product[]>([]);
   orders = signal<any[]>([]);
-  bankAccounts = signal<any[]>([]);
+  bankAccounts = signal<VendorBankAccount[]>([]);
+  /** Cuenta seleccionada para eliminar; si no es null se muestra el modal de confirmación */
+  bankAccountToRemove = signal<VendorBankAccount | null>(null);
+  /** Modal para crear nueva cuenta bancaria */
+  bankAccountModalOpen = signal(false);
+  /** Id de la cuenta cuyos datos completos se muestran (solo lectura); null = IBAN oculto */
+  bankAccountExpandedId = signal<string | null>(null);
   isUpdatingStatus = signal(false);
   isSavingProfile = signal(false);
   isSavingSettings = signal(false);
+  isAddingBank = signal(false);
+  isRemovingBank = signal(false);
   isAddingUser = signal(false);
   isRemovingUser = signal(false);
   profileError = signal('');
   profileSuccess = signal(false);
   settingsError = signal('');
   settingsSuccess = signal(false);
+  bankError = signal('');
+  bankSuccess = signal('');
   usersError = signal('');
   usersSuccess = signal('');
   /** Base64 de nueva imagen, '' = usuario quiere quitar, null = sin cambio */
@@ -60,6 +124,7 @@ export class SellerProfileComponent implements OnInit {
     city: [''],
     postal_code: [''],
     country: [''],
+    artist_type_ids: [[] as string[]],
     short_description: [''],
     description: [''],
   });
@@ -83,17 +148,133 @@ export class SellerProfileComponent implements OnInit {
     role: [VENDOR_USER_ROLES.ADMIN, [Validators.required]],
   });
 
-  setTab(tab: 'products' | 'orders' | 'bank' | 'profile' | 'users' | 'settings'): void {
+  bankAccountForm: FormGroup = this.fb.group({
+    account_holder_name: ['', [Validators.required]],
+    iban: ['', [Validators.required]],
+    swift_bic: [''],
+    bank_name: [''],
+    is_default: [false],
+  });
+
+  setTab(tab: TabId): void {
     this.profileSuccess.set(false);
     this.settingsSuccess.set(false);
+    this.bankSuccess.set('');
     this.usersSuccess.set('');
     this.profileError.set('');
     this.settingsError.set('');
+    this.bankError.set('');
     this.usersError.set('');
     this.activeTab.set(tab);
     if (tab === 'users') {
       this.loadVendorUsers();
     }
+    if (tab === 'bank') {
+      this.loadBankAccounts();
+    }
+  }
+
+  maskIban(iban: string): string {
+    if (!iban || iban.length < 8) return iban;
+    return '****' + iban.slice(-4);
+  }
+
+  /** IBAN formateado con espacios cada 4 caracteres para lectura */
+  formatIbanDisplay(iban: string): string {
+    if (!iban) return '';
+    const clean = iban.replace(/\s/g, '');
+    return clean.replace(/(.{4})/g, '$1 ').trim();
+  }
+
+  openNewBankAccountModal(): void {
+    this.bankAccountForm.reset({
+      account_holder_name: '',
+      iban: '',
+      swift_bic: '',
+      bank_name: '',
+      is_default: false,
+    });
+    this.bankError.set('');
+    this.bankAccountModalOpen.set(true);
+  }
+
+  closeNewBankAccountModal(): void {
+    this.bankAccountModalOpen.set(false);
+  }
+
+  toggleBankAccountView(accountId: string): void {
+    this.bankAccountExpandedId.update((id) => (id === accountId ? null : accountId));
+  }
+
+  private loadBankAccounts(): void {
+    const v = this.vendor();
+    if (!v?.id) return;
+    this.vendorService.getBankAccounts(v.id).subscribe({
+      next: (list) => this.bankAccounts.set(list),
+      error: () => this.bankAccounts.set([]),
+    });
+  }
+
+  addBankAccount(): void {
+    const v = this.vendor();
+    if (!v?.id || this.bankAccountForm.invalid) return;
+    this.isAddingBank.set(true);
+    this.bankError.set('');
+    this.bankSuccess.set('');
+    const payload = {
+      ...this.bankAccountForm.value,
+      iban: (this.bankAccountForm.value.iban || '').replace(/\s/g, ''),
+    };
+    this.vendorService.addBankAccount(v.id, payload).subscribe({
+      next: (res) => {
+        this.bankAccounts.update((list) => [...list, res.data]);
+        this.bankAccountForm.reset({
+          account_holder_name: '',
+          iban: '',
+          swift_bic: '',
+          bank_name: '',
+          is_default: false,
+        });
+        this.bankSuccess.set('Cuenta añadida correctamente.');
+        this.bankAccountModalOpen.set(false);
+        this.isAddingBank.set(false);
+      },
+      error: (err) => {
+        this.bankError.set(err.error?.message ?? 'Error al añadir cuenta');
+        this.isAddingBank.set(false);
+      },
+    });
+  }
+
+  confirmRemoveBankAccount(account: VendorBankAccount): void {
+    this.bankAccountToRemove.set(account);
+  }
+
+  cancelRemoveBankAccount(): void {
+    this.bankAccountToRemove.set(null);
+  }
+
+  removeBankAccount(): void {
+    const account = this.bankAccountToRemove();
+    const v = this.vendor();
+    if (!v?.id || !account?.id) {
+      this.bankAccountToRemove.set(null);
+      return;
+    }
+    this.isRemovingBank.set(true);
+    this.bankError.set('');
+    this.vendorService.removeBankAccount(v.id, account.id).subscribe({
+      next: () => {
+        this.bankAccounts.update((list) => list.filter((a) => a.id !== account.id));
+        this.bankSuccess.set('Cuenta desactivada. Se mantiene en el historial.');
+        this.bankAccountToRemove.set(null);
+        this.isRemovingBank.set(false);
+      },
+      error: (err) => {
+        this.bankError.set(err.error?.message ?? 'Error al eliminar');
+        this.isRemovingBank.set(false);
+      },
+    });
   }
 
   ngOnInit(): void {
@@ -101,6 +282,10 @@ export class SellerProfileComponent implements OnInit {
     if (!userId) {
       return;
     }
+    this.artistService.getArtistTypes().subscribe({
+      next: (types) => this.artistTypes.set(Array.isArray(types) ? types : []),
+      error: () => this.artistTypes.set([]),
+    });
     this.vendorService.getVendorByUserId(userId).subscribe({
       next: (vendor) => {
         this.vendor.set(vendor);
@@ -174,21 +359,41 @@ export class SellerProfileComponent implements OnInit {
   private patchFormsWithVendor(v: Artist | null): void {
     if (!v) return;
     this.imageData.set(null);
-    this.profileForm.patchValue({
-      name: v.name ?? '',
-      surname: v.surname ?? '',
-      website: v.website ?? '',
-      city: v.city ?? '',
-      postal_code: v.postal_code ?? '',
-      country: v.country ?? '',
-      short_description: v.short_description ?? '',
-      description: v.description ?? '',
-    }, { emitEvent: false });
-    this.settingsForm.patchValue({
-      phone: v.phone ?? '',
-      nif: v.nif ?? '',
-      preparation_days: v.preparation_days ?? 7,
-    }, { emitEvent: false });
+    this.profileForm.patchValue(
+      {
+        name: v.name ?? '',
+        surname: v.surname ?? '',
+        website: v.website ?? '',
+        city: v.city ?? '',
+        postal_code: v.postal_code ?? '',
+        country: v.country ?? '',
+        artist_type_ids: (v.artist_types ?? []).map((t) => t.id),
+        short_description: v.short_description ?? '',
+        description: v.description ?? '',
+      },
+      { emitEvent: false },
+    );
+    this.settingsForm.patchValue(
+      {
+        phone: v.phone ?? '',
+        nif: v.nif ?? '',
+        preparation_days: v.preparation_days ?? 7,
+      },
+      { emitEvent: false },
+    );
+  }
+
+  toggleArtistType(typeId: string): void {
+    const current = (this.profileForm.get('artist_type_ids')?.value as string[]) ?? [];
+    const next = current.includes(typeId)
+      ? current.filter((id) => id !== typeId)
+      : [...current, typeId];
+    this.profileForm.patchValue({ artist_type_ids: next });
+  }
+
+  isArtistTypeSelected(typeId: string): boolean {
+    const ids = (this.profileForm.get('artist_type_ids')?.value as string[]) ?? [];
+    return ids.includes(typeId);
   }
 
   saveProfile(): void {
@@ -197,7 +402,8 @@ export class SellerProfileComponent implements OnInit {
     this.isSavingProfile.set(true);
     this.profileError.set('');
     this.profileSuccess.set(false);
-    const payload = { ...this.profileForm.value };
+    const raw = this.profileForm.value;
+    const payload = { ...raw, artist_type_ids: (raw.artist_type_ids ?? []).filter(Boolean) };
     const img = this.imageData();
     if (img === '') {
       payload.image = null;
@@ -254,7 +460,14 @@ export class SellerProfileComponent implements OnInit {
         const d = res.data;
         this.vendorUsers.update((list) => [
           ...list,
-          { id: d.user_id, user_id: d.user_id, role: d.role, name: d.name, surname: d.surname, email: d.email },
+          {
+            id: d.user_id,
+            user_id: d.user_id,
+            role: d.role,
+            name: d.name,
+            surname: d.surname,
+            email: d.email,
+          },
         ]);
         this.addUserForm.patchValue({ email: '', role: VENDOR_USER_ROLES.ADMIN });
         this.usersSuccess.set('Usuario añadido correctamente.');
