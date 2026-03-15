@@ -143,10 +143,12 @@
         <div class="avatar">
           <img [src]="artist.image || '/assets/placeholder-image.jpg'" [alt]="artist.name" />
         </div>
-        <div class="info">
-          <h3>{{ artist.name }}</h3>
-          <p *ngIf="artist.short_description">{{ artist.short_description }}</p>
-        </div>
+        <h3 class="artist-name">
+          {{ artist.name }}<span *ngIf="artist.surname"> {{ artist.surname }}</span>
+        </h3>
+        <p class="artist-short-desc" *ngIf="artist.short_description">
+          {{ artist.short_description }}
+        </p>
       </a>
     </div>
 
