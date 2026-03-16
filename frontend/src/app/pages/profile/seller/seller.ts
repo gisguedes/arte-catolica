@@ -388,7 +388,10 @@ export class SellerProfileComponent implements OnInit {
     }
     this.route.queryParams.subscribe((params) => {
       const tab = params['tab'] as TabId | undefined;
-      if (tab && ['products', 'orders', 'bank', 'profile', 'users', 'billing', 'settings'].includes(tab)) {
+      if (
+        tab &&
+        ['products', 'orders', 'bank', 'profile', 'users', 'billing', 'settings'].includes(tab)
+      ) {
         this.activeTab.set(tab);
       }
     });

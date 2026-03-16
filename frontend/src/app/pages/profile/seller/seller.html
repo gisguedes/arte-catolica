@@ -60,7 +60,9 @@
             </div>
             <div class="empty-state" *ngIf="products().length === 0">
               <p>No has creado productos aún</p>
-              <a [routerLink]="['/', locale(), 'profile', 'seller', 'products', 'new']" class="btn-primary"
+              <a
+                [routerLink]="['/', locale(), 'profile', 'seller', 'products', 'new']"
+                class="btn-primary"
                 >Crear Primer Producto</a
               >
             </div>
@@ -72,7 +74,7 @@
                 </div>
                 <div class="product-row-info">
                   <span class="product-row-name">{{ p.name }}</span>
-                  <span class="product-row-price">{{ p.price | number : '1.2-2' }} €</span>
+                  <span class="product-row-price">{{ p.price | number: '1.2-2' }} €</span>
                   <span class="status-badge" [class]="'status-' + (p.status ?? 'approved')">{{
                     statusLabel(p.status)
                   }}</span>
