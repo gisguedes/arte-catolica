@@ -1,0 +1,177 @@
+<div class="seller-profile">
+  <div class="container">
+    <div class="header">
+      <h1>Nuevo producto</h1>
+      <a [routerLink]="['/', locale(), 'profile', 'seller']" class="back-link"
+        >← Volver al perfil profesional</a
+      >
+    </div>
+
+    <div *ngIf="vendor()" class="tab-content">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="profile-form">
+        <h3>Datos básicos</h3>
+        <div class="form-group">
+          <label for="name">Nombre del producto *</label>
+          <input id="name" type="text" formControlName="name" placeholder="Ej. Cruz de altar" />
+          <span class="form-error" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+            El nombre es obligatorio
+          </span>
+        </div>
+        <div class="form-group">
+          <label for="description">Descripción</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            rows="4"
+            placeholder="Describe el producto..."
+          ></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="stock">Stock (opcional)</label>
+            <input id="stock" type="number" formControlName="stock" min="0" placeholder="—" />
+          </div>
+          <div class="form-group">
+            <label for="availability">Disponibilidad</label>
+            <select id="availability" formControlName="availability" class="select-input">
+              <option value="">— Seleccionar —</option>
+              <option value="En stock">En stock</option>
+              <option value="Bajo pedido">Bajo pedido</option>
+              <option value="Agotado">Agotado</option>
+              <option value="Consultar">Consultar</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="sku">SKU / Referencia</label>
+          <input id="sku" type="text" formControlName="sku" placeholder="Ej. CRUZ-001" />
+        </div>
+
+        <h3>Dimensiones (cm, opcional)</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="height_cm">Alto</label>
+            <input id="height_cm" type="number" formControlName="height_cm" min="0" step="0.1" placeholder="—" />
+          </div>
+          <div class="form-group">
+            <label for="width_cm">Ancho</label>
+            <input id="width_cm" type="number" formControlName="width_cm" min="0" step="0.1" placeholder="—" />
+          </div>
+          <div class="form-group">
+            <label for="depth_cm">Fondo</label>
+            <input id="depth_cm" type="number" formControlName="depth_cm" min="0" step="0.1" placeholder="—" />
+          </div>
+        </div>
+
+        <h3>Categorías</h3>
+        <p class="form-hint">Busca y selecciona una o varias categorías. Se muestran como etiquetas.</p>
+        <div class="tag-selector">
+          <div class="tag-list" *ngIf="getSelectedItems('category_ids', categories()).length > 0">
+            <span class="tag" *ngFor="let item of getSelectedItems('category_ids', categories())">
+              {{ item.name }}
+              <button type="button" class="tag-remove" (click)="removeFromArray('category_ids', item.id)" aria-label="Quitar">×</button>
+            </span>
+          </div>
+          <input
+            type="text"
+            class="tag-search"
+            placeholder="Buscar categoría..."
+            [value]="categorySearch()"
+            (input)="categorySearch.set($any($event.target).value)"
+          />
+          <div class="tag-dropdown" *ngIf="filteredCategories().length > 0">
+            <button type="button" class="tag-option" *ngFor="let c of filteredCategories()" (click)="toggleArray('category_ids', c.id); categorySearch.set('')">
+              {{ c.name }}
+            </button>
+          </div>
+        </div>
+        <p class="form-hint" *ngIf="categories().length === 0">No hay categorías disponibles.</p>
+
+        <h3>Materiales</h3>
+        <p class="form-hint">Busca y selecciona uno o varios materiales. Se muestran como etiquetas.</p>
+        <div class="tag-selector">
+          <div class="tag-list" *ngIf="getSelectedItems('material_ids', materials()).length > 0">
+            <span class="tag" *ngFor="let item of getSelectedItems('material_ids', materials())">
+              {{ item.name }}
+              <button type="button" class="tag-remove" (click)="removeFromArray('material_ids', item.id)" aria-label="Quitar">×</button>
+            </span>
+          </div>
+          <input
+            type="text"
+            class="tag-search"
+            placeholder="Buscar material..."
+            [value]="materialSearch()"
+            (input)="materialSearch.set($any($event.target).value)"
+          />
+          <div class="tag-dropdown" *ngIf="filteredMaterials().length > 0">
+            <button type="button" class="tag-option" *ngFor="let m of filteredMaterials()" (click)="toggleArray('material_ids', m.id); materialSearch.set('')">
+              {{ m.name }}
+            </button>
+          </div>
+        </div>
+        <p class="form-hint" *ngIf="materials().length === 0">No hay materiales disponibles.</p>
+
+        <h3>Técnicas</h3>
+        <p class="form-hint">Busca y selecciona una o varias técnicas. Se muestran como etiquetas.</p>
+        <div class="tag-selector">
+          <div class="tag-list" *ngIf="getSelectedItems('technique_ids', techniques()).length > 0">
+            <span class="tag" *ngFor="let item of getSelectedItems('technique_ids', techniques())">
+              {{ item.name }}
+              <button type="button" class="tag-remove" (click)="removeFromArray('technique_ids', item.id)" aria-label="Quitar">×</button>
+            </span>
+          </div>
+          <input
+            type="text"
+            class="tag-search"
+            placeholder="Buscar técnica..."
+            [value]="techniqueSearch()"
+            (input)="techniqueSearch.set($any($event.target).value)"
+          />
+          <div class="tag-dropdown" *ngIf="filteredTechniques().length > 0">
+            <button type="button" class="tag-option" *ngFor="let t of filteredTechniques()" (click)="toggleArray('technique_ids', t.id); techniqueSearch.set('')">
+              {{ t.name }}
+            </button>
+          </div>
+        </div>
+        <p class="form-hint" *ngIf="techniques().length === 0">No hay técnicas disponibles.</p>
+
+        <h3>Colores</h3>
+        <p class="form-hint">Busca y selecciona uno o varios colores. Se muestran como etiquetas.</p>
+        <div class="tag-selector">
+          <div class="tag-list" *ngIf="getSelectedItems('color_ids', colors()).length > 0">
+            <span class="tag" *ngFor="let item of getSelectedItems('color_ids', colors())">
+              {{ item.name }}
+              <button type="button" class="tag-remove" (click)="removeFromArray('color_ids', item.id)" aria-label="Quitar">×</button>
+            </span>
+          </div>
+          <input
+            type="text"
+            class="tag-search"
+            placeholder="Buscar color..."
+            [value]="colorSearch()"
+            (input)="colorSearch.set($any($event.target).value)"
+          />
+          <div class="tag-dropdown" *ngIf="filteredColors().length > 0">
+            <button type="button" class="tag-option tag-option-color" *ngFor="let co of filteredColors()" (click)="toggleArray('color_ids', co.id); colorSearch.set('')">
+              <span class="color-swatch" [style.background]="co.hex" [title]="co.name"></span>
+              {{ co.name }}
+            </button>
+          </div>
+        </div>
+        <p class="form-hint" *ngIf="colors().length === 0">No hay colores disponibles.</p>
+
+        <p class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+        <div class="modal-actions" style="margin-top: 1.5rem;">
+          <a [routerLink]="['/', locale(), 'profile', 'seller']" class="btn-secondary">Cancelar</a>
+          <button type="submit" class="btn-primary" [disabled]="form.invalid || isSubmitting()">
+            {{ isSubmitting() ? 'Creando...' : 'Crear producto' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div *ngIf="!vendor()" class="empty-state">
+      <p>Cargando...</p>
+    </div>
+  </div>
+</div>

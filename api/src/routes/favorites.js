@@ -25,7 +25,15 @@ router.get('/', async (req, res) => {
   try {
     const result = await query(
       `SELECT uf.id, uf.product_id, uf.created_at,
-        p.price,
+        (
+          SELECT pp.price
+          FROM product_prices pp
+          WHERE pp.product_id = p.id
+            AND pp.start_date <= CURRENT_DATE
+            AND pp.end_date >= CURRENT_DATE
+          ORDER BY pp.start_date DESC
+          LIMIT 1
+        ) AS price,
         COALESCE(p.status, 'approved') AS status,
         (
           SELECT image_path FROM product_images pi
