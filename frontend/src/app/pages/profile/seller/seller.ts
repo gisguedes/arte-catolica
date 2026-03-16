@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
 import {
@@ -35,6 +35,8 @@ export class SellerProfileComponent implements OnInit {
   private artistService = inject(ArtistService);
   private localeService = inject(LocaleService);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   readonly VENDOR_USER_ROLES = VENDOR_USER_ROLES;
   readonly VENDOR_ASSIGNABLE_ROLES = VENDOR_ASSIGNABLE_ROLES;
@@ -384,6 +386,15 @@ export class SellerProfileComponent implements OnInit {
     if (!userId) {
       return;
     }
+    this.route.queryParams.subscribe((params) => {
+      const tab = params['tab'] as TabId | undefined;
+      if (
+        tab &&
+        ['products', 'orders', 'bank', 'profile', 'users', 'billing', 'settings'].includes(tab)
+      ) {
+        this.activeTab.set(tab);
+      }
+    });
     this.artistService.getArtistTypes().subscribe({
       next: (types) => this.artistTypes.set(Array.isArray(types) ? types : []),
       error: () => this.artistTypes.set([]),
@@ -405,6 +416,15 @@ export class SellerProfileComponent implements OnInit {
       next: (products) => this.products.set(products),
       error: () => this.products.set([]),
     });
+  }
+
+  productImageUrl(imagePath: string | undefined): string {
+    return this.productService.productImageUrl(imagePath);
+  }
+
+  navigateToProduct(productId: string): void {
+    const loc = this.locale();
+    this.router.navigate(['/', loc, 'profile', 'seller', 'products', productId]);
   }
 
   statusLabel(status?: string): string {
@@ -480,10 +500,11 @@ export class SellerProfileComponent implements OnInit {
     links.forEach((item) => {
       this.addSocialLink(item.network ?? '', item.url ?? '');
     });
+    const vAny = v as unknown as { phone?: string; nif?: string };
     this.settingsForm.patchValue(
       {
-        phone: (v as Record<string, unknown>).phone ?? '',
-        nif: (v as Record<string, unknown>).nif ?? '',
+        phone: vAny.phone ?? '',
+        nif: vAny.nif ?? '',
         preparation_days: v.preparation_days ?? 7,
       },
       { emitEvent: false },

@@ -38,6 +38,10 @@ export class ApiService {
     });
   }
 
+  getBaseUrl(): string {
+    return this.baseUrl;
+  }
+
   // Métodos genéricos para CRUD (el interceptor agregará el token automáticamente)
   get<T>(endpoint: string): Observable<T> {
     return this.http.get<T>(`${this.baseUrl}/${endpoint}`);

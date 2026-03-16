@@ -1,13 +1,32 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, map, of } from 'rxjs';
 import { ApiService } from './api';
-import { Product, Category, Technique, Material, ShippingCalendar } from '../models/product.model';
+import {
+  Product,
+  Category,
+  Technique,
+  Material,
+  ShippingCalendar,
+  CreateProductPayload,
+  UpdateProductPayload,
+  ColorOption,
+  ProductPriceContract,
+  AddProductPricePayload,
+  ProductImage,
+} from '../models/product.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService {
   private apiService = inject(ApiService);
+
+  /** URL completa para una imagen de producto (image_path puede ser ruta relativa) */
+  productImageUrl(imagePath: string | undefined): string {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http')) return imagePath;
+    return `${this.apiService.getBaseUrl()}/uploads/${imagePath}`;
+  }
 
   private normalizeProduct(product: Product): Product {
     return {
@@ -89,6 +108,28 @@ export class ProductService {
       .pipe(map((response) => response.data || (response as any)));
   }
 
+  getColors(): Observable<ColorOption[]> {
+    return this.apiService
+      .get<{ data: ColorOption[] }>('colors')
+      .pipe(map((response) => response.data || (response as any)));
+  }
+
+  createProduct(vendorId: string, payload: CreateProductPayload): Observable<{ data: Product }> {
+    return this.apiService
+      .post<{ data: Product }>(`vendors/${vendorId}/products`, payload)
+      .pipe(map((r) => ({ data: this.normalizeProduct(r.data) })));
+  }
+
+  updateProduct(
+    vendorId: string,
+    productId: string,
+    payload: UpdateProductPayload
+  ): Observable<{ data: Product }> {
+    return this.apiService
+      .patch<{ data: Product }>(`vendors/${vendorId}/products/${productId}`, payload)
+      .pipe(map((r) => ({ data: this.normalizeProduct(r.data) })));
+  }
+
   getProductsByArtist(artistId: string): Observable<Product[]> {
     return this.apiService
       .get<{ data: Product[] }>(`vendors/${artistId}/products`)
@@ -97,6 +138,56 @@ export class ProductService {
           (response.data || (response as any)).map((p: Product) => this.normalizeProduct(p)),
         ),
       );
+  }
+
+  getProductPrices(vendorId: string, productId: string): Observable<ProductPriceContract[]> {
+    return this.apiService
+      .get<{ data: ProductPriceContract[] }>(`vendors/${vendorId}/products/${productId}/prices`)
+      .pipe(map((r) => r.data ?? []));
+  }
+
+  addProductPrice(
+    vendorId: string,
+    productId: string,
+    payload: AddProductPricePayload
+  ): Observable<{ data: ProductPriceContract }> {
+    return this.apiService.post<{ data: ProductPriceContract }>(
+      `vendors/${vendorId}/products/${productId}/prices`,
+      payload
+    );
+  }
+
+  uploadProductImage(
+    vendorId: string,
+    productId: string,
+    payload: { image: string; order?: number; is_primary?: boolean; color_id?: string | null }
+  ): Observable<{ data: ProductImage }> {
+    return this.apiService.post<{ data: ProductImage }>(
+      `vendors/${vendorId}/products/${productId}/images`,
+      payload
+    );
+  }
+
+  patchProductImage(
+    vendorId: string,
+    productId: string,
+    imageId: string,
+    payload: { color_id?: string | null; order?: number; is_primary?: boolean }
+  ): Observable<{ data: ProductImage }> {
+    return this.apiService.patch<{ data: ProductImage }>(
+      `vendors/${vendorId}/products/${productId}/images/${imageId}`,
+      payload
+    );
+  }
+
+  deleteProductImage(
+    vendorId: string,
+    productId: string,
+    imageId: string
+  ): Observable<void> {
+    return this.apiService.delete<void>(
+      `vendors/${vendorId}/products/${productId}/images/${imageId}`
+    );
   }
 
   getShippingCalendar(

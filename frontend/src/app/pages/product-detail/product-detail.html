@@ -73,6 +73,20 @@
             ›
           </button>
         </div>
+        <div class="color-dots-below-gallery" *ngIf="product()?.colors?.length">
+          <span class="color-dots-label">Color</span>
+          <div class="color-dots-inner">
+            <button
+              *ngFor="let color of product()?.colors"
+              type="button"
+              class="dot"
+              [style.background]="color.hex"
+              [title]="color.name + (imageIndexForColor(color.id) >= 0 ? ' — Ver foto' : '')"
+              [attr.aria-label]="'Color ' + color.name"
+              (click)="selectColor(color.id)"
+            ></button>
+          </div>
+        </div>
         <div class="meta-links">
           <a
             *ngIf="product()?.vendor"

@@ -43,7 +43,15 @@ const buildProductSelect = () => `
   SELECT
     p.id,
     p.vendor_id,
-    p.price,
+    (
+      SELECT pp.price
+      FROM product_prices pp
+      WHERE pp.product_id = p.id
+        AND pp.start_date <= CURRENT_DATE
+        AND pp.end_date >= CURRENT_DATE
+      ORDER BY pp.start_date DESC
+      LIMIT 1
+    ) AS price,
     p.stock,
     p.availability,
     p.height_cm,

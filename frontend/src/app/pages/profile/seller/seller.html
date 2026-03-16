@@ -51,14 +51,51 @@
           <div class="products-section">
             <div class="section-header">
               <h2>Mis Productos</h2>
-              <button class="btn-primary">Nuevo Producto</button>
+              <a
+                *ngIf="products().length > 0"
+                [routerLink]="['/', locale(), 'profile', 'seller', 'products', 'new']"
+                class="btn-primary"
+                >Nuevo Producto</a
+              >
             </div>
             <div class="empty-state" *ngIf="products().length === 0">
               <p>No has creado productos aún</p>
-              <button class="btn-primary">Crear Primer Producto</button>
+              <a
+                [routerLink]="['/', locale(), 'profile', 'seller', 'products', 'new']"
+                class="btn-primary"
+                >Crear Primer Producto</a
+              >
             </div>
             <div class="products-list" *ngIf="products().length > 0">
-              <!-- Products will be displayed here -->
+              <div class="product-row" *ngFor="let p of products()">
+                <div class="product-row-image">
+                  <img *ngIf="p.image" [src]="productImageUrl(p.image)" [alt]="p.name" />
+                  <span *ngIf="!p.image" class="product-row-no-image">Sin imagen</span>
+                </div>
+                <div class="product-row-info">
+                  <span class="product-row-name">{{ p.name }}</span>
+                  <span class="product-row-price">{{ p.price | number: '1.2-2' }} €</span>
+                  <span class="status-badge" [class]="'status-' + (p.status ?? 'approved')">{{
+                    statusLabel(p.status)
+                  }}</span>
+                </div>
+                <div class="product-row-actions">
+                  <button
+                    type="button"
+                    class="btn-primary btn-sm"
+                    (click)="navigateToProduct(p.id)"
+                  >
+                    Editar
+                  </button>
+                  <a
+                    [routerLink]="['/', locale(), 'products', p.id]"
+                    class="btn-secondary btn-sm"
+                    target="_blank"
+                    rel="noopener"
+                    >Ver en tienda</a
+                  >
+                </div>
+              </div>
             </div>
           </div>
         </div>
