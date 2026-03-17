@@ -224,6 +224,18 @@ export class SellerProfileComponent implements OnInit {
     this.billingError.set('');
     this.usersError.set('');
     this.activeTab.set(tab);
+
+    // Refleja el tab (y, si está disponible, el vendorId) en la URL para facilitar depuración.
+    const v = this.vendor();
+    const queryParams: Record<string, string> = { tab };
+    if (v?.id) {
+      queryParams['vendorId'] = v.id;
+    }
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge',
+    });
     if (tab === 'users') {
       this.loadVendorUsers();
     }
@@ -394,6 +406,8 @@ export class SellerProfileComponent implements OnInit {
       ) {
         this.activeTab.set(tab);
       }
+      // vendorId se usa de momento solo como contexto en la URL;
+      // la carga real del vendor sigue basada en el usuario logueado.
     });
     this.artistService.getArtistTypes().subscribe({
       next: (types) => this.artistTypes.set(Array.isArray(types) ? types : []),
@@ -405,6 +419,15 @@ export class SellerProfileComponent implements OnInit {
         this.patchFormsWithVendor(vendor);
         if (vendor?.id) {
           this.loadProducts(vendor.id);
+          // Si falta vendorId en la URL, lo añadimos para que la ruta sea trazable.
+          const currentParams = this.route.snapshot.queryParams;
+          if (!currentParams['vendorId']) {
+            this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: { vendorId: vendor.id },
+              queryParamsHandling: 'merge',
+            });
+          }
         }
       },
       error: () => this.vendor.set(null),

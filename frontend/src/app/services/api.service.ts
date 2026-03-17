@@ -10,12 +10,12 @@ export class ApiService {
       - local → http://localhost:8000/api
       - staging → https://arte-backend-staging.onrender.com/api
       - prod → https://api.arte-catolica.com/api */
-  private readonly baseUrl = environment.apiUrl; 
+  private readonly baseUrl = environment.apiUrl;
 
   getHealth() {
     /*Llama al endpoint de salud del backend Laravel
         prueba simple para comprobar que el FE se conecta correctamente
-     */ 
+     */
     return this.http.get(`${this.baseUrl}/health`);
   }
 }

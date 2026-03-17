@@ -83,7 +83,11 @@
                 (change)="onAvatarSelected($event)"
                 class="avatar-input-hidden"
               />
-              <button type="button" class="btn-photo btn-photo-upload" (click)="avatarInput.click()">
+              <button
+                type="button"
+                class="btn-photo btn-photo-upload"
+                (click)="avatarInput.click()"
+              >
                 {{ avatarPreview() ? 'Cambiar foto' : 'Subir foto' }}
               </button>
               <button
@@ -123,7 +127,10 @@
 
         <div class="danger-zone">
           <h3>Zona de riesgo</h3>
-          <p>Si te das de baja, tu cuenta quedará desactivada y tendrás que iniciar sesión de nuevo para reactivarla.</p>
+          <p>
+            Si te das de baja, tu cuenta quedará desactivada y tendrás que iniciar sesión de nuevo
+            para reactivarla.
+          </p>
           <button type="button" class="btn-danger" (click)="openDeactivateModal()">
             Darme de baja
           </button>
@@ -281,11 +288,12 @@
   <div class="confirm-backdrop" (click)="closeDeactivateModal()"></div>
   <div class="confirm-panel">
     <h3>¿Estás seguro de darte de baja?</h3>
-    <p>Tu cuenta quedará desactivada, se cerrará tu sesión y no podrás acceder hasta que la reactives al iniciar sesión de nuevo.</p>
+    <p>
+      Tu cuenta quedará desactivada, se cerrará tu sesión y no podrás acceder hasta que la reactives
+      al iniciar sesión de nuevo.
+    </p>
     <div class="confirm-actions">
-      <button type="button" class="btn-secondary" (click)="closeDeactivateModal()">
-        Cancelar
-      </button>
+      <button type="button" class="btn-secondary" (click)="closeDeactivateModal()">Cancelar</button>
       <button
         type="button"
         class="btn-danger"

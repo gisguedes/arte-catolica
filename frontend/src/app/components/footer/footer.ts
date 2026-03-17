@@ -14,11 +14,10 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 })
 export class FooterComponent {
   private localeService = inject(LocaleService);
+  private viewportScroller = inject(ViewportScroller);
 
   locale = this.localeService.locale;
   currentYear = new Date().getFullYear();
-
-  constructor(private readonly viewportScroller: ViewportScroller) {}
 
   scrollToTop(event?: Event): void {
     if (event) {

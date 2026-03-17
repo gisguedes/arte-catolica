@@ -50,7 +50,7 @@ export class SellerProductNewComponent implements OnInit {
     const q = (this.categorySearch() || '').trim().toLowerCase();
     const selected = (this.form.get('category_ids')?.value as string[]) ?? [];
     return list.filter(
-      (c) => !selected.includes(c.id) && (!q || (c.name || '').toLowerCase().includes(q))
+      (c) => !selected.includes(c.id) && (!q || (c.name || '').toLowerCase().includes(q)),
     );
   });
   filteredMaterials = computed(() => {
@@ -58,7 +58,7 @@ export class SellerProductNewComponent implements OnInit {
     const q = (this.materialSearch() || '').trim().toLowerCase();
     const selected = (this.form.get('material_ids')?.value as string[]) ?? [];
     return list.filter(
-      (m) => !selected.includes(m.id) && (!q || (m.name || '').toLowerCase().includes(q))
+      (m) => !selected.includes(m.id) && (!q || (m.name || '').toLowerCase().includes(q)),
     );
   });
   filteredTechniques = computed(() => {
@@ -66,7 +66,7 @@ export class SellerProductNewComponent implements OnInit {
     const q = (this.techniqueSearch() || '').trim().toLowerCase();
     const selected = (this.form.get('technique_ids')?.value as string[]) ?? [];
     return list.filter(
-      (t) => !selected.includes(t.id) && (!q || (t.name || '').toLowerCase().includes(q))
+      (t) => !selected.includes(t.id) && (!q || (t.name || '').toLowerCase().includes(q)),
     );
   });
   filteredColors = computed(() => {
@@ -74,7 +74,7 @@ export class SellerProductNewComponent implements OnInit {
     const q = (this.colorSearch() || '').trim().toLowerCase();
     const selected = (this.form.get('color_ids')?.value as string[]) ?? [];
     return list.filter(
-      (c) => !selected.includes(c.id) && (!q || (c.name || '').toLowerCase().includes(q))
+      (c) => !selected.includes(c.id) && (!q || (c.name || '').toLowerCase().includes(q)),
     );
   });
 
@@ -126,7 +126,10 @@ export class SellerProductNewComponent implements OnInit {
     });
   }
 
-  toggleArray(controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids', id: string): void {
+  toggleArray(
+    controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids',
+    id: string,
+  ): void {
     const control = this.form.get(controlName);
     if (!control) return;
     const current: string[] = control.value ?? [];
@@ -134,7 +137,10 @@ export class SellerProductNewComponent implements OnInit {
     control.setValue(next);
   }
 
-  isSelected(controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids', id: string): boolean {
+  isSelected(
+    controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids',
+    id: string,
+  ): boolean {
     const control = this.form.get(controlName);
     const arr: string[] = control?.value ?? [];
     return arr.includes(id);
@@ -142,14 +148,19 @@ export class SellerProductNewComponent implements OnInit {
 
   getSelectedItems(
     controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids',
-    list: Category[] | Material[] | Technique[] | ColorOption[]
+    list: Category[] | Material[] | Technique[] | ColorOption[],
   ): { id: string; name: string }[] {
     const control = this.form.get(controlName);
     const ids: string[] = control?.value ?? [];
-    return list.filter((x) => ids.includes(x.id)).map((x) => ({ id: x.id, name: (x as { name?: string }).name ?? '' }));
+    return list
+      .filter((x) => ids.includes(x.id))
+      .map((x) => ({ id: x.id, name: (x as { name?: string }).name ?? '' }));
   }
 
-  removeFromArray(controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids', id: string): void {
+  removeFromArray(
+    controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids',
+    id: string,
+  ): void {
     this.toggleArray(controlName, id);
   }
 

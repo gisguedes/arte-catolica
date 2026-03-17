@@ -529,13 +529,16 @@
   }
 
   .btn-primary {
-    display: inline-block;
-    padding: 0.875rem 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 500;
     background: var(--primary-color);
     color: white;
-    border: none;
+    border: 1px solid transparent;
     border-radius: 8px;
-    font-weight: 600;
     text-decoration: none;
     cursor: pointer;
     transition: background 0.3s;
@@ -961,7 +964,7 @@
   }
 
   .bank-form-modal {
-    max-width: 480px;
+    max-width: 520px;
 
     h3 {
       margin: 0 0 1.25rem 0;
@@ -1188,7 +1191,7 @@
 
   .btn-add-social,
   .btn-secondary {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1.25rem;
     background: #f0f0f0;
     border: 1px solid #e0e0e0;
     color: #333;
@@ -1303,7 +1306,10 @@
   }
 
   .btn-secondary {
-    padding: 0.5rem 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1.25rem;
     font-size: 0.95rem;
     font-weight: 500;
     color: #555;
@@ -1333,6 +1339,39 @@
     &:hover:not(:disabled) {
       background: #c82333;
       border-color: #bd2130;
+    }
+  }
+
+  // Asegura consistencia visual entre botones primarios/secundarios
+  // en acciones de modales (mismo tamaño Cancelar / Añadir).
+  .modal-actions {
+    .btn-primary,
+    .btn-secondary {
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 2.5rem; // fuerza misma altura en modales
+      padding: 0 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+  }
+
+  .product-row-actions {
+    button.btn-primary.btn-sm,
+    a.btn-secondary.btn-sm {
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 2rem; // fuerza misma altura en lista de productos
+      padding: 0 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      line-height: 1.2;
+      text-decoration: none;
     }
   }
 }

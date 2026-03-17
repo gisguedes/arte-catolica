@@ -236,7 +236,9 @@
   font-weight: 500;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 
   &:hover {
     background: #e5e5e5;

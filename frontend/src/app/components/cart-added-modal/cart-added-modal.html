@@ -3,27 +3,17 @@
     <div class="success-icon" aria-hidden="true">✓</div>
     <p class="success-message">Producto añadido al carrito</p>
     <div class="product-row">
-      <img
-        [src]="productThumbnail()"
-        [alt]="product()!.name"
-        class="product-thumbnail"
-      />
+      <img [src]="productThumbnail()" [alt]="product()!.name" class="product-thumbnail" />
       <div class="product-details">
         <h4 class="product-name">{{ product()!.name }}</h4>
         <p class="product-price">{{ formatPrice(product()!.price) }}</p>
       </div>
     </div>
     <div class="actions">
-      <a
-        [routerLink]="['/', locale(), 'cart']"
-        class="btn-cart"
-        (click)="dismiss()"
-      >
+      <a [routerLink]="['/', locale(), 'cart']" class="btn-cart" (click)="dismiss()">
         Ir al carrito
       </a>
-      <button type="button" class="btn-close" (click)="dismiss()" aria-label="Cerrar">
-        ×
-      </button>
+      <button type="button" class="btn-close" (click)="dismiss()" aria-label="Cerrar">×</button>
     </div>
   </div>
 </div>

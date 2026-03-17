@@ -123,7 +123,7 @@ export class ProductService {
   updateProduct(
     vendorId: string,
     productId: string,
-    payload: UpdateProductPayload
+    payload: UpdateProductPayload,
   ): Observable<{ data: Product }> {
     return this.apiService
       .patch<{ data: Product }>(`vendors/${vendorId}/products/${productId}`, payload)
@@ -149,22 +149,22 @@ export class ProductService {
   addProductPrice(
     vendorId: string,
     productId: string,
-    payload: AddProductPricePayload
+    payload: AddProductPricePayload,
   ): Observable<{ data: ProductPriceContract }> {
     return this.apiService.post<{ data: ProductPriceContract }>(
       `vendors/${vendorId}/products/${productId}/prices`,
-      payload
+      payload,
     );
   }
 
   uploadProductImage(
     vendorId: string,
     productId: string,
-    payload: { image: string; order?: number; is_primary?: boolean; color_id?: string | null }
+    payload: { image: string; order?: number; is_primary?: boolean; color_id?: string | null },
   ): Observable<{ data: ProductImage }> {
     return this.apiService.post<{ data: ProductImage }>(
       `vendors/${vendorId}/products/${productId}/images`,
-      payload
+      payload,
     );
   }
 
@@ -172,21 +172,17 @@ export class ProductService {
     vendorId: string,
     productId: string,
     imageId: string,
-    payload: { color_id?: string | null; order?: number; is_primary?: boolean }
+    payload: { color_id?: string | null; order?: number; is_primary?: boolean },
   ): Observable<{ data: ProductImage }> {
     return this.apiService.patch<{ data: ProductImage }>(
       `vendors/${vendorId}/products/${productId}/images/${imageId}`,
-      payload
+      payload,
     );
   }
 
-  deleteProductImage(
-    vendorId: string,
-    productId: string,
-    imageId: string
-  ): Observable<void> {
+  deleteProductImage(vendorId: string, productId: string, imageId: string): Observable<void> {
     return this.apiService.delete<void>(
-      `vendors/${vendorId}/products/${productId}/images/${imageId}`
+      `vendors/${vendorId}/products/${productId}/images/${imageId}`,
     );
   }
 

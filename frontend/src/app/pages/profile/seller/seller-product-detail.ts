@@ -90,7 +90,7 @@ export class SellerProductDetailComponent implements OnInit {
     const q = (this.categorySearch() || '').trim().toLowerCase();
     const selected = (this.editForm.get('category_ids')?.value as string[]) ?? [];
     return list.filter(
-      (c) => !selected.includes(c.id) && (!q || (c.name || '').toLowerCase().includes(q))
+      (c) => !selected.includes(c.id) && (!q || (c.name || '').toLowerCase().includes(q)),
     );
   });
   filteredMaterials = computed(() => {
@@ -98,7 +98,7 @@ export class SellerProductDetailComponent implements OnInit {
     const q = (this.materialSearch() || '').trim().toLowerCase();
     const selected = (this.editForm.get('material_ids')?.value as string[]) ?? [];
     return list.filter(
-      (m) => !selected.includes(m.id) && (!q || (m.name || '').toLowerCase().includes(q))
+      (m) => !selected.includes(m.id) && (!q || (m.name || '').toLowerCase().includes(q)),
     );
   });
   filteredTechniques = computed(() => {
@@ -106,7 +106,7 @@ export class SellerProductDetailComponent implements OnInit {
     const q = (this.techniqueSearch() || '').trim().toLowerCase();
     const selected = (this.editForm.get('technique_ids')?.value as string[]) ?? [];
     return list.filter(
-      (t) => !selected.includes(t.id) && (!q || (t.name || '').toLowerCase().includes(q))
+      (t) => !selected.includes(t.id) && (!q || (t.name || '').toLowerCase().includes(q)),
     );
   });
   filteredColors = computed(() => {
@@ -114,7 +114,7 @@ export class SellerProductDetailComponent implements OnInit {
     const q = (this.colorSearch() || '').trim().toLowerCase();
     const selected = (this.editForm.get('color_ids')?.value as string[]) ?? [];
     return list.filter(
-      (c) => !selected.includes(c.id) && (!q || (c.name || '').toLowerCase().includes(q))
+      (c) => !selected.includes(c.id) && (!q || (c.name || '').toLowerCase().includes(q)),
     );
   });
 
@@ -299,7 +299,10 @@ export class SellerProductDetailComponent implements OnInit {
     });
   }
 
-  toggleArray(controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids', id: string): void {
+  toggleArray(
+    controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids',
+    id: string,
+  ): void {
     const control = this.editForm.get(controlName);
     if (!control) return;
     const current: string[] = control.value ?? [];
@@ -307,20 +310,28 @@ export class SellerProductDetailComponent implements OnInit {
     control.setValue(next);
   }
 
-  isSelected(controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids', id: string): boolean {
+  isSelected(
+    controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids',
+    id: string,
+  ): boolean {
     const arr: string[] = this.editForm.get(controlName)?.value ?? [];
     return arr.includes(id);
   }
 
   getSelectedItems(
     controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids',
-    list: Category[] | Material[] | Technique[] | ColorOption[]
+    list: Category[] | Material[] | Technique[] | ColorOption[],
   ): { id: string; name: string }[] {
     const ids: string[] = this.editForm.get(controlName)?.value ?? [];
-    return list.filter((x) => ids.includes(x.id)).map((x) => ({ id: x.id, name: (x as { name?: string }).name ?? '' }));
+    return list
+      .filter((x) => ids.includes(x.id))
+      .map((x) => ({ id: x.id, name: (x as { name?: string }).name ?? '' }));
   }
 
-  removeFromArray(controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids', id: string): void {
+  removeFromArray(
+    controlName: 'category_ids' | 'material_ids' | 'technique_ids' | 'color_ids',
+    id: string,
+  ): void {
     this.toggleArray(controlName, id);
   }
 
@@ -369,11 +380,13 @@ export class SellerProductDetailComponent implements OnInit {
     if (!v?.id || !productId) return;
     const colorId = value === '' || value === 'null' ? null : value;
     this.imageError.set('');
-    this.productService.patchProductImage(v.id, productId, imageId, { color_id: colorId }).subscribe({
-      next: () => this.reloadProduct(),
-      error: (err: { error?: { message?: string } }) =>
-        this.imageError.set(err.error?.message ?? 'Error al asignar el color'),
-    });
+    this.productService
+      .patchProductImage(v.id, productId, imageId, { color_id: colorId })
+      .subscribe({
+        next: () => this.reloadProduct(),
+        error: (err: { error?: { message?: string } }) =>
+          this.imageError.set(err.error?.message ?? 'Error al asignar el color'),
+      });
   }
 
   moveImageOrder(imageId: string, direction: 'up' | 'down'): void {
@@ -390,19 +403,21 @@ export class SellerProductDetailComponent implements OnInit {
     const currentOrder = current.order ?? idx;
     const otherOrder = other.order ?? otherIdx;
     this.imageError.set('');
-    this.productService.patchProductImage(v.id, productId, imageId, { order: otherOrder }).subscribe({
-      next: () => {
-        this.productService
-          .patchProductImage(v.id, productId, other.id, { order: currentOrder })
-          .subscribe({
-            next: () => this.reloadProduct(),
-            error: (err: { error?: { message?: string } }) =>
-              this.imageError.set(err.error?.message ?? 'Error al cambiar el orden'),
-          });
-      },
-      error: (err: { error?: { message?: string } }) =>
-        this.imageError.set(err.error?.message ?? 'Error al cambiar el orden'),
-    });
+    this.productService
+      .patchProductImage(v.id, productId, imageId, { order: otherOrder })
+      .subscribe({
+        next: () => {
+          this.productService
+            .patchProductImage(v.id, productId, other.id, { order: currentOrder })
+            .subscribe({
+              next: () => this.reloadProduct(),
+              error: (err: { error?: { message?: string } }) =>
+                this.imageError.set(err.error?.message ?? 'Error al cambiar el orden'),
+            });
+        },
+        error: (err: { error?: { message?: string } }) =>
+          this.imageError.set(err.error?.message ?? 'Error al cambiar el orden'),
+      });
   }
 
   onDeleteImage(imageId: string): void {
