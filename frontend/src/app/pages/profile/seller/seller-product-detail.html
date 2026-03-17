@@ -1,0 +1,482 @@
+<div class="seller-profile">
+  <div class="container">
+    <div class="header">
+      <h1>Editar producto</h1>
+      <a
+        [routerLink]="['/', locale(), 'profile', 'seller']"
+        [queryParams]="{ tab: 'products', vendorId: vendor()?.id }"
+        class="back-link"
+        >← Volver a Mis Productos</a
+      >
+    </div>
+
+    <div *ngIf="product() && vendor()" class="tab-content">
+      <div class="product-detail-header">
+        <h2>{{ product()!.name }}</h2>
+        <p class="form-hint header-hint" *ngIf="product()!.price != null">
+          Precio vigente hoy: <strong>{{ formatPrice(product()!.price!) }} €</strong>
+        </p>
+        <p class="form-hint header-hint" *ngIf="product()!.price == null">
+          Sin precio definido. Añade uno en la pestaña Precios.
+        </p>
+      </div>
+
+      <nav class="product-detail-tabs" aria-label="Secciones del producto">
+        <button
+          type="button"
+          class="product-detail-tab"
+          [class.active]="productDetailTab() === 'info'"
+          (click)="setProductDetailTab('info')"
+        >
+          Info
+        </button>
+        <button
+          type="button"
+          class="product-detail-tab"
+          [class.active]="productDetailTab() === 'images'"
+          (click)="setProductDetailTab('images')"
+        >
+          Fotos
+        </button>
+        <button
+          type="button"
+          class="product-detail-tab"
+          [class.active]="productDetailTab() === 'prices'"
+          (click)="setProductDetailTab('prices')"
+        >
+          Precios
+        </button>
+      </nav>
+
+      <div *ngIf="productDetailTab() === 'info'" class="product-detail-panel">
+        <h3>Datos del producto</h3>
+        <p class="form-hint section-hint">
+          Modifica nombre, descripción, categorías, materiales, técnicas, colores y dimensiones.
+          Guarda los cambios con el botón inferior.
+        </p>
+        <form [formGroup]="editForm" (ngSubmit)="onSubmitEdit()" class="profile-form">
+          <div class="form-group">
+            <label for="edit-name">Nombre del producto *</label>
+            <input
+              id="edit-name"
+              type="text"
+              formControlName="name"
+              placeholder="Ej. Cruz de altar"
+            />
+            <span
+              class="form-error"
+              *ngIf="editForm.get('name')?.invalid && editForm.get('name')?.touched"
+            >
+              El nombre es obligatorio
+            </span>
+          </div>
+          <div class="form-group">
+            <label for="edit-description">Descripción</label>
+            <textarea
+              id="edit-description"
+              formControlName="description"
+              rows="4"
+              placeholder="Describe el producto..."
+            ></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-stock">Stock (opcional)</label>
+              <input
+                id="edit-stock"
+                type="number"
+                formControlName="stock"
+                min="0"
+                placeholder="—"
+              />
+            </div>
+            <div class="form-group">
+              <label for="edit-availability">Disponibilidad</label>
+              <select id="edit-availability" formControlName="availability" class="select-input">
+                <option value="">— Seleccionar —</option>
+                <option value="En stock">En stock</option>
+                <option value="Bajo pedido">Bajo pedido</option>
+                <option value="Agotado">Agotado</option>
+                <option value="Consultar">Consultar</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="edit-sku">SKU / Referencia</label>
+            <input id="edit-sku" type="text" formControlName="sku" placeholder="Ej. CRUZ-001" />
+          </div>
+          <h4 class="form-subsection">Dimensiones (cm, opcional)</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-height_cm">Alto</label>
+              <input
+                id="edit-height_cm"
+                type="number"
+                formControlName="height_cm"
+                min="0"
+                step="0.1"
+                placeholder="—"
+              />
+            </div>
+            <div class="form-group">
+              <label for="edit-width_cm">Ancho</label>
+              <input
+                id="edit-width_cm"
+                type="number"
+                formControlName="width_cm"
+                min="0"
+                step="0.1"
+                placeholder="—"
+              />
+            </div>
+            <div class="form-group">
+              <label for="edit-depth_cm">Fondo</label>
+              <input
+                id="edit-depth_cm"
+                type="number"
+                formControlName="depth_cm"
+                min="0"
+                step="0.1"
+                placeholder="—"
+              />
+            </div>
+          </div>
+          <h4 class="form-subsection">Categorías</h4>
+          <div class="tag-selector">
+            <div class="tag-list" *ngIf="getSelectedItems('category_ids', categories()).length > 0">
+              <span class="tag" *ngFor="let item of getSelectedItems('category_ids', categories())">
+                {{ item.name }}
+                <button
+                  type="button"
+                  class="tag-remove"
+                  (click)="removeFromArray('category_ids', item.id)"
+                  aria-label="Quitar"
+                >
+                  ×
+                </button>
+              </span>
+            </div>
+            <input
+              type="text"
+              class="tag-search"
+              placeholder="Buscar categoría..."
+              [value]="categorySearch()"
+              (input)="categorySearch.set($any($event.target).value)"
+            />
+            <div class="tag-dropdown" *ngIf="filteredCategories().length > 0">
+              <button
+                type="button"
+                class="tag-option"
+                *ngFor="let c of filteredCategories()"
+                (click)="toggleArray('category_ids', c.id); categorySearch.set('')"
+              >
+                {{ c.name }}
+              </button>
+            </div>
+          </div>
+          <h4 class="form-subsection">Materiales</h4>
+          <div class="tag-selector">
+            <div class="tag-list" *ngIf="getSelectedItems('material_ids', materials()).length > 0">
+              <span class="tag" *ngFor="let item of getSelectedItems('material_ids', materials())">
+                {{ item.name }}
+                <button
+                  type="button"
+                  class="tag-remove"
+                  (click)="removeFromArray('material_ids', item.id)"
+                  aria-label="Quitar"
+                >
+                  ×
+                </button>
+              </span>
+            </div>
+            <input
+              type="text"
+              class="tag-search"
+              placeholder="Buscar material..."
+              [value]="materialSearch()"
+              (input)="materialSearch.set($any($event.target).value)"
+            />
+            <div class="tag-dropdown" *ngIf="filteredMaterials().length > 0">
+              <button
+                type="button"
+                class="tag-option"
+                *ngFor="let m of filteredMaterials()"
+                (click)="toggleArray('material_ids', m.id); materialSearch.set('')"
+              >
+                {{ m.name }}
+              </button>
+            </div>
+          </div>
+          <h4 class="form-subsection">Técnicas</h4>
+          <div class="tag-selector">
+            <div
+              class="tag-list"
+              *ngIf="getSelectedItems('technique_ids', techniques()).length > 0"
+            >
+              <span
+                class="tag"
+                *ngFor="let item of getSelectedItems('technique_ids', techniques())"
+              >
+                {{ item.name }}
+                <button
+                  type="button"
+                  class="tag-remove"
+                  (click)="removeFromArray('technique_ids', item.id)"
+                  aria-label="Quitar"
+                >
+                  ×
+                </button>
+              </span>
+            </div>
+            <input
+              type="text"
+              class="tag-search"
+              placeholder="Buscar técnica..."
+              [value]="techniqueSearch()"
+              (input)="techniqueSearch.set($any($event.target).value)"
+            />
+            <div class="tag-dropdown" *ngIf="filteredTechniques().length > 0">
+              <button
+                type="button"
+                class="tag-option"
+                *ngFor="let t of filteredTechniques()"
+                (click)="toggleArray('technique_ids', t.id); techniqueSearch.set('')"
+              >
+                {{ t.name }}
+              </button>
+            </div>
+          </div>
+          <h4 class="form-subsection">Colores</h4>
+          <div class="tag-selector">
+            <div class="tag-list" *ngIf="getSelectedItems('color_ids', colors()).length > 0">
+              <span class="tag" *ngFor="let item of getSelectedItems('color_ids', colors())">
+                {{ item.name }}
+                <button
+                  type="button"
+                  class="tag-remove"
+                  (click)="removeFromArray('color_ids', item.id)"
+                  aria-label="Quitar"
+                >
+                  ×
+                </button>
+              </span>
+            </div>
+            <input
+              type="text"
+              class="tag-search"
+              placeholder="Buscar color..."
+              [value]="colorSearch()"
+              (input)="colorSearch.set($any($event.target).value)"
+            />
+            <div class="tag-dropdown" *ngIf="filteredColors().length > 0">
+              <button
+                type="button"
+                class="tag-option tag-option-color"
+                *ngFor="let co of filteredColors()"
+                (click)="toggleArray('color_ids', co.id); colorSearch.set('')"
+              >
+                <span class="color-swatch" [style.background]="co.hex" [title]="co.name"></span>
+                {{ co.name }}
+              </button>
+            </div>
+          </div>
+          <p class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+          <p class="form-success" *ngIf="editSuccess()">{{ editSuccess() }}</p>
+          <div class="modal-actions" style="margin-top: 1rem">
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="editForm.invalid || editSubmitting()"
+            >
+              {{ editSubmitting() ? 'Guardando...' : 'Guardar datos del producto' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div *ngIf="productDetailTab() === 'images'" class="product-detail-panel">
+        <h3>Fotos del producto</h3>
+        <p class="form-hint section-hint">
+          Puedes asignar un color a cada foto; en la ficha pública, al hacer clic en ese color se
+          mostrará la foto. Solo una foto por color.
+        </p>
+        <input
+          #fileInput
+          type="file"
+          accept="image/*"
+          class="hidden-file-input"
+          (change)="onFileSelected($event)"
+        />
+        <div class="images-actions">
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="triggerUpload()"
+            [disabled]="imageUploading()"
+          >
+            {{ imageUploading() ? 'Subiendo...' : 'Subir foto' }}
+          </button>
+        </div>
+        <p class="form-error" *ngIf="imageError()">{{ imageError() }}</p>
+        <div class="product-images-grid" *ngIf="sortedProductImages().length">
+          <div class="product-image-card" *ngFor="let img of sortedProductImages(); let i = index">
+            <div class="image-thumb-wrap">
+              <img [src]="productImageUrl(img.image_path)" [alt]="'Foto del producto'" />
+              <span class="image-order-badge">Orden {{ i + 1 }}</span>
+            </div>
+            <div class="image-meta">
+              <div class="image-order-actions">
+                <span class="image-meta-label">Orden</span>
+                <button
+                  type="button"
+                  class="btn-order"
+                  [disabled]="i === 0"
+                  (click)="moveImageOrder(img.id, 'up')"
+                  title="Subir"
+                  aria-label="Subir"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  class="btn-order"
+                  [disabled]="i === sortedProductImages().length - 1"
+                  (click)="moveImageOrder(img.id, 'down')"
+                  title="Bajar"
+                  aria-label="Bajar"
+                >
+                  ↓
+                </button>
+              </div>
+              <div class="image-meta-row">
+                <label [attr.for]="'color-' + img.id" class="image-meta-label">Color</label>
+                <select
+                  [id]="'color-' + img.id"
+                  [value]="img.color_id ?? ''"
+                  (change)="onImageColorChange(img.id, $any($event.target).value)"
+                >
+                  <option value="">Sin color</option>
+                  <option *ngFor="let c of colors()" [value]="c.id">{{ c.name }}</option>
+                </select>
+              </div>
+              <button
+                type="button"
+                class="btn-delete-image"
+                (click)="onDeleteImage(img.id)"
+                title="Eliminar foto"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="form-hint" *ngIf="!sortedProductImages().length && !imageUploading()">
+          Aún no hay fotos. Sube la primera arriba.
+        </p>
+      </div>
+
+      <div *ngIf="productDetailTab() === 'prices'" class="product-detail-panel">
+        <h3>Historial de precios</h3>
+        <div class="prices-table-wrap" *ngIf="prices().length > 0">
+          <table class="prices-table">
+            <thead>
+              <tr>
+                <th>Vigente desde</th>
+                <th>Vigente hasta</th>
+                <th>Precio (€)</th>
+                <th>Última modificación</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of prices()">
+                <td>{{ formatDate(c.start_date) }}</td>
+                <td>{{ formatDate(c.end_date) }}</td>
+                <td>{{ formatPrice(c.price) }}</td>
+                <td>{{ formatDateTime(c.updated_at) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="form-hint" *ngIf="prices().length === 0">Aún no hay ningún precio definido.</p>
+        <div class="product-detail-panel-actions">
+          <button type="button" class="btn-primary btn-sm" (click)="openPriceModal()">
+            Añadir precio
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal: Añadir nuevo precio -->
+      <div class="modal-overlay" *ngIf="priceModalOpen()" (click)="closePriceModal()">
+        <div class="modal-content price-modal" (click)="$event.stopPropagation()">
+          <h3>Añadir nuevo precio</h3>
+          <p class="form-hint section-hint">
+            Si no indicas fechas, el nuevo precio se aplicará desde mañana. Puedes indicar fechas
+            para definir temporadas.
+          </p>
+          <form
+            [formGroup]="priceForm"
+            (ngSubmit)="onSubmitPrice()"
+            class="profile-form price-form"
+          >
+            <div class="form-row">
+              <div class="form-group">
+                <label for="price">Precio (€) *</label>
+                <input
+                  id="price"
+                  type="number"
+                  formControlName="price"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                />
+                <span
+                  class="form-error"
+                  *ngIf="priceForm.get('price')?.invalid && priceForm.get('price')?.touched"
+                >
+                  El precio es obligatorio y debe ser ≥ 0
+                </span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="start_date">Vigente desde (opcional)</label>
+                <input id="start_date" type="date" formControlName="start_date" />
+                <span class="form-hint">Por defecto: mañana</span>
+              </div>
+              <div class="form-group">
+                <label for="end_date">Vigente hasta (opcional)</label>
+                <input id="end_date" type="date" formControlName="end_date" />
+                <span class="form-hint">Por defecto: 31/12/2999</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="previous_end_date">El precio actual termina el (opcional)</label>
+              <input id="previous_end_date" type="date" formControlName="previous_end_date" />
+              <span class="form-hint"
+                >Si no lo indicas, se cierra el día anterior al inicio del nuevo precio.</span
+              >
+            </div>
+            <p class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+            <p class="form-success" *ngIf="priceSuccess()">{{ priceSuccess() }}</p>
+            <div class="modal-actions">
+              <button type="button" class="btn-secondary" (click)="closePriceModal()">
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                class="btn-primary"
+                [disabled]="priceForm.invalid || isSubmitting()"
+              >
+                {{ isSubmitting() ? 'Añadiendo...' : 'Añadir precio' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!vendor()" class="empty-state">
+      <p>Cargando...</p>
+    </div>
+  </div>
+</div>

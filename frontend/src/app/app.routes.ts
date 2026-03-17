@@ -8,6 +8,8 @@ import { ProfileComponent } from './pages/profile/profile';
 import { BuyerProfileComponent } from './pages/profile/buyer/buyer';
 import { OrderDetailComponent } from './pages/profile/buyer/order-detail/order-detail';
 import { SellerProfileComponent } from './pages/profile/seller/seller';
+import { SellerProductNewComponent } from './pages/profile/seller/seller-product-new';
+import { SellerProductDetailComponent } from './pages/profile/seller/seller-product-detail';
 import { ProductDetailComponent } from './pages/product-detail/product-detail';
 import { CategoriesComponent } from './pages/categories/categories';
 import { CategoryDetailComponent } from './pages/category-detail/category-detail';
@@ -67,6 +69,8 @@ export const routes: Routes = [
       { path: 'profile/buyer', component: BuyerProfileComponent },
       { path: 'profile/buyer/orders/:id', component: OrderDetailComponent },
       { path: 'profile/seller', component: SellerProfileComponent },
+      { path: 'profile/seller/products/new', component: SellerProductNewComponent },
+      { path: 'profile/seller/products/:id', component: SellerProductDetailComponent },
       { path: 'ser-vendedor', component: BecomeSellerComponent },
       { path: 'health', component: HealthComponent },
     ],
@@ -93,6 +97,8 @@ export const routes: Routes = [
       { path: 'profile/buyer', component: BuyerProfileComponent },
       { path: 'profile/buyer/orders/:id', component: OrderDetailComponent },
       { path: 'profile/seller', component: SellerProfileComponent },
+      { path: 'profile/seller/products/new', component: SellerProductNewComponent },
+      { path: 'profile/seller/products/:id', component: SellerProductDetailComponent },
       { path: 'ser-vendedor', component: BecomeSellerComponent },
       { path: 'health', component: HealthComponent },
     ],

@@ -21,6 +21,7 @@ export interface Product {
   height_cm?: number;
   width_cm?: number;
   depth_cm?: number;
+  sku?: string;
   materials?: Material[];
   techniques?: Technique[];
   colors?: ColorOption[];
@@ -61,10 +62,6 @@ export interface Artist {
   name: string;
   surname?: string | null;
   status?: ArtistStatus;
-  /** Teléfono (privado, solo perfil vendedor) */
-  phone?: string | null;
-  /** NIF/CIF (privado, solo perfil vendedor) */
-  nif?: string | null;
   /** Descripción breve para la card de artistas/vendors */
   short_description?: string | null;
   /** Descripción larga para la página de detalle del artista */
@@ -96,6 +93,8 @@ export interface ProductImage {
   image_path: string;
   order?: number;
   is_primary?: boolean;
+  /** Si está asignado, al hacer clic en este color en la ficha producto se muestra esta foto */
+  color_id?: string | null;
 }
 
 export interface Material {
@@ -133,4 +132,56 @@ export interface Technique {
   slug: string;
   name: string;
   description?: string | null;
+}
+
+/** Contrato de precio de un producto (vigencia por fechas) */
+export interface ProductPriceContract {
+  id: string;
+  product_id: string;
+  price: number;
+  start_date: string;
+  end_date: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/** Payload para añadir un nuevo precio desde el panel del vendedor */
+export interface AddProductPricePayload {
+  price: number;
+  start_date?: string;
+  end_date?: string;
+  previous_end_date?: string;
+}
+
+/** Payload para crear un producto desde el panel del vendedor */
+export interface CreateProductPayload {
+  name: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  availability?: string;
+  height_cm?: number;
+  width_cm?: number;
+  depth_cm?: number;
+  sku?: string;
+  category_ids?: string[];
+  material_ids?: string[];
+  technique_ids?: string[];
+  color_ids?: string[];
+}
+
+/** Payload para actualizar un producto (todos los campos opcionales; name no puede enviarse vacío) */
+export interface UpdateProductPayload {
+  name?: string;
+  description?: string;
+  stock?: number | null;
+  availability?: string | null;
+  height_cm?: number | null;
+  width_cm?: number | null;
+  depth_cm?: number | null;
+  sku?: string | null;
+  category_ids?: string[];
+  material_ids?: string[];
+  technique_ids?: string[];
+  color_ids?: string[];
 }

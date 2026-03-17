@@ -1,3 +1,0 @@
--- DEPRECADO: El carrito se gestiona en el frontend (localStorage).
--- No se usa base de datos para el carrito para evitar carga con muchos usuarios.
--- Los ítems del carrito se envían en el body al crear una orden (orders POST).

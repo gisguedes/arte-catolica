@@ -22,16 +22,15 @@ export class AppComponent implements OnDestroy {
   private localeService = inject(LocaleService);
   private authService = inject(AuthService);
   private favoritesService = inject(FavoritesService);
+  private router = inject(Router);
+  private viewportScroller = inject(ViewportScroller);
 
   private loadFavoritesEffect = effect(() => {
     const u = this.authService.user();
     if (u?.id) this.favoritesService.loadFavorites();
   });
 
-  constructor(
-    private readonly router: Router,
-    private readonly viewportScroller: ViewportScroller,
-  ) {
+  constructor() {
     this.localeService.syncFromUrl();
     this.router.events
       .pipe(

@@ -1,9 +1,18 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const path = require('path');
+const fs = require('fs');
+
 const dotenv = require('dotenv');
 
 dotenv.config();
+
+const uploadsDir = path.join(__dirname, 'uploads');
+const productsUploadsDir = path.join(uploadsDir, 'products');
+if (!fs.existsSync(productsUploadsDir)) {
+  fs.mkdirSync(productsUploadsDir, { recursive: true });
+}
 
 const productsRouter = require('./routes/products');
 const vendorsRouter = require('./routes/vendors');
@@ -31,6 +40,7 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, timestamp: new Date().toISOString() });
 });
 
+app.use('/api/uploads', express.static(uploadsDir));
 app.use('/api', authRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/vendors', vendorsRouter);

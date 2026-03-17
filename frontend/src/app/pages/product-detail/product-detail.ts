@@ -58,12 +58,27 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     const product = this.product();
     const images = product?.images ?? [];
     if (images.length > 0) {
-      return images[this.imageIndex() % images.length].image_path;
+      const path = images[this.imageIndex() % images.length].image_path;
+      return this.productService.productImageUrl(path) || '/assets/placeholder-image.jpg';
     }
-    return product?.image || '/assets/placeholder-image.jpg';
+    const fallback = product?.image;
+    return this.productService.productImageUrl(fallback) || '/assets/placeholder-image.jpg';
   });
 
   hasGallery = computed(() => (this.product()?.images?.length ?? 0) > 1);
+
+  /** Índice de la imagen que tiene asignado este color (o -1) */
+  imageIndexForColor(colorId: string): number {
+    const images = this.product()?.images ?? [];
+    const idx = images.findIndex((img) => img.color_id === colorId);
+    return idx >= 0 ? idx : -1;
+  }
+
+  /** Al hacer clic en un color, mostrar la foto asignada a ese color si existe */
+  selectColor(colorId: string): void {
+    const idx = this.imageIndexForColor(colorId);
+    if (idx >= 0) this.imageIndex.set(idx);
+  }
 
   artistCountry = computed(
     () => this.product()?.vendor?.country ?? this.product()?.artist?.country ?? null,

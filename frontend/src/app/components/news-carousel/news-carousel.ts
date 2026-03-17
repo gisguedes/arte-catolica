@@ -18,7 +18,7 @@ interface NewsItem {
 })
 export class NewsCarouselComponent {
   @Input() news: NewsItem[] = [];
-  
+
   currentIndex = signal(0);
 
   next(): void {
@@ -30,7 +30,7 @@ export class NewsCarouselComponent {
   prev(): void {
     if (this.news.length > 0) {
       this.currentIndex.set(
-        this.currentIndex() === 0 ? this.news.length - 1 : this.currentIndex() - 1
+        this.currentIndex() === 0 ? this.news.length - 1 : this.currentIndex() - 1,
       );
     }
   }
@@ -39,4 +39,3 @@ export class NewsCarouselComponent {
     this.currentIndex.set(index);
   }
 }
-
